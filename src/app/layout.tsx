@@ -1,9 +1,13 @@
-import type { Metadata } from "next";
-import { Jost } from 'next/font/google';
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Header from '@/components/header/Header';
+import Footer from '@/components/footer/Footer';
+import type { ReactNode } from 'react';
+import clsx from 'clsx';
 
-const jostFont = Jost({
-    variable: '--font-jost',
+const fontMain = Inter({
+    variable: '--font-main',
     subsets: ['latin', 'cyrillic'],
     weight: ['400'],
 });
@@ -14,17 +18,22 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: ReactNode;
 }>) {
-  return (
-    <html lang="ru">
-      <body
-        className={`${jostFont.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
-  );
+    return (
+        <html lang="ru">
+            <body
+                className={clsx(
+                    'flex min-h-screen flex-col antialiased',
+                    fontMain.variable,
+                )}
+            >
+                <Header />
+                {children}
+                <Footer />
+            </body>
+        </html>
+    );
 }
