@@ -18,7 +18,10 @@
   --color-orange: #e49149;
   --color-purple: #765990;
   --color-red: #a15e5e;
+  --color-light-gray: #e5e5e5;
   --color-star-rating: #ffbb30;
+
+  --text-color-dark: #414141;
 
   --shadow-default: 2px 0px 8px 0px rgba(0, 0, 0, 0.1);
   --shadow-button-default: 4px 8px 16px 0px rgba(112, 192, 91, 0.2);
