@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --bottom-nav-height: 64px;
+
+  --background: #fbfff8;
   --foreground: #171717;
+  --spacing: 0.25rem;
+
+  --section-padding: 12px;
+
+  --font-main: var(--font-main);
+
+  --color-primary: #70c05b;
+  --color-dark: #271746;
+  --color-yellow: #facb73;
+  --color-green: #78d195;
+  --color-orange: #e49149;
+  --color-purple: #765990;
+  --color-red: #a15e5e;
+  --color-light-gray: #e5e5e5;
+  --color-star-rating: #ffbb30;
+
+  --text-color-dark: #414141;
+
+  --placeholder-text-color: #8f8f8f;
+
+  --shadow-default: 2px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  --shadow-button-default: 4px 8px 16px 0px rgba(112, 192, 91, 0.2);
+  --shadow-button-secondary: 4px 8px 16px 0px rgba(0, 0, 0, 0.1);
+  --shadow-button-active: inset 0px 2px 0px 0px rgba(0, 0, 0, 0.2);
+  --shadow-article: 4px 8px 16px 0px rgba(255, 102, 51, 0.2);
+  --shadow-card-shop: 4px 8px 16px 0px rgba(255, 102, 51, 0.2);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (min-width: 768px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bottom-nav-height: 0px;
   }
 }
 
+@utility wrapper {
+  padding-inline: max(var(--section-padding), calc((100% - 1208px) / 2));
+  width: 100%;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-main), sans-serif;
 }

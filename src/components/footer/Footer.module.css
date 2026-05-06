@@ -1,0 +1,32 @@
+.grid {
+  display: grid;
+  grid-template-areas:
+        'logo social'
+        '. phone'
+        'nav nav'
+}
+
+.logo {
+  grid-area: logo;
+}
+
+.social {
+  grid-area: social;
+}
+
+.phone {
+  grid-area: phone;
+}
+
+.nav {
+  grid-area: nav;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 180px 1fr auto;
+    grid-template-areas:
+            'logo nav social'
+            '. . phone';
+  }
+}
