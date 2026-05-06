@@ -32,7 +32,7 @@ export default function RootLayout({
             >
                 <Header />
                 {children}
-                <Footer />
+                <Footer className="pb-(--bottom-nav-height) md:pb-0" />
             </body>
         </html>
     );
