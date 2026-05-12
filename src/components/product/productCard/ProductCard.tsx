@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { ProductCardProps } from '@/types/product';
+import type { ProductDto } from '@/types/product';
 import iconHeart from '../../../../public/icons-header/icon-heart.svg';
 import { formatPrice } from '@/utils/formatPrice';
 import StarRating from '@/components/StarRating';
@@ -13,7 +13,7 @@ const ProductCard = ({
     discountPercent = 0,
     rating,
     categories,
-}: ProductCardProps) => {
+}: ProductDto) => {
     const calculateFinalPrice = (price: number, discount: number): number => {
         return discount > 0 ? price * (1 - discount / 100) : price;
     };
