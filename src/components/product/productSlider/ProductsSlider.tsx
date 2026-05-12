@@ -2,7 +2,7 @@
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import clsx from 'clsx';
-import type { ProductCardProps } from '@/types/product';
+import type { ProductDto } from '@/types/product';
 import 'swiper/css';
 import type { Swiper as SwiperType } from 'swiper';
 import { PRODUCTS_SLIDER_CONFIG } from '@/consts/productsSliderSettings';
@@ -11,7 +11,7 @@ import ProductCard from '@/components/product/productCard/ProductCard';
 interface ProductsSliderProps {
     onSwiper?: (swiper: SwiperType) => void;
     onReady?: () => void;
-    products: ProductCardProps[];
+    products: ProductDto[];
     className?: string;
 }
 
@@ -31,7 +31,7 @@ const ProductsSlider = ({
             className={clsx(className, 'w-full', MOBILE_PEEK_STYLES)}
         >
             {products.map((product) => (
-                <SwiperSlide key={product.id}>
+                <SwiperSlide key={product._id}>
                     <ProductCard {...product} />
                 </SwiperSlide>
             ))}

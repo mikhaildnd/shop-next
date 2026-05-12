@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
-import type { ProductCardProps } from '@/types/product';
+import type { ProductDto } from '@/types/product';
 
 import ProductsSlider from '@/components/product/productSlider/ProductsSlider.lazy';
 import ProductsSectionHeader from '@/components/product/productsSection/ProductsSectionHeader';
@@ -13,7 +13,7 @@ import clsx from 'clsx';
 interface ProductSectionProps {
     title: string;
     link: string;
-    products: ProductCardProps[];
+    products: ProductDto[];
 }
 
 const CONTENT_HEIGHT = 'min-h-[260px] sm:min-h-[300px] lg:min-h-[400px]';
