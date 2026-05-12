@@ -3,11 +3,9 @@ import { ObjectId } from 'mongodb';
 type ProductMeasure =
     | {
           weight: string;
-          volume?: never;
       }
     | {
           volume: string;
-          weight?: never;
       };
 
 interface ProductBase<TId> {
