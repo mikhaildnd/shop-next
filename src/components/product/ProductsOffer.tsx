@@ -1,12 +1,15 @@
-import database from '@/data/database.json';
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
+import type { ProductDto } from '@/types/product';
+import { getProducts } from '@/services/products';
 
 const ProductsOffer = async () => {
-    await new Promise((r) => setTimeout(r, 2000));
+    let products: ProductDto[] = [];
 
-    const products = database.products.filter((p) =>
-        p.categories.includes('actions'),
-    );
+    try {
+        products = await getProducts('actions');
+    } catch (error) {
+        console.error(error);
+    }
 
     return (
         <ProductsSection

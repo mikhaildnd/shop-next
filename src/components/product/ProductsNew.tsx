@@ -1,18 +1,21 @@
-import database from '@/data/database.json';
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
+import type { ProductDto } from '@/types/product';
+import { getProducts } from '@/services/products';
 
 const ProductsNew = async () => {
-    await new Promise((r) => setTimeout(r, 2000));
+    let products: ProductDto[] = [];
 
-    const newProducts = database.products.filter((p) =>
-        p.categories?.includes('new'),
-    );
+    try {
+        products = await getProducts('new');
+    } catch (error) {
+        console.error(error);
+    }
 
     return (
         <ProductsSection
             title="Новинки"
             link="/new-products"
-            products={newProducts}
+            products={products}
         />
     );
 };

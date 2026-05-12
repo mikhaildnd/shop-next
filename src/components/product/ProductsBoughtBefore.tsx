@@ -1,24 +1,21 @@
-import database from '@/data/database.json';
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
+import type { ProductDto } from '@/types/product';
+import { getProductsByUserEmail } from '@/services/products';
 
-const ProductsBoughtBefore = () => {
-    const userPurchases = database.users[0].purchases
-        .map((purchase) => {
-            const product = database.products.find(
-                (product) => product.id === purchase.id,
-            );
-            if (!product) return undefined;
-            const { discountPercent, ...rest } = product;
-            void discountPercent; //ignore
-            return rest;
-        })
-        .filter((item) => item !== undefined);
+const ProductsBoughtBefore = async () => {
+    let purchases: ProductDto[] = [];
+
+    try {
+        purchases = await getProductsByUserEmail();
+    } catch (error) {
+        console.error(error);
+    }
 
     return (
         <ProductsSection
             title="Покупали ранее"
             link="/bought-earlier"
-            products={userPurchases}
+            products={purchases}
         />
     );
 };
