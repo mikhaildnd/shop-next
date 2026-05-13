@@ -2,8 +2,6 @@ import { getDb } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import type { ProductDocument, ProductDto } from '@/types/product';
 
-export const revalidate = 3600;
-
 export async function GET(req: Request) {
     try {
         const category = new URL(req.url).searchParams.get('category');

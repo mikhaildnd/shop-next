@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
 import type { UserDocument } from '@/types/user';
 import type { ProductDocument, ProductDto } from '@/types/product';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
     try {
         const db = await getDb();
