@@ -1,20 +1,19 @@
-import { MongoClient } from 'mongodb';
+import 'dotenv/config';
+import { PrismaClient } from '@/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const url = process.env.NEXT_SHOP_DB_URL;
-const dbName = process.env.NEXT_SHOP_DB_NAME;
-
-if (!url) {
-    throw new Error('NEXT_SHOP_DB_URL is not defined');
-}
-
-if (!dbName) {
-    throw new Error('NEXT_SHOP_DB_NAME is not defined');
-}
-
-const client = new MongoClient(url);
-
-const clientPromise = client.connect();
-
-export const getDb = async () => {
-    return (await clientPromise).db(dbName);
+const globalForPrisma = globalThis as unknown as {
+    prisma?: PrismaClient;
 };
+
+export const prisma =
+    globalForPrisma.prisma ??
+    new PrismaClient({
+        adapter: new PrismaPg({
+            connectionString: process.env.DATABASE_URL,
+        }),
+    });
+
+if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = prisma;
+}
