@@ -1,17 +1,12 @@
-import { ObjectId } from 'mongodb';
+export type UserRole = 'ADMIN' | 'USER';
 
-type UserPurchases = {
-    productId: ObjectId;
-    date: string;
-};
-
-interface UserBase {
+export type UserDto = {
+    id: string;
     name: string;
     email: string;
-    phone: string;
-    purchases: UserPurchases[];
-}
-
-export type UserDto = UserBase & { _id: string };
-
-export type UserDocument = UserBase & { _id: ObjectId };
+    emailVerified: boolean;
+    phone: string | null;
+    role: UserRole;
+    createdAt: string;
+    updatedAt: string;
+};
