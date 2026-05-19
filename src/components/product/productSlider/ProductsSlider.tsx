@@ -31,8 +31,11 @@ const ProductsSlider = ({
             className={clsx(className, 'w-full', MOBILE_PEEK_STYLES)}
         >
             {products.map((product) => (
-                <SwiperSlide key={product._id}>
-                    <ProductCard {...product} />
+                <SwiperSlide
+                    className="!h-auto"
+                    key={product.id}
+                >
+                    <ProductCard product={product} />
                 </SwiperSlide>
             ))}
         </Swiper>
