@@ -1,6 +1,6 @@
-import { getDb } from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import type { ProductDocument, ProductDto } from '@/types/product';
+import { mapProductToDto } from '@/lib/mappers/product.mapper';
 
 export async function GET(req: Request) {
     try {
@@ -13,16 +13,27 @@ export async function GET(req: Request) {
             );
         }
 
-        const db = await getDb();
-        const products = await db
-            .collection<ProductDocument>('products')
-            .find({ categories: category })
-            .toArray();
+        const products = await prisma.product.findMany({
+            where: {
+                categories: {
+                    some: {
+                        category: {
+                            slug: category,
+                        },
+                    },
+                },
+            },
+            include: {
+                images: true,
+                categories: {
+                    include: {
+                        category: true,
+                    },
+                },
+            },
+        });
 
-        const mappedProducts: ProductDto[] = products.map((product) => ({
-            ...product,
-            _id: product._id.toString(),
-        }));
+        const mappedProducts = products.map(mapProductToDto);
 
         return NextResponse.json(mappedProducts);
     } catch (error) {
