@@ -1,12 +1,16 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
 import type { ProductDto } from '@/types/product';
-import { getProductsByUserEmail } from '@/services/products';
+import { getProducts } from '@/services/product.service';
 
+//Пока что покупки не реализованы
 const ProductsBoughtBefore = async () => {
     let purchases: ProductDto[] = [];
 
     try {
-        purchases = await getProductsByUserEmail();
+        purchases = await getProducts({
+            limit: 8,
+            category: 'frozen',
+        });
     } catch (error) {
         console.error(error);
     }
@@ -14,7 +18,7 @@ const ProductsBoughtBefore = async () => {
     return (
         <ProductsSection
             title="Покупали ранее"
-            link="/bought-earlier"
+            link="catalog/purchases"
             products={purchases}
         />
     );

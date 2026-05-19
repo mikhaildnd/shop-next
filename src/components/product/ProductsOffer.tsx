@@ -1,12 +1,15 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
 import type { ProductDto } from '@/types/product';
-import { getProducts } from '@/services/products';
+import { getProducts } from '@/services/product.service';
 
 const ProductsOffer = async () => {
     let products: ProductDto[] = [];
 
     try {
-        products = await getProducts('actions');
+        products = await getProducts({
+            limit: 8,
+            promotion: true,
+        });
     } catch (error) {
         console.error(error);
     }
@@ -14,7 +17,7 @@ const ProductsOffer = async () => {
     return (
         <ProductsSection
             title="Акции"
-            link="/actions"
+            link="catalog/promotion"
             products={products}
         />
     );
