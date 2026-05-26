@@ -11,16 +11,14 @@ const Profile = ({ className }: { className?: string }) => {
                 alt="Ваш профиль"
                 width={40}
                 height={40}
-                className="min-h-10 min-w-10 rounded-full"
+                className="h-10 w-10 rounded-full"
             />
             <p className="hidden cursor-pointer p-2.5 xl:block">Михаил</p>
             <button className="hidden cursor-pointer p-2 xl:block">
-                <Image
-                    src={ArrowIcon}
-                    alt="Меню профиля"
-                    width={24}
-                    height={24}
-                    sizes="24px"
+                <ArrowIcon
+                    //TODO сделать правильно ариа
+                    aria-label="Меню профиля"
+                    className="size-6"
                 />
             </button>
         </div>

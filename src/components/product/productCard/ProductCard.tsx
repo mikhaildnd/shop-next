@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import type { ProductDto } from '@/types/product';
-import iconHeart from '../../../../public/icons-header/icon-heart.svg';
+import IconHeart from '../../../../public/icons-header/icon-heart.svg';
 import { formatPrice } from '@/utils/formatPrice';
 import StarRating from '@/components/StarRating';
 import { getProductPricing } from '@/lib/productPricing';
@@ -36,12 +36,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
                     />
                 )}
                 <button className="absolute top-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-[#f3f2f1] opacity-50 transition-colors duration-300 hover:bg-[#fcd5ba]">
-                    <Image
-                        src={iconHeart}
-                        alt="В избранное"
-                        width={18}
-                        height={18}
-                        sizes="18px"
+                    <IconHeart
+                        aria-label="В избранное"
+                        className="size-4.5"
                     />
                 </button>
                 {hasDiscount && (

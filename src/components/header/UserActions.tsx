@@ -6,26 +6,22 @@ import UserActionItem from '@/components/header/UserActionItem';
 
 const UserActions = () => {
     return (
-        <ul className="flex grow items-center justify-between">
+        <ul className="flex grow items-end justify-between">
             <UserActionItem
+                Icon={IconMenuMob}
                 className="md:hidden"
-                src={IconMenuMob}
-                alt="Меню"
                 text="Меню"
             />
             <UserActionItem
-                src={IconHeart}
-                alt="Избранное"
+                Icon={IconHeart}
                 text="Избранное"
             />
             <UserActionItem
-                src={IconBox}
-                alt="Заказы"
+                Icon={IconBox}
                 text="Заказы"
             />
             <UserActionItem
-                src={IconCart}
-                alt="Корзина"
+                Icon={IconCart}
                 text="Корзина"
             />
         </ul>

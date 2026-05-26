@@ -1,17 +1,16 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import type { ComponentType, SVGProps } from 'react';
 
-interface UserBlockItemProps {
-    src: string;
+type IconType = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface UserActionItemProps {
+    Icon: IconType;
     text?: string;
-    width?: number;
-    height?: number;
-    alt: string;
     className?: string;
 }
 
-const UserActionItem = (props: UserBlockItemProps) => {
-    const { src, text, width = 24, height = 24, alt, className } = props;
+const UserActionItem = (props: UserActionItemProps) => {
+    const { Icon, text, className } = props;
 
     return (
         <li className={className}>
@@ -19,12 +18,9 @@ const UserActionItem = (props: UserBlockItemProps) => {
                 className="flex cursor-pointer flex-col items-center gap-1.5 p-2"
                 href="/1"
             >
-                <Image
-                    src={src}
-                    alt={alt}
-                    width={width}
-                    height={height}
-                    className="h-6 w-6 object-contain"
+                <Icon
+                    aria-label={text}
+                    className="size-5.5"
                 />
                 <span className="text-xs">{text}</span>
             </Link>
