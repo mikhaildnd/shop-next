@@ -11,7 +11,7 @@ const Logo = ({ className }: { className?: string }) => {
             className={clsx('flex items-center', className)}
         >
             <Image
-                className="shrink-0"
+                className="h-auto w-auto shrink-0"
                 src={LogoImage}
                 alt="Логотип магазина"
                 priority
