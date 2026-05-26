@@ -4,23 +4,23 @@ import type { ProductDto } from '@/types/product';
 import type { Prisma } from '@/generated/prisma/client';
 
 type GetProductsParams = {
-    limit?: number;
-    promotion?: boolean;
+    take?: number;
+    skip?: number;
     category?: string;
 };
 
-export async function getProducts({
-    limit,
-    promotion,
-    category,
-}: GetProductsParams = {}): Promise<ProductDto[]> {
-    const where: Prisma.ProductWhereInput = {};
+//TODO мб вынести, т.к. повтояется в product-section.service.ts
+type GetProductsResult = {
+    products: ProductDto[];
+    totalCount: number;
+};
 
-    if (promotion) {
-        where.discountPercent = {
-            gt: 0,
-        };
-    }
+export async function getProducts({
+    take,
+    skip,
+    category,
+}: GetProductsParams = {}): Promise<GetProductsResult> {
+    const where: Prisma.ProductWhereInput = {};
 
     if (category) {
         where.categories = {
@@ -32,34 +32,29 @@ export async function getProducts({
         };
     }
 
-    const products = await prisma.product.findMany({
-        // where: {
-        //     ...(promotion && {
-        //         discountPercent: {
-        //             gt: 0,
-        //         },
-        //     }),
-        //     ...(category && {
-        //         categories: {
-        //             some: {
-        //                 category: {
-        //                     slug: category,
-        //                 },
-        //             },
-        //         },
-        //     }),
-        // },
-        where,
-        include: {
-            images: true,
-            categories: {
-                include: {
-                    category: true,
+    const [products, totalCount] = await prisma.$transaction([
+        prisma.product.findMany({
+            where,
+            include: {
+                images: true,
+                categories: {
+                    include: {
+                        category: true,
+                    },
                 },
             },
-        },
-        take: limit,
-    });
+            skip,
+            take,
 
-    return products.map(mapProductToDto);
+            orderBy: {
+                createdAt: 'desc',
+            },
+        }),
+
+        prisma.product.count({
+            where,
+        }),
+    ]);
+
+    return { products: products.map(mapProductToDto), totalCount };
 }
