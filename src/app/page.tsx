@@ -9,16 +9,17 @@ import LazySection from '@/components/shared/LazySection';
 import Maps from '@/components/maps/Maps.lazy';
 import { slides } from '@/data/mainSlides';
 
-export default function Page() {
+//TODO добавить метаданные на все страницы
+export default async function Page() {
     return (
-        <main className="mb-10 flex wrapper grow flex-col gap-y-10 md:mt-6 md:mb-20 md:gap-y-20">
+        <>
             <div className="-mx-(--section-padding) md:mx-0">
                 <MainSlider
                     className="h-[500px] w-full rounded-b-3xl md:rounded-3xl xl:h-[680px]"
                     slides={slides}
-                    autoplay={{
-                        delay: 10000,
-                    }}
+                    // autoplay={{
+                    //     delay: 10000,
+                    // }}
                 />
             </div>
             <Suspense fallback={<ProductsSectionSkeleton />}>
@@ -38,6 +39,6 @@ export default function Page() {
             <LazySection>
                 <Maps />
             </LazySection>
-        </main>
+        </>
     );
 }
