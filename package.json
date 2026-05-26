@@ -15,7 +15,7 @@
         "clsx": "^2.1.1",
         "mongodb": "^7.2.0",
         "mongoose": "^9.6.1",
-        "next": "16.1.6",
+        "next": "16.2.6",
         "pg": "^8.20.0",
         "react": "19.2.3",
         "react-dom": "19.2.3",
@@ -23,6 +23,7 @@
         "tailwind-merge": "^3.5.0"
     },
     "devDependencies": {
+        "@svgr/webpack": "^8.1.0",
         "@tailwindcss/postcss": "^4",
         "@types/node": "^20",
         "@types/pg": "^8.20.0",
@@ -38,5 +39,6 @@
         "tailwindcss": "^4",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5"
-    }
+    },
+    "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215"
 }
