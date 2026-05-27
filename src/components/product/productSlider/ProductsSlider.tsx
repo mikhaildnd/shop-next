@@ -7,6 +7,7 @@ import 'swiper/css';
 import type { Swiper as SwiperType } from 'swiper';
 import { PRODUCTS_SLIDER_CONFIG } from '@/consts/productsSliderSettings';
 import ProductCard from '@/components/product/productCard/ProductCard';
+import { routes } from '@/lib/routes';
 
 interface ProductsSliderProps {
     onSwiper?: (swiper: SwiperType) => void;
@@ -35,7 +36,10 @@ const ProductsSlider = ({
                     className="!h-auto"
                     key={product.id}
                 >
-                    <ProductCard product={product} />
+                    <ProductCard
+                        product={product}
+                        href={routes.product(product.slug)}
+                    />
                 </SwiperSlide>
             ))}
         </Swiper>

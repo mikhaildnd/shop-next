@@ -1,5 +1,6 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
 import { getProductsSection } from '@/services/product-section.service';
+import { routes } from '@/lib/routes';
 
 const ProductsOffer = async () => {
     const section = await getProductsSection({
@@ -14,7 +15,7 @@ const ProductsOffer = async () => {
     return (
         <ProductsSection
             title={section.title}
-            link={`/catalog/${section.slug}`}
+            link={routes.category(section.slug)}
             products={section.products}
         />
     );
