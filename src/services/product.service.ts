@@ -58,3 +58,27 @@ export async function getProducts({
 
     return { products: products.map(mapProductToDto), totalCount };
 }
+
+export async function getProductBySlug(
+    slug: string,
+): Promise<ProductDto | null> {
+    const product = await prisma.product.findUnique({
+        where: {
+            slug,
+        },
+        include: {
+            images: true,
+            categories: {
+                include: {
+                    category: true,
+                },
+            },
+        },
+    });
+
+    if (!product) {
+        return null;
+    }
+
+    return mapProductToDto(product);
+}
