@@ -1,15 +1,17 @@
 import Image from 'next/image';
 import type { ProductDto } from '@/types/product';
-import IconHeart from '../../../../public/icons-header/icon-heart.svg';
 import { formatPrice } from '@/utils/formatPrice';
 import StarRating from '@/components/StarRating';
 import { getProductPricing } from '@/lib/productPricing';
+import Link from 'next/link';
+import { Heart } from 'lucide-react';
 
 type ProductCardProps = {
     product: ProductDto;
+    href: string;
 };
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, href }: ProductCardProps) => {
     const { title, images, ratingRate, ratingCount, discountPercent } = product;
 
     const { regularPrice, discountedPrice, hasDiscount } =
@@ -26,23 +28,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <article className="flex h-full w-full flex-col overflow-hidden rounded bg-white">
             {/*MEDIA SECTION*/}
             <div className="relative aspect-square w-full">
-                {mainImage && (
-                    <Image
-                        src={mainImage.url}
-                        alt={mainImage.alt ?? title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 160px, (max-width: 1280px) 224px, 272px"
-                    />
-                )}
-                <button className="absolute top-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-[#f3f2f1] opacity-50 transition-colors duration-300 hover:bg-[#fcd5ba]">
-                    <IconHeart
-                        aria-label="В избранное"
-                        className="size-4.5"
-                    />
+                <Link
+                    href={href}
+                    className="absolute inset-0"
+                >
+                    {mainImage && (
+                        <Image
+                            src={mainImage.url}
+                            alt={mainImage.alt ?? title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 160px, (max-width: 1280px) 224px, 272px"
+                        />
+                    )}
+                </Link>
+
+                {/*FAVORITE BUTTON*/}
+                <button
+                    aria-label="В избранное"
+                    className="group absolute top-2 right-2 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-80"
+                >
+                    <Heart className="size-5.5 fill-transparent stroke-[1.5px] transition-[fill] duration-150 group-hover:fill-black" />
                 </button>
+
+                {/*DISCOUNT PLATE*/}
                 {hasDiscount && (
-                    <div className="absolute bottom-2.5 left-2.5 rounded bg-[#ff6633] px-2 py-1 text-white">
+                    <div className="absolute bottom-2.5 left-2.5 rounded-sm bg-[#ff6633] px-2 py-1 text-sm text-white">
                         -{discountPercent}%
                     </div>
                 )}
@@ -55,7 +66,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                     {hasDiscount && (
                         <div className="flex flex-col">
                             <p className="text-sm font-bold text-[#414141] md:text-lg">
-                                {formatPrice(discountedPrice)}₽
+                                {formatPrice(discountedPrice)} ₸
                             </p>
                             <p className="text-[8px] text-[#bfbfbf] md:text-xs">
                                 Со скидкой
@@ -63,13 +74,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         </div>
                     )}
                     <p className={regularPriceClassnames}>
-                        {formatPrice(regularPrice)}₽
+                        {formatPrice(regularPrice)} ₸
                     </p>
                 </div>
 
                 {/*TITLE SEGMENT*/}
                 <h3 className="line-clamp-2 min-h-10 text-sm leading-tight text-[#414141] md:min-h-13.5 md:text-base">
-                    {title}
+                    <Link
+                        className="hover:underline"
+                        href={href}
+                    >
+                        {title}
+                    </Link>
                 </h3>
 
                 {/*RATING SEGMENT*/}
