@@ -2,11 +2,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import LogoImage from '../../../public/icons/logo.png';
 import clsx from 'clsx';
+import { routes } from '@/lib/routes';
 
 const Logo = ({ className }: { className?: string }) => {
     return (
         <Link
-            href="/"
+            href={routes.home()}
             aria-label="На главную"
             className={clsx('flex items-center', className)}
         >
