@@ -20,7 +20,7 @@ const UserActionItem = (props: UserActionItemProps) => {
             >
                 <Icon
                     aria-label={text}
-                    className="size-5.5"
+                    className="size-5.5 stroke-[1.5px]"
                 />
                 <span className="text-xs">{text}</span>
             </Link>

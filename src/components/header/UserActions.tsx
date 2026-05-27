@@ -1,8 +1,6 @@
-import IconHeart from '../../../public/icons-header/icon-heart.svg';
-import IconBox from '../../../public/icons-header/icon-box.svg';
-import IconCart from '../../../public/icons-header/icon-cart.svg';
 import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
 import UserActionItem from '@/components/header/UserActionItem';
+import { Heart, ShoppingCart, ShoppingBag } from 'lucide-react';
 
 const UserActions = () => {
     return (
@@ -13,15 +11,15 @@ const UserActions = () => {
                 text="Меню"
             />
             <UserActionItem
-                Icon={IconHeart}
+                Icon={Heart}
                 text="Избранное"
             />
             <UserActionItem
-                Icon={IconBox}
+                Icon={ShoppingBag}
                 text="Заказы"
             />
             <UserActionItem
-                Icon={IconCart}
+                Icon={ShoppingCart}
                 text="Корзина"
             />
         </ul>
