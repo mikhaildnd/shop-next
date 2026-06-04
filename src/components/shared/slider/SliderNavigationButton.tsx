@@ -1,9 +1,10 @@
-import clsx from 'clsx';
 import type { SVGProps } from 'react';
+import { cn } from '@/utils/cn';
 
-interface NavigationButtonProps {
+interface SliderNavigationButtonProps {
     direction: 'prev' | 'next';
     className?: string;
+    iconClassName?: string;
     isDisabled?: boolean;
     onClick: () => void;
 }
@@ -19,18 +20,19 @@ const ArrowIcon = (props: SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const NavigationButton = ({
+const SliderNavigationButton = ({
     direction,
     className,
+    iconClassName,
     isDisabled = false,
     onClick,
-}: NavigationButtonProps) => {
+}: SliderNavigationButtonProps) => {
     return (
         <button
             type="button"
             disabled={isDisabled}
             onClick={onClick}
-            className={clsx(
+            className={cn(
                 'group flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white disabled:cursor-not-allowed',
                 'absolute top-1/2 z-5 -translate-y-1/2',
                 direction === 'next' ? 'left-10' : 'right-10',
@@ -38,12 +40,13 @@ const NavigationButton = ({
             )}
         >
             <ArrowIcon
-                className={clsx(
-                    'h-6 w-6 fill-[#4f4f4f]',
+                className={cn(
+                    'size-6 fill-[#4f4f4f]',
                     direction === 'next' && 'rotate-180',
                     isDisabled
                         ? 'opacity-50'
                         : 'transition-colors group-hover:fill-black group-active:fill-black',
+                    iconClassName,
                 )}
             />
             <span className="sr-only">
@@ -53,4 +56,4 @@ const NavigationButton = ({
     );
 };
 
-export default NavigationButton;
+export default SliderNavigationButton;

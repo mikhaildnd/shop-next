@@ -2,15 +2,18 @@
 
 import { useSwiper } from 'swiper/react';
 import { useEffect, useState } from 'react';
-import clsx from 'clsx';
-import PaginationBullet from '@/components/mainSlider/PaginationBullet';
+import SliderPaginationBullet from '@/components/shared/slider/SliderPaginationBullet';
+import { cn } from '@/utils/cn';
 
-interface PaginationProps {
+interface SliderPaginationProps {
     totalSlides: number;
     className?: string;
 }
 
-const Pagination = ({ totalSlides, className }: PaginationProps) => {
+const SliderPagination = ({
+    totalSlides,
+    className,
+}: SliderPaginationProps) => {
     const swiper = useSwiper();
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -33,11 +36,11 @@ const Pagination = ({ totalSlides, className }: PaginationProps) => {
     if (!swiper) return null;
 
     return (
-        <div className={clsx('flex justify-center gap-1.5', className)}>
+        <div className={cn('flex justify-center gap-1.5', className)}>
             {Array.from({ length: totalSlides }).map((_, idx) => {
                 const isActive = idx === activeIndex;
                 return (
-                    <PaginationBullet
+                    <SliderPaginationBullet
                         key={idx}
                         isActive={isActive}
                         onClick={() => swiper.slideToLoop(idx)}
@@ -48,4 +51,4 @@ const Pagination = ({ totalSlides, className }: PaginationProps) => {
     );
 };
 
-export default Pagination;
+export default SliderPagination;

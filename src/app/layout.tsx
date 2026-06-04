@@ -31,9 +31,7 @@ export default function RootLayout({
                 )}
             >
                 <Header />
-                <main className="mb-10 flex wrapper grow flex-col gap-y-10 md:mt-6 md:mb-20 md:gap-y-20">
-                    {children}
-                </main>
+                <main className="wrapper grow">{children}</main>
                 <Footer className="pb-(--bottom-nav-height) md:pb-0" />
             </body>
         </html>

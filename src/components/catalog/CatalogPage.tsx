@@ -1,13 +1,16 @@
 import ProductCard from '@/components/product/productCard/ProductCard';
-import Pagination from '@/components/Pagination';
-import LoadMoreButton from '@/components/LoadMoreButton';
+import Pagination from '@/components/shared/Pagination';
+import LoadMoreButton from '@/components/shared/LoadMoreButton';
 import type { ProductDto } from '@/types/product';
+import { routes } from '@/lib/routes';
+// import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
 
 type CatalogPageProps = {
     products: ProductDto[];
     currentPage: number;
     totalPages: number;
     startPage: number;
+    categorySlug: string;
 };
 
 export default function CatalogPage({
@@ -15,6 +18,7 @@ export default function CatalogPage({
     currentPage,
     totalPages,
     startPage,
+    categorySlug,
 }: CatalogPageProps) {
     const hasPagination = totalPages > 1;
     const hasMore = currentPage < totalPages;
@@ -26,6 +30,11 @@ export default function CatalogPage({
                     <ProductCard
                         key={product.id}
                         product={product}
+                        href={routes.productInCategory(
+                            product.slug,
+                            categorySlug,
+                        )}
+                        // href={`${routes.product(product.slug)}?category=${categorySlug}`}
                     />
                 ))}
             </div>

@@ -8,7 +8,7 @@ import ProductsSlider from '@/components/product/productSlider/ProductsSlider.la
 import ProductsSectionHeader from '@/components/product/productsSection/ProductsSectionHeader';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import ProductsSectionControls from '@/components/product/productsSection/ProductsSectionControls';
-import clsx from 'clsx';
+import { cn } from '@/utils/cn';
 
 interface ProductSectionProps {
     title: string;
@@ -43,7 +43,12 @@ const ProductsSection = ({ title, link, products }: ProductSectionProps) => {
             </ProductsSectionHeader>
 
             {hasProducts ? (
-                <div className={CONTENT_HEIGHT}>
+                <div
+                    className={cn(
+                        '-mr-(--section-padding) lg:mr-0',
+                        CONTENT_HEIGHT,
+                    )}
+                >
                     <ProductsSlider
                         products={products}
                         onSwiper={setSwiper}
@@ -52,7 +57,7 @@ const ProductsSection = ({ title, link, products }: ProductSectionProps) => {
                 </div>
             ) : (
                 <div
-                    className={clsx(
+                    className={cn(
                         'flex items-center justify-center rounded-2xl bg-[#f8f8f8] text-sm text-gray-500',
                         CONTENT_HEIGHT,
                     )}

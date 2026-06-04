@@ -1,7 +1,7 @@
 import MainSlider from '@/components/mainSlider/MainSlider';
-import ProductsOffer from '@/components/product/ProductsOffer';
-import ProductsNew from '@/components/product/ProductsNew';
-import ProductsBoughtBefore from '@/components/product/ProductsBoughtBefore';
+import ProductsOfferSection from '@/app/_components/ProductsOfferSection';
+import ProductsNewSection from '@/app/_components/ProductsNewSection';
+import ProductsBoughtBeforeSection from '@/app/_components/ProductsBoughtBeforeSection';
 import BannerSpecialOffers from '@/components/banners/BannerSpecialOffers';
 import { Suspense } from 'react';
 import ProductsSectionSkeleton from '@/components/product/productsSection/ProductsSectionSkeleton';
@@ -12,7 +12,7 @@ import { slides } from '@/data/mainSlides';
 //TODO добавить метаданные на все страницы
 export default async function Page() {
     return (
-        <>
+        <div className="page-spacing flex flex-col gap-y-10 md:gap-y-20">
             <div className="-mx-(--section-padding) md:mx-0">
                 <MainSlider
                     className="h-[500px] w-full rounded-b-3xl md:rounded-3xl xl:h-[680px]"
@@ -23,22 +23,22 @@ export default async function Page() {
                 />
             </div>
             <Suspense fallback={<ProductsSectionSkeleton />}>
-                <ProductsOffer />
+                <ProductsOfferSection />
             </Suspense>
             <LazySection>
                 <Suspense fallback={<ProductsSectionSkeleton />}>
-                    <ProductsNew />
+                    <ProductsNewSection />
                 </Suspense>
             </LazySection>
             <LazySection>
                 <Suspense fallback={<ProductsSectionSkeleton />}>
-                    <ProductsBoughtBefore />
+                    <ProductsBoughtBeforeSection />
                 </Suspense>
             </LazySection>
             <BannerSpecialOffers />
             <LazySection>
                 <Maps />
             </LazySection>
-        </>
+        </div>
     );
 }

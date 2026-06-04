@@ -1,9 +1,10 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
-import { getProductsSection } from '@/services/product-section.service';
+import { getProductsSection } from '@/services/product/product-section.service';
+import { routes } from '@/lib/routes';
 
-const ProductsNew = async () => {
+const ProductsOfferSection = async () => {
     const section = await getProductsSection({
-        category: 'new',
+        category: 'promotion',
         take: 8,
     });
 
@@ -14,10 +15,10 @@ const ProductsNew = async () => {
     return (
         <ProductsSection
             title={section.title}
-            link={`/catalog/${section.slug}`}
+            link={routes.category(section.slug)}
             products={section.products}
         />
     );
 };
 
-export default ProductsNew;
+export default ProductsOfferSection;

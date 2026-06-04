@@ -8,9 +8,10 @@ import 'swiper/css';
 import 'swiper/css/effect-fade';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import type { MainSlideData } from '@/types/mainSlideData';
-import NavigationButton from '@/components/mainSlider/NavigationButton';
-import Pagination from '@/components/mainSlider/Pagination';
+import SliderNavigationButton from '@/components/shared/slider/SliderNavigationButton';
+import SliderPagination from '@/components/shared/slider/SliderPagination';
 import Slide from '@/components/mainSlider/Slide';
+import clsx from 'clsx';
 
 interface MainSliderProps {
     slides: MainSlideData[];
@@ -25,26 +26,32 @@ const MainSlider = ({ slides, className, autoplay }: MainSliderProps) => {
     return (
         <Swiper
             onSwiper={setSwiper}
-            className={className}
+            className={clsx(className, 'relative')}
             modules={[Autoplay, EffectFade]}
             autoplay={autoplay}
             effect="fade"
             loop
         >
-            <div className="absolute inset-0 hidden md:flex">
-                <NavigationButton
-                    direction="prev"
-                    onClick={prevSlide}
-                />
-                <NavigationButton
-                    direction="next"
-                    onClick={nextSlide}
-                />
-            </div>
-            <Pagination
-                className="absolute bottom-6 left-1/2 z-5 -translate-x-1/2"
-                totalSlides={slides.length}
-            />
+            {slides.length > 1 && (
+                <>
+                    <div className="absolute inset-0 hidden md:flex">
+                        <SliderNavigationButton
+                            direction="prev"
+                            onClick={prevSlide}
+                        />
+                        <SliderNavigationButton
+                            direction="next"
+                            onClick={nextSlide}
+                        />
+                    </div>
+
+                    <SliderPagination
+                        className="absolute bottom-6 left-1/2 z-5 -translate-x-1/2"
+                        totalSlides={slides.length}
+                    />
+                </>
+            )}
+
             {slides.map((slide) => {
                 const { id, image, link, slideText } = slide;
 

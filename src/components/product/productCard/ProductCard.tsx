@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { ProductDto } from '@/types/product';
 import { formatPrice } from '@/utils/formatPrice';
-import StarRating from '@/components/StarRating';
+import StarRating from '@/components/shared/StarRating';
 import { getProductPricing } from '@/lib/productPricing';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
