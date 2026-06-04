@@ -1,11 +1,9 @@
 import type { BreadcrumbItem } from '@/components/breadcrumbs/Breadcrumbs';
+import { routes } from '@/lib/routes';
+import type { ProductCategoryDto } from '@/types/product';
 
 type BuildProductBreadcrumbsParams = {
-    category?: {
-        title: string;
-        slug: string;
-    };
-
+    category?: ProductCategoryDto;
     product: {
         title: string;
     };
@@ -18,19 +16,19 @@ export function buildProductBreadcrumbs({
     const items: BreadcrumbItem[] = [
         {
             label: 'Главная',
-            href: '/',
+            href: routes.home(),
         },
 
         {
             label: 'Каталог',
-            href: '/catalog',
+            href: routes.catalog(),
         },
     ];
 
     if (category) {
         items.push({
             label: category.title,
-            href: `/catalog?category=${category.slug}`,
+            href: routes.category(category.slug),
         });
     }
 

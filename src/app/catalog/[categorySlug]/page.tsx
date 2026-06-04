@@ -1,18 +1,20 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProducts } from '@/services/product.service';
+import { getProducts } from '@/services/product/product.service';
 import { getCategoryBySlug } from '@/services/category.service';
 import { getCatalogPaginationParams } from '@/lib/pagination/get-catalog-pagination-params';
 import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
 import type { CatalogSearchParams } from '@/types/catalog-search-params';
 import CatalogEmpty from '@/components/catalog/CatalogEmpty';
 import CatalogPage from '@/components/catalog/CatalogPage';
+import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
+import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrumbs';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
 type PageProps = {
     params: Promise<{
-        category: string;
+        categorySlug: string;
     }>;
 
     searchParams: Promise<CatalogSearchParams>;
@@ -21,7 +23,7 @@ type PageProps = {
 export async function generateMetadata({
     params,
 }: PageProps): Promise<Metadata> {
-    const { category: slug } = await params;
+    const { categorySlug: slug } = await params;
 
     const category = await getCategoryBySlug(slug);
 
@@ -38,7 +40,7 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params, searchParams }: PageProps) {
-    const [{ category: slug }, query] = await Promise.all([
+    const [{ categorySlug: slug }, query] = await Promise.all([
         params,
         searchParams,
     ]);
@@ -77,12 +79,27 @@ export default async function Page({ params, searchParams }: PageProps) {
         notFound();
     }
 
+    const breadcrumbs = buildCatalogBreadcrumbs({
+        category: {
+            id: category.id,
+            title: category.title,
+            slug: category.slug,
+        },
+    });
+
     return (
-        <CatalogPage
-            products={products}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            startPage={startPage}
-        />
+        <div className="page-spacing">
+            <Breadcrumbs
+                items={breadcrumbs}
+                className="py-4"
+            />
+            <CatalogPage
+                products={products}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                startPage={startPage}
+                categorySlug={slug}
+            />
+        </div>
     );
 }

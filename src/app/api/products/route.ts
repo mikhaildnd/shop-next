@@ -1,41 +1,28 @@
-import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { mapProductToDto } from '@/lib/mappers/product.mapper';
+import { getProducts } from '@/services/product/product.service';
 
 export async function GET(req: Request) {
     try {
-        const category = new URL(req.url).searchParams.get('category');
+        const { searchParams } = new URL(req.url);
 
-        if (!category?.trim()) {
-            return NextResponse.json(
-                { message: 'Параметр категории обязателен' },
-                { status: 400 },
-            );
-        }
+        const category = searchParams.get('category');
 
-        const products = await prisma.product.findMany({
-            where: {
-                categories: {
-                    some: {
-                        category: {
-                            slug: category,
-                        },
-                    },
-                },
-            },
-            include: {
-                images: true,
-                categories: {
-                    include: {
-                        category: true,
-                    },
-                },
-            },
+        const takeParam = searchParams.get('take');
+        const skipParam = searchParams.get('skip');
+
+        const parsedTake = takeParam ? Number(takeParam) : undefined;
+        const parsedSkip = skipParam ? Number(skipParam) : undefined;
+
+        const take = Number.isNaN(parsedTake) ? undefined : parsedTake;
+        const skip = Number.isNaN(parsedSkip) ? undefined : parsedSkip;
+
+        const { products, totalCount } = await getProducts({
+            category: category?.trim() || undefined,
+            take,
+            skip,
         });
 
-        const mappedProducts = products.map(mapProductToDto);
-
-        return NextResponse.json(mappedProducts);
+        return NextResponse.json({ products, totalCount });
     } catch (error) {
         console.error('Server error: ', error);
         return NextResponse.json(

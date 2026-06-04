@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import clsx from 'clsx';
 
 export type BreadcrumbItem = {
     label: string;
@@ -19,9 +20,9 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
     return (
         <nav
             aria-label="Breadcrumb"
-            className={className}
+            className={clsx('overflow-x-auto', className)}
         >
-            <ol className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+            <ol className="flex items-center gap-2 text-xs whitespace-nowrap md:text-sm">
                 {items.map((item, index) => {
                     const isLast = index === items.length - 1;
 

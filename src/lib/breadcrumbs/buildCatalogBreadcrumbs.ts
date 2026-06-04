@@ -1,11 +1,9 @@
 import type { BreadcrumbItem } from '@/components/breadcrumbs/Breadcrumbs';
 import { routes } from '@/lib/routes';
+import type { ProductCategoryDto } from '@/types/product';
 
 type BuildCatalogBreadcrumbsParams = {
-    category?: {
-        title: string;
-        slug: string;
-    };
+    category?: ProductCategoryDto;
 };
 
 export function buildCatalogBreadcrumbs({
