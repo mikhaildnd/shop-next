@@ -2,13 +2,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { MainSlideData } from '@/types/mainSlideData';
 
-interface SlideProps extends Omit<MainSlideData, 'id'> {}
+type SlideProps = Omit<MainSlideData, 'id'>;
 
 const Slide = ({ image, link, slideText }: SlideProps) => {
     const SlideContent = (
         <div className="relative h-full bg-gray-300">
             <Image
                 {...image}
+                alt={image.alt}
                 fill
                 className="object-cover"
             />
