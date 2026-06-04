@@ -2,6 +2,9 @@ import { prisma } from '@/lib/db';
 import { mapProductToDto } from '@/lib/mappers/product.mapper';
 import type { ProductDto } from '@/types/product';
 import type { Prisma } from '@/generated/prisma/client';
+import { cache } from 'react';
+import type { ProductsResponse } from '@/services/product/types';
+import { productInclude } from '@/lib/prisma/product';
 
 type GetProductsParams = {
     take?: number;
@@ -9,17 +12,11 @@ type GetProductsParams = {
     category?: string;
 };
 
-//TODO мб вынести, т.к. повтояется в product-section.service.ts
-type GetProductsResult = {
-    products: ProductDto[];
-    totalCount: number;
-};
-
 export async function getProducts({
     take,
     skip,
     category,
-}: GetProductsParams = {}): Promise<GetProductsResult> {
+}: GetProductsParams = {}): Promise<ProductsResponse> {
     const where: Prisma.ProductWhereInput = {};
 
     if (category) {
@@ -35,14 +32,7 @@ export async function getProducts({
     const [products, totalCount] = await prisma.$transaction([
         prisma.product.findMany({
             where,
-            include: {
-                images: true,
-                categories: {
-                    include: {
-                        category: true,
-                    },
-                },
-            },
+            include: productInclude,
             skip,
             take,
 
@@ -59,26 +49,19 @@ export async function getProducts({
     return { products: products.map(mapProductToDto), totalCount };
 }
 
-export async function getProductBySlug(
-    slug: string,
-): Promise<ProductDto | null> {
-    const product = await prisma.product.findUnique({
-        where: {
-            slug,
-        },
-        include: {
-            images: true,
-            categories: {
-                include: {
-                    category: true,
-                },
+export const getProductBySlug = cache(
+    async (slug: string): Promise<ProductDto | null> => {
+        const product = await prisma.product.findUnique({
+            where: {
+                slug,
             },
-        },
-    });
+            include: productInclude,
+        });
 
-    if (!product) {
-        return null;
-    }
+        if (!product) {
+            return null;
+        }
 
-    return mapProductToDto(product);
-}
+        return mapProductToDto(product);
+    },
+);

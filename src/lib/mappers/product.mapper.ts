@@ -1,5 +1,5 @@
 import type { ProductDto } from '@/types/product';
-import type { ProductWithRelations } from '@/types/prisma-payloads';
+import type { ProductWithRelations } from '@/lib/prisma/product';
 
 export function mapProductToDto(product: ProductWithRelations): ProductDto {
     return {

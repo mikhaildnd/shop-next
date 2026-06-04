@@ -1,14 +1,11 @@
-import { getProducts } from '@/services/product.service';
+import { getProducts } from '@/services/product/product.service';
 import { getCategoryBySlug } from '@/services/category.service';
-
-import type { ProductDto } from '@/types/product';
+import type { ProductsResponse } from '@/services/product/types';
 
 type ProductsSectionData = {
     title: string;
     slug: string;
-    products: ProductDto[];
-    totalCount: number;
-};
+} & ProductsResponse;
 
 type GetProductsSectionParams = {
     category: string;
