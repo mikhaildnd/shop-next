@@ -29,7 +29,6 @@ const LazySection = ({
 
     useEffect(() => {
         if (!lazy) {
-            setIsVisible(true);
             return;
         }
 
@@ -51,7 +50,7 @@ const LazySection = ({
         return () => observer.disconnect();
     }, [rootMargin, lazy]);
 
-    return <div ref={ref}>{isVisible ? children : fallback}</div>;
+    return <div ref={ref}>{!lazy || isVisible ? children : fallback}</div>;
 };
 
 export default LazySection;

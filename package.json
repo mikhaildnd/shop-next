@@ -1,32 +1,42 @@
 {
-  "name": "shop-next",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@iminside/react-yandex-maps": "^1.2.7",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "swiper": "^12.1.2",
-    "tailwind-merge": "^3.5.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "clsx": "^2.1.1",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+    "name": "shop-next",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev -p 3000",
+        "build": "next build",
+        "start": "next start -p 3000",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "@iminside/react-yandex-maps": "^1.2.7",
+        "@prisma/adapter-pg": "^7.8.0",
+        "@prisma/client": "^7.8.0",
+        "clsx": "^2.1.1",
+        "lucide-react": "^1.16.0",
+        "next": "16.2.6",
+        "pg": "^8.20.0",
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "swiper": "^12.1.2",
+        "tailwind-merge": "^3.5.0"
+    },
+    "devDependencies": {
+        "@svgr/webpack": "^8.1.0",
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/pg": "^8.20.0",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "dotenv": "^17.4.2",
+        "eslint": "^9",
+        "eslint-config-next": "16.1.6",
+        "prettier": "^3.8.1",
+        "prettier-plugin-tailwindcss": "^0.7.2",
+        "prisma": "^7.8.0",
+        "tailwindcss": "^4",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5"
+    },
+    "packageManager": "pnpm@11.4.0+sha512.f0febc7e37552ab485494a914241b338e0b3580b93d54ce31f00933015880863129038a1b4ae4e414a0ee63ac35bf21197e990172c4a68256450b5636310968f"
 }

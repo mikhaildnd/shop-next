@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MeasureType {
+  GRAM
+  MILLILITER
+  PIECE
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String?
+  ingredients String[]
+
+  basePrice       Decimal @map("base_price") @db.Decimal(10, 2)
+  discountPercent Int     @default(0) @map("discount_percent")
+
+  ratingRate  Decimal @default(0) @map("rating_rate") @db.Decimal(3, 2)
+  ratingCount Int     @default(0) @map("rating_count")
+
+  stock Int @default(0)
+
+  isSeed Boolean @default(false) @map("is_seed")
+
+  measureType  MeasureType @map("measure_type")
+  measureValue Decimal     @map("measure_value") @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categories ProductCategory[]
+  images     ProductImage[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id  String  @id @default(uuid())
+  url String
+  alt String?
+
+  sortOrder Int @default(0) @map("sort_order")
+
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, sortOrder])
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Category {
+  id    String @id @default(uuid())
+  slug  String @unique
+  title String @unique
+
+  products ProductCategory[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model ProductCategory {
+  productId  String @map("product_id")
+  categoryId String @map("category_id")
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([productId])
+  @@index([categoryId])
+  @@map("product_categories")
+}
+
+model User {
+  id String @id @default(uuid())
+
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false) @map("email_verified")
+  phone         String?  @unique
+  role          UserRole @default(USER)
+
+  isSeed Boolean @default(false) @map("is_seed")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}

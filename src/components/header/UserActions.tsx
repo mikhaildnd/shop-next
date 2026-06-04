@@ -1,31 +1,25 @@
-import IconHeart from '../../../public/icons-header/icon-heart.svg';
-import IconBox from '../../../public/icons-header/icon-box.svg';
-import IconCart from '../../../public/icons-header/icon-cart.svg';
 import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
 import UserActionItem from '@/components/header/UserActionItem';
+import { Heart, ShoppingCart, ShoppingBag } from 'lucide-react';
 
 const UserActions = () => {
     return (
-        <ul className="flex grow items-center justify-between">
+        <ul className="flex grow items-end justify-between">
             <UserActionItem
+                Icon={IconMenuMob}
                 className="md:hidden"
-                src={IconMenuMob}
-                alt="Меню"
                 text="Меню"
             />
             <UserActionItem
-                src={IconHeart}
-                alt="Избранное"
+                Icon={Heart}
                 text="Избранное"
             />
             <UserActionItem
-                src={IconBox}
-                alt="Заказы"
+                Icon={ShoppingBag}
                 text="Заказы"
             />
             <UserActionItem
-                src={IconCart}
-                alt="Корзина"
+                Icon={ShoppingCart}
                 text="Корзина"
             />
         </ul>

@@ -31,7 +31,7 @@ export default function RootLayout({
                 )}
             >
                 <Header />
-                {children}
+                <main className="wrapper grow">{children}</main>
                 <Footer className="pb-(--bottom-nav-height) md:pb-0" />
             </body>
         </html>
