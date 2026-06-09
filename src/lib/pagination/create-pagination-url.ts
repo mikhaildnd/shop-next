@@ -1,21 +1,21 @@
-import { createUrl } from './create-url';
+import { createUrl } from '../url/create-url';
 import type { SearchParams } from '@/lib/url/types';
 
-type CreateCatalogPageUrlParams = {
+interface CreatePaginationUrlParams {
     searchParams: SearchParams;
     page: number;
-};
+}
 
-type CreateLoadMoreUrlParams = {
+interface CreateLoadMoreUrlParams {
     searchParams: SearchParams;
     page: number;
     from: number;
-};
+}
 
-export function createCatalogPageUrl({
+export function createPaginationUrl({
     searchParams,
     page,
-}: CreateCatalogPageUrlParams) {
+}: CreatePaginationUrlParams) {
     return createUrl({
         searchParams,
         params: {

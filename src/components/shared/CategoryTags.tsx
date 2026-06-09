@@ -1,0 +1,32 @@
+import Link from 'next/link';
+import { routes } from '@/lib/routes';
+import { cn } from '@/utils/cn';
+import type { CategoryDto } from '@/services/category/category.types';
+
+interface CategoryTagsProps {
+    categories: CategoryDto[];
+    className?: string;
+}
+
+export default function CategoryTags({
+    categories,
+    className,
+}: CategoryTagsProps) {
+    if (!categories.length) {
+        return null;
+    }
+
+    return (
+        <div className={cn('flex gap-2 pb-1 whitespace-nowrap', className)}>
+            {categories.map((category) => (
+                <Link
+                    key={category.id}
+                    href={routes.category(category.slug)}
+                    className="inline-flex h-9 shrink-0 items-center rounded-full bg-neutral-100 px-4 text-sm font-medium whitespace-nowrap text-neutral-700 transition-colors hover:bg-neutral-200"
+                >
+                    {category.title}
+                </Link>
+            ))}
+        </div>
+    );
+}

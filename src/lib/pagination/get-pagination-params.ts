@@ -1,12 +1,12 @@
-import type { CatalogSearchParams } from '@/types/catalog-search-params';
+import type { PaginationSearchParams } from '@/lib/pagination/types';
 import { parsePageParam } from '@/utils/parsePageParam';
 
 type GetPaginationParamsOptions = {
-    searchParams: CatalogSearchParams;
+    searchParams: PaginationSearchParams;
     limit: number;
 };
 
-export function getCatalogPaginationParams({
+export function getPaginationParams({
     searchParams,
     limit,
 }: GetPaginationParamsOptions) {

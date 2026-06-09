@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { buildPagination } from '@/lib/pagination/build-pagination';
 import { useSearchParams } from 'next/navigation';
-import { createCatalogPageUrl } from '@/lib/url/create-catalog-url';
+import { createPaginationUrl } from '@/lib/pagination/create-pagination-url';
 
 type PaginationProps = {
     currentPage: number;
@@ -20,7 +20,7 @@ export default function Pagination({
     return (
         <nav className="flex items-center gap-2">
             <Link
-                href={createCatalogPageUrl({
+                href={createPaginationUrl({
                     searchParams,
                     page: currentPage - 1,
                 })}
@@ -51,7 +51,7 @@ export default function Pagination({
                 return (
                     <Link
                         key={page}
-                        href={createCatalogPageUrl({
+                        href={createPaginationUrl({
                             searchParams,
                             page,
                         })}
@@ -67,7 +67,7 @@ export default function Pagination({
             })}
 
             <Link
-                href={createCatalogPageUrl({
+                href={createPaginationUrl({
                     searchParams,
                     page: currentPage + 1,
                 })}
