@@ -1,8 +1,9 @@
-import type { ProductDto } from '@/types/product';
 import type { ProductWithRelations } from '@/lib/prisma/product';
+import type { ProductDto } from '@/services/product/product.types';
 
 export function mapProductToDto(product: ProductWithRelations): ProductDto {
     return {
+        // TODO добавидь zod-валидацию
         id: product.id,
         slug: product.slug,
         title: product.title,
@@ -21,10 +22,17 @@ export function mapProductToDto(product: ProductWithRelations): ProductDto {
             alt: image.alt,
             sortOrder: image.sortOrder,
         })),
-        categories: product.categories.map(({ category }) => ({
-            id: category.id,
-            slug: category.slug,
-            title: category.title,
+        category: product.category
+            ? {
+                  id: product.category.id,
+                  slug: product.category.slug,
+                  title: product.category.title,
+              }
+            : null,
+        collections: product.collections.map(({ collection }) => ({
+            id: collection.id,
+            slug: collection.slug,
+            title: collection.title,
         })),
         createdAt: product.createdAt.toISOString(),
         updatedAt: product.updatedAt.toISOString(),

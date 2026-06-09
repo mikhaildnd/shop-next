@@ -1,35 +1,48 @@
 import { prisma } from '@/lib/db';
 import { mapProductToDto } from '@/lib/mappers/product.mapper';
-import type { ProductDto } from '@/types/product';
 import type { Prisma } from '@/generated/prisma/client';
 import { cache } from 'react';
-import type { ProductsResponse } from '@/services/product/types';
+import type {
+    ProductDto,
+    ProductsResponse,
+} from '@/services/product/product.types';
 import { productInclude } from '@/lib/prisma/product';
 
 type GetProductsParams = {
     take?: number;
     skip?: number;
-    category?: string;
+
+    categorySlugs?: string[];
+    collection?: string;
 };
 
 export async function getProducts({
     take,
     skip,
-    category,
+    categorySlugs,
+    collection,
 }: GetProductsParams = {}): Promise<ProductsResponse> {
     const where: Prisma.ProductWhereInput = {};
 
-    if (category) {
-        where.categories = {
+    if (categorySlugs?.length) {
+        where.category = {
+            slug: {
+                in: categorySlugs,
+            },
+        };
+    }
+
+    if (collection) {
+        where.collections = {
             some: {
-                category: {
-                    slug: category,
+                collection: {
+                    slug: collection,
                 },
             },
         };
     }
 
-    const [products, totalCount] = await prisma.$transaction([
+    const [products, totalCount] = await Promise.all([
         prisma.product.findMany({
             where,
             include: productInclude,

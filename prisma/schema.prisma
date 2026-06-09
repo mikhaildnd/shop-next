@@ -46,9 +46,14 @@ model Product {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  categories ProductCategory[]
-  images     ProductImage[]
+  categoryId String? @map("category_id")
 
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  collections ProductCollection[]
+  images      ProductImage[]
+
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -72,25 +77,45 @@ model Category {
   slug  String @unique
   title String @unique
 
-  products ProductCategory[]
+  parentId String? @map("parent_id")
+
+  parent Category? @relation("CategoryTree", fields: [parentId], references: [id])
+
+  children Category[] @relation("CategoryTree")
+
+  products Product[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([parentId])
   @@map("categories")
 }
 
-model ProductCategory {
-  productId  String @map("product_id")
-  categoryId String @map("category_id")
+model Collection {
+  id    String @id @default(uuid())
+  slug  String @unique
+  title String @unique
 
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products ProductCollection[]
 
-  @@id([productId, categoryId])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("collections")
+}
+
+model ProductCollection {
+  productId    String @map("product_id")
+  collectionId String @map("collection_id")
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([productId, collectionId])
   @@index([productId])
-  @@index([categoryId])
-  @@map("product_categories")
+  @@index([collectionId])
+  @@map("product_collections")
 }
 
 model User {

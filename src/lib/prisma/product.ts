@@ -2,9 +2,10 @@ import type { Prisma } from '@/generated/prisma/client';
 
 export const productInclude = {
     images: true,
-    categories: {
+    category: true,
+    collections: {
         include: {
-            category: true,
+            collection: true,
         },
     },
 } satisfies Prisma.ProductInclude;
