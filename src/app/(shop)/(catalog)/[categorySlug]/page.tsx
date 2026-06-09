@@ -17,7 +17,7 @@ import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-catego
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import { getChildCategories } from '@/lib/category/get-child-categories';
 import CategoryTags from '@/components/shared/CategoryTags';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalSrollWrapper';
+import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 

@@ -8,7 +8,7 @@ import ProductInfoCard from '@/app/(shop)/(catalog)/product/[productSlug]/_compo
 import ProductProperty from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductProperty';
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import { getCategories } from '@/services/category/category.service';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalSrollWrapper';
+import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 
 type ProductPageProps = {
     params: Promise<{
