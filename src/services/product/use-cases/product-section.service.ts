@@ -1,6 +1,6 @@
 import { getProducts } from '@/services/product/product.service';
-import { getCategoryBySlug } from '@/services/category.service';
-import type { ProductsResponse } from '@/services/product/types';
+import type { ProductsResponse } from '@/services/product/product.types';
+import { getCollectionBySlug } from '@/services/collection/collection.service';
 
 type ProductsSectionData = {
     title: string;
@@ -8,29 +8,29 @@ type ProductsSectionData = {
 } & ProductsResponse;
 
 type GetProductsSectionParams = {
-    category: string;
+    collection: string;
     take?: number;
 };
 
 export async function getProductsSection({
-    category,
+    collection,
     take,
 }: GetProductsSectionParams): Promise<ProductsSectionData | null> {
-    const [fetchedCategory, productsData] = await Promise.all([
-        getCategoryBySlug(category),
+    const [fetchedCollection, productsData] = await Promise.all([
+        getCollectionBySlug(collection),
         getProducts({
-            category,
+            collection,
             take,
         }),
     ]);
 
-    if (!fetchedCategory) {
+    if (!fetchedCollection) {
         return null;
     }
 
     return {
-        title: fetchedCategory.title,
-        slug: fetchedCategory.slug,
+        title: fetchedCollection.title,
+        slug: fetchedCollection.slug,
         products: productsData.products,
         totalCount: productsData.totalCount,
     };

@@ -1,3 +1,6 @@
+import type { CollectionDto } from '@/services/collection/collection.types';
+import type { CategoryDto } from '@/services/category/category.types';
+
 export type MeasureType = 'GRAM' | 'MILLILITER' | 'PIECE';
 
 export type ProductImageDto = {
@@ -7,11 +10,7 @@ export type ProductImageDto = {
     sortOrder: number;
 };
 
-export type ProductCategoryDto = {
-    id: string;
-    slug: string;
-    title: string;
-};
+export type ProductCategoryDto = Pick<CategoryDto, 'id' | 'slug' | 'title'>;
 
 export type ProductDto = {
     id: string;
@@ -34,7 +33,8 @@ export type ProductDto = {
 
     images: ProductImageDto[];
 
-    categories: ProductCategoryDto[];
+    category: ProductCategoryDto | null;
+    collections: CollectionDto[];
 
     createdAt: string;
     updatedAt: string;
@@ -46,7 +46,8 @@ export type ProductSeed = Omit<
     | 'createdAt'
     | 'updatedAt'
     | 'images'
-    | 'categories'
+    | 'category'
+    | 'collections'
     | 'basePrice'
     | 'ratingRate'
     | 'measureValue'
@@ -54,10 +55,16 @@ export type ProductSeed = Omit<
     | 'ingredients'
 > & {
     images: string[];
-    categories: string[];
+    category: string; // category slug
+    collections?: string[]; // collection slugs
     basePrice: number;
     ratingRate: number;
     measureValue: number;
     discountPercent?: number;
     ingredients?: string[];
+};
+
+export type ProductsResponse = {
+    products: ProductDto[];
+    totalCount: number;
 };

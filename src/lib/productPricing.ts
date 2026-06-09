@@ -1,4 +1,4 @@
-import type { ProductDto } from '@/types/product';
+import type { ProductDto } from '@/services/product/product.types';
 
 const calculateDiscountPrice = (price: number, discount: number): number => {
     return discount > 0 ? price * (1 - discount / 100) : price;
