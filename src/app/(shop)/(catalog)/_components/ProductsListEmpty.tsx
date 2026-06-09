@@ -1,12 +1,12 @@
-type CatalogEmptyProps = {
+type ProductsListEmptyProps = {
     title: string;
     description?: string;
 };
 
-export default function CatalogEmpty({
+export default function ProductsListEmpty({
     title,
     description,
-}: CatalogEmptyProps) {
+}: ProductsListEmptyProps) {
     return (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 py-20 text-center">
             <h2 className="text-2xl font-semibold">{title}</h2>

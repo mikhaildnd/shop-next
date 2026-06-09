@@ -1,13 +1,13 @@
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import type { ProductDto } from '@/types/product';
 import 'swiper/css';
 import type { Swiper as SwiperType } from 'swiper';
 import { PRODUCTS_SLIDER_CONFIG } from '@/consts/productsSliderSettings';
 import ProductCard from '@/components/product/productCard/ProductCard';
 import { routes } from '@/lib/routes';
 import { cn } from '@/utils/cn';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductsSliderProps {
     onSwiper?: (swiper: SwiperType) => void;

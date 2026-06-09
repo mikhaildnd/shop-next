@@ -10,7 +10,7 @@ import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import type { MainSlideData } from '@/types/mainSlideData';
 import SliderNavigationButton from '@/components/shared/slider/SliderNavigationButton';
 import SliderPagination from '@/components/shared/slider/SliderPagination';
-import Slide from '@/components/mainSlider/Slide';
+import Slide from '@/app/(shop)/_components/mainSlider/Slide';
 import clsx from 'clsx';
 
 interface MainSliderProps {

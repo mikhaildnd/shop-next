@@ -1,7 +1,7 @@
-import MainSlider from '@/components/mainSlider/MainSlider';
-import ProductsOfferSection from '@/app/_components/ProductsOfferSection';
-import ProductsNewSection from '@/app/_components/ProductsNewSection';
-import ProductsBoughtBeforeSection from '@/app/_components/ProductsBoughtBeforeSection';
+import MainSlider from '@/app/(shop)/_components/mainSlider/MainSlider';
+import ProductsOfferSection from '@/app/(shop)/_components/ProductsOfferSection';
+import ProductsNewSection from '@/app/(shop)/_components/ProductsNewSection';
+import ProductsBoughtBeforeSection from '@/app/(shop)/_components/ProductsBoughtBeforeSection';
 import BannerSpecialOffers from '@/components/banners/BannerSpecialOffers';
 import { Suspense } from 'react';
 import ProductsSectionSkeleton from '@/components/product/productsSection/ProductsSectionSkeleton';

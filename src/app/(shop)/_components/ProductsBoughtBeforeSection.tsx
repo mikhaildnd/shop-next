@@ -1,11 +1,11 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
-import { getProductsSection } from '@/services/product/product-section.service';
+import { getProductsSection } from '@/services/product/use-cases/product-section.service';
 
 //Пока что покупки не реализованы
 const ProductsBoughtBeforeSection = async () => {
     const section = await getProductsSection({
         take: 8,
-        category: 'frozen',
+        collection: 'frozen',
     });
 
     if (!section) {
@@ -15,7 +15,7 @@ const ProductsBoughtBeforeSection = async () => {
     return (
         <ProductsSection
             title="Покупали ранее"
-            link="/catalog/purchases"
+            link="/purchases"
             products={section.products}
         />
     );
