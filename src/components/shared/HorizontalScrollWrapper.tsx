@@ -1,8 +1,9 @@
-import type { PropsWithChildren } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
-interface HorizontalScrollWrapperProps extends PropsWithChildren {
+interface HorizontalScrollWrapperProps {
     className?: string;
+    children: ReactNode;
 }
 
 export default function HorizontalScrollWrapper({
