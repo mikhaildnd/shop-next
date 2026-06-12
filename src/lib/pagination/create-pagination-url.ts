@@ -20,7 +20,7 @@ export function createPaginationUrl({
     return createUrl({
         searchParams,
         params: {
-            page,
+            page: page > 1 ? page : undefined,
             view: undefined,
             from: undefined,
         },
