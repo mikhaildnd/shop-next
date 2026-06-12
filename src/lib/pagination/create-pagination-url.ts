@@ -1,16 +1,17 @@
 import { createUrl } from '../url/create-url';
 import type { SearchParams } from '@/lib/url/types';
+import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
-interface CreatePaginationUrlParams {
+type CreatePaginationUrlParams = {
     searchParams: SearchParams;
     page: number;
-}
+};
 
-interface CreateLoadMoreUrlParams {
+type CreateLoadMoreUrlParams = {
     searchParams: SearchParams;
     page: number;
     from: number;
-}
+};
 
 export function createPaginationUrl({
     searchParams,
@@ -20,7 +21,7 @@ export function createPaginationUrl({
         searchParams,
         params: {
             page,
-            view: 'single',
+            view: undefined,
             from: undefined,
         },
     });
@@ -35,7 +36,7 @@ export function createLoadMoreUrl({
         searchParams,
         params: {
             page,
-            view: 'append',
+            view: PAGINATION_VIEWS.APPEND,
             from,
         },
     });

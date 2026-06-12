@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import {
     getCategoryBySlug,
@@ -17,6 +17,8 @@ import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-catego
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import CategoryTags from '@/components/shared/CategoryTags';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
+import { createUrl } from '@/lib/url/create-url';
+import { getCanonicalPaginationUrl } from '@/lib/pagination/get-canonical-pagination-url';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -52,6 +54,17 @@ export default async function Page({ params, searchParams }: PageProps) {
         params,
         searchParams,
     ]);
+
+    const canonicalSearch = getCanonicalPaginationUrl(query);
+
+    const currentSearch = createUrl({
+        searchParams: new URLSearchParams(),
+        params: query,
+    });
+
+    if (canonicalSearch !== currentSearch) {
+        redirect(`${routes.category(slug)}${canonicalSearch}`);
+    }
 
     const categories = await getCategories();
 

@@ -1,5 +1,7 @@
+export type PaginationView = 'single' | 'append';
+
 export type PaginationSearchParams = {
     page?: string;
-    view?: 'single' | 'append';
+    view?: PaginationView;
     from?: string;
 };
