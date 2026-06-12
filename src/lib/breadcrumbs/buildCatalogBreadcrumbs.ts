@@ -18,6 +18,10 @@ export function buildCatalogBreadcrumbs({
             label: 'Главная',
             href: routes.home(),
         },
+        {
+            label: 'Каталог',
+            href: routes.catalog(),
+        },
     ];
 
     categoryPath.forEach((category, index) => {

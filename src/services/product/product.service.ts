@@ -13,14 +13,14 @@ type GetProductsParams = {
     skip?: number;
 
     categorySlugs?: string[];
-    collection?: string;
+    collectionSlug?: string;
 };
 
 export async function getProducts({
     take,
     skip,
     categorySlugs,
-    collection,
+    collectionSlug,
 }: GetProductsParams = {}): Promise<ProductsResponse> {
     const where: Prisma.ProductWhereInput = {};
 
@@ -32,11 +32,11 @@ export async function getProducts({
         };
     }
 
-    if (collection) {
+    if (collectionSlug) {
         where.collections = {
             some: {
                 collection: {
-                    slug: collection,
+                    slug: collectionSlug,
                 },
             },
         };

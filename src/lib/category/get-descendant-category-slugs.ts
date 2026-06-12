@@ -14,7 +14,13 @@ export function getDescendantCategorySlugs(
         childrenMap.set(category.parentId, children);
     }
 
-    const result: string[] = [];
+    const rootCategory = categories.find((category) => category.id === rootId);
+
+    if (!rootCategory) {
+        return [];
+    }
+
+    const result = [rootCategory.slug];
 
     const walk = (parentId: string) => {
         const children = childrenMap.get(parentId) ?? [];

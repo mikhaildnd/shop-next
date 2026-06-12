@@ -15,7 +15,6 @@ import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrum
 import { routes } from '@/lib/routes';
 import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
 import { getCategoryPath } from '@/lib/category/get-category-path';
-import { getChildCategories } from '@/lib/category/get-child-categories';
 import CategoryTags from '@/components/shared/CategoryTags';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 
@@ -58,7 +57,6 @@ export default async function Page({ params, searchParams }: PageProps) {
 
     const category = categories.find((category) => category.slug === slug);
 
-    // Страница не существует
     if (!category) {
         notFound();
     }
@@ -67,7 +65,9 @@ export default async function Page({ params, searchParams }: PageProps) {
 
     const categorySlugs = getDescendantCategorySlugs(categories, category.id);
 
-    const childCategories = getChildCategories(categories, category.id);
+    const childCategories = categories.filter(
+        (childCategory) => childCategory.parentId === category.id,
+    );
 
     const { currentPage, startPage, take, skip } = getPaginationParams({
         searchParams: query,
@@ -82,8 +82,7 @@ export default async function Page({ params, searchParams }: PageProps) {
 
     const totalPages = Math.ceil(totalCount / LIMIT);
 
-    // Страница не существует
-    if (currentPage > totalPages) {
+    if (totalPages > 0 && currentPage > totalPages) {
         notFound();
     }
 
@@ -99,6 +98,7 @@ export default async function Page({ params, searchParams }: PageProps) {
                     className="py-4"
                 />
             </HorizontalScrollWrapper>
+            <h1 className="mb-2 catalog-heading xl:mb-3">{category.title}</h1>
             <HorizontalScrollWrapper className="mb-3">
                 <CategoryTags categories={childCategories} />
             </HorizontalScrollWrapper>

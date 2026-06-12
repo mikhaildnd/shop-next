@@ -1,8 +1,7 @@
 import ProductCard from '@/components/product/productCard/ProductCard';
 import Pagination from '@/components/shared/Pagination';
 import LoadMoreButton from '@/components/shared/LoadMoreButton';
-
-import { ProductDto } from '@/services/product/product.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductsListContentProps {
     products: ProductDto[];

@@ -1,9 +1,11 @@
 export const routes = {
     home: () => '/',
 
-    category: (slug: string) => `/${slug}`,
+    catalog: () => '/catalog',
 
-    collection: (slug: string) => `/${slug}`,
+    category: (slug: string) => `/catalog/${slug}`,
+
+    collection: (slug: string) => `/collection/${slug}`,
 
     product: (slug: string) => `/product/${slug}`,
 

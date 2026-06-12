@@ -22,6 +22,10 @@ export function buildProductBreadcrumbs({
             label: 'Главная',
             href: routes.home(),
         },
+        {
+            label: 'Каталог',
+            href: routes.catalog(),
+        },
     ];
 
     categoryPath.forEach((category) => {

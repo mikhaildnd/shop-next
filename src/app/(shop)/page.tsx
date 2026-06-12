@@ -30,11 +30,11 @@ export default async function Page() {
                     <ProductsNewSection />
                 </Suspense>
             </LazySection>
-            <LazySection>
-                <Suspense fallback={<ProductsSectionSkeleton />}>
-                    <ProductsBoughtBeforeSection />
-                </Suspense>
-            </LazySection>
+            {/*<LazySection>*/}
+            {/*    <Suspense fallback={<ProductsSectionSkeleton />}>*/}
+            {/*        <ProductsBoughtBeforeSection />*/}
+            {/*    </Suspense>*/}
+            {/*</LazySection>*/}
             <BannerSpecialOffers />
             <LazySection>
                 <Maps />
