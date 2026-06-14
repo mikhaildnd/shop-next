@@ -56,7 +56,6 @@ export default async function Page({ params, searchParams }: PageProps) {
     ]);
 
     const canonicalSearch = getCanonicalPaginationUrl(query);
-
     const currentSearch = createUrl({
         searchParams: new URLSearchParams(),
         params: query,
@@ -67,7 +66,6 @@ export default async function Page({ params, searchParams }: PageProps) {
     }
 
     const categories = await getCategories();
-
     const category = categories.find((category) => category.slug === slug);
 
     if (!category) {
@@ -75,9 +73,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     }
 
     const categoryPath = getCategoryPath(categories, category.id);
-
     const categorySlugs = getDescendantCategorySlugs(categories, category.id);
-
     const childCategories = categories.filter(
         (childCategory) => childCategory.parentId === category.id,
     );
@@ -111,7 +107,9 @@ export default async function Page({ params, searchParams }: PageProps) {
                     className="py-4"
                 />
             </HorizontalScrollWrapper>
+
             <h1 className="mb-2 catalog-heading xl:mb-3">{category.title}</h1>
+
             <HorizontalScrollWrapper className="mb-3">
                 <CategoryTags categories={childCategories} />
             </HorizontalScrollWrapper>

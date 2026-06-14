@@ -19,7 +19,7 @@ export async function getProductsSection({
     const [fetchedCollection, productsData] = await Promise.all([
         getCollectionBySlug(collection),
         getProducts({
-            collection,
+            collectionSlug: collection,
             take,
         }),
     ]);

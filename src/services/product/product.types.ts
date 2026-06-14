@@ -18,7 +18,9 @@ export type ProductDto = {
     title: string;
     description: string | null;
 
-    basePrice: number;
+    regularPrice: number;
+    salePrice: number | null;
+    effectivePrice: number;
     discountPercent: number;
 
     ratingRate: number;
@@ -40,28 +42,28 @@ export type ProductDto = {
     updatedAt: string;
 };
 
-export type ProductSeed = Omit<
-    ProductDto,
-    | 'id'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'images'
-    | 'category'
-    | 'collections'
-    | 'basePrice'
-    | 'ratingRate'
-    | 'measureValue'
-    | 'discountPercent'
-    | 'ingredients'
-> & {
-    images: string[];
-    category: string; // category slug
-    collections?: string[]; // collection slugs
-    basePrice: number;
+export type ProductSeed = {
+    slug: string;
+    title: string;
+    description: string | null;
+
+    regularPrice: number;
+    salePrice?: number | null;
+
     ratingRate: number;
+    ratingCount: number;
+
+    stock: number;
+
+    measureType: MeasureType;
     measureValue: number;
-    discountPercent?: number;
+
     ingredients?: string[];
+
+    images: string[];
+
+    category: string;
+    collections?: string[];
 };
 
 export type ProductsResponse = {

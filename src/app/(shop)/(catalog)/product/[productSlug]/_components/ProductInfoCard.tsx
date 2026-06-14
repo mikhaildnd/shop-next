@@ -1,7 +1,6 @@
 import StarRating from '@/components/shared/StarRating';
 import { cn } from '@/utils/cn';
 import { formatPrice } from '@/utils/formatPrice';
-import { getProductPricing } from '@/lib/productPricing';
 import { ProductDto } from '@/services/product/product.types';
 
 interface ProductInfoCardProps {
@@ -10,12 +9,7 @@ interface ProductInfoCardProps {
 }
 
 const ProductInfoCard = ({ product, className }: ProductInfoCardProps) => {
-    const { regularPrice, discountedPrice, hasDiscount } =
-        getProductPricing(product);
-
-    const regularPriceClassnames = hasDiscount
-        ? 'text-[#606060] line-through'
-        : 'font-bold text-[#414141]';
+    const hasDiscount = product.discountPercent > 0;
 
     return (
         <section
@@ -37,8 +31,8 @@ const ProductInfoCard = ({ product, className }: ProductInfoCardProps) => {
 
             <div className="flex flex-col gap-y-1">
                 <div className="flex flex-row items-center gap-x-2">
-                    <p className={cn(regularPriceClassnames, 'text-md')}>
-                        {formatPrice(regularPrice)} ₸
+                    <p className="text-2xl font-bold text-[#414141]">
+                        {formatPrice(product.effectivePrice)} ₸
                     </p>
                     {hasDiscount && (
                         <div className="rounded-sm bg-[#ff6633] px-2 py-1 text-sm text-white">
@@ -48,14 +42,9 @@ const ProductInfoCard = ({ product, className }: ProductInfoCardProps) => {
                 </div>
 
                 {hasDiscount && (
-                    <div className="flex flex-col">
-                        <p className="text-2xl font-bold text-[#414141]">
-                            {formatPrice(discountedPrice)} ₸
-                        </p>
-                        {/*<p className="text-[8px] text-[#bfbfbf] md:text-xs">*/}
-                        {/*    Со скидкой*/}
-                        {/*</p>*/}
-                    </div>
+                    <p className="text-md text-[#606060] line-through">
+                        {formatPrice(product.regularPrice)} ₸
+                    </p>
                 )}
             </div>
 

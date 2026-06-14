@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,6 +5,100 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Product {
+  id              String              @id @default(uuid())
+  slug            String              @unique
+  title           String
+  description     String?
+  ingredients     String[]
+  ratingRate      Decimal             @default(0) @map("rating_rate") @db.Decimal(3, 2)
+  ratingCount     Int                 @default(0) @map("rating_count")
+  stock           Int                 @default(0)
+  isSeed          Boolean             @default(false) @map("is_seed")
+  measureType     MeasureType         @map("measure_type")
+  measureValue    Decimal             @map("measure_value") @db.Decimal(10, 2)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  categoryId      String?             @map("category_id")
+  regularPrice    Decimal             @map("regular_price") @db.Decimal(10, 2)
+  salePrice       Decimal?            @map("sale_price") @db.Decimal(10, 2)
+  effectivePrice  Decimal?            @default(dbgenerated("COALESCE(sale_price, regular_price)")) @map("effective_price") @db.Decimal(10, 2)
+  discountPercent Int?                @default(dbgenerated("\nCASE\n    WHEN (sale_price IS NULL) THEN (0)::numeric\n    ELSE round((((regular_price - sale_price) / regular_price) * (100)::numeric))\nEND")) @map("discount_percent")
+  collections     ProductCollection[]
+  images          ProductImage[]
+  category        Category?           @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([discountPercent])
+  @@index([effectivePrice])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  url       String
+  alt       String?
+  sortOrder Int     @default(0) @map("sort_order")
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, sortOrder])
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  slug      String     @unique
+  title     String     @unique
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  parentId  String?    @map("parent_id")
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Collection {
+  id        String              @id @default(uuid())
+  slug      String              @unique
+  title     String              @unique
+  createdAt DateTime            @default(now()) @map("created_at")
+  updatedAt DateTime            @updatedAt @map("updated_at")
+  products  ProductCollection[]
+
+  @@map("collections")
+}
+
+model ProductCollection {
+  productId    String     @map("product_id")
+  collectionId String     @map("collection_id")
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([productId, collectionId])
+  @@index([productId])
+  @@index([collectionId])
+  @@map("product_collections")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false) @map("email_verified")
+  phone         String?  @unique
+  role          UserRole @default(USER)
+  isSeed        Boolean  @default(false) @map("is_seed")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
 }
 
 enum MeasureType {
@@ -21,116 +110,4 @@ enum MeasureType {
 enum UserRole {
   ADMIN
   USER
-}
-
-model Product {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  description String?
-  ingredients String[]
-
-  basePrice       Decimal @map("base_price") @db.Decimal(10, 2)
-  discountPercent Int     @default(0) @map("discount_percent")
-
-  ratingRate  Decimal @default(0) @map("rating_rate") @db.Decimal(3, 2)
-  ratingCount Int     @default(0) @map("rating_count")
-
-  stock Int @default(0)
-
-  isSeed Boolean @default(false) @map("is_seed")
-
-  measureType  MeasureType @map("measure_type")
-  measureValue Decimal     @map("measure_value") @db.Decimal(10, 2)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  categoryId String? @map("category_id")
-
-  category Category? @relation(fields: [categoryId], references: [id])
-
-  collections ProductCollection[]
-  images      ProductImage[]
-
-  @@index([categoryId])
-  @@map("products")
-}
-
-model ProductImage {
-  id  String  @id @default(uuid())
-  url String
-  alt String?
-
-  sortOrder Int @default(0) @map("sort_order")
-
-  productId String  @map("product_id")
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, sortOrder])
-  @@index([productId])
-  @@map("product_images")
-}
-
-model Category {
-  id    String @id @default(uuid())
-  slug  String @unique
-  title String @unique
-
-  parentId String? @map("parent_id")
-
-  parent Category? @relation("CategoryTree", fields: [parentId], references: [id])
-
-  children Category[] @relation("CategoryTree")
-
-  products Product[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([parentId])
-  @@map("categories")
-}
-
-model Collection {
-  id    String @id @default(uuid())
-  slug  String @unique
-  title String @unique
-
-  products ProductCollection[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("collections")
-}
-
-model ProductCollection {
-  productId    String @map("product_id")
-  collectionId String @map("collection_id")
-
-  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-
-  @@id([productId, collectionId])
-  @@index([productId])
-  @@index([collectionId])
-  @@map("product_collections")
-}
-
-model User {
-  id String @id @default(uuid())
-
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false) @map("email_verified")
-  phone         String?  @unique
-  role          UserRole @default(USER)
-
-  isSeed Boolean @default(false) @map("is_seed")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("users")
 }
