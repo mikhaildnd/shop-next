@@ -1,3 +1,5 @@
+// мб удалить, сейчас не используется
+
 import { createUrl } from '@/lib/url/create-url';
 import type { PaginationSearchParams } from '@/lib/pagination/types';
 import { getCanonicalPaginationSearchParams } from '@/lib/pagination/get-canonical-pagination-search-params';

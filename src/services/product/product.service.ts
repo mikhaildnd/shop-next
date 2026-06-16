@@ -1,19 +1,23 @@
 import { prisma } from '@/lib/db';
 import { mapProductToDto } from '@/lib/mappers/product.mapper';
-import type { Prisma } from '@/generated/prisma/client';
 import { cache } from 'react';
 import type {
     ProductDto,
     ProductsResponse,
 } from '@/services/product/product.types';
 import { productInclude } from '@/lib/prisma/product';
+import { getProductOrderBy } from '@/lib/product/sort/get-product-order-by';
+import { getProductWhere } from '@/lib/product/filters/get-product-where';
+import { getProductFilters } from '@/lib/product/filters/get-product-filters';
+import type { ProductSearchParams } from '@/lib/product/types';
+import { normalizeSortParam } from '@/lib/product/sort/normalize/normalize-sort-param';
 
 type GetProductsParams = {
     take?: number;
     skip?: number;
-
     categorySlugs?: string[];
     collectionSlug?: string;
+    searchParams?: ProductSearchParams;
 };
 
 export async function getProducts({
@@ -21,8 +25,12 @@ export async function getProducts({
     skip,
     categorySlugs,
     collectionSlug,
-}: GetProductsParams = {}): Promise<ProductsResponse> {
-    const where: Prisma.ProductWhereInput = {};
+    searchParams,
+}: GetProductsParams): Promise<ProductsResponse> {
+    const filters = getProductFilters(searchParams ?? {});
+    const sort = normalizeSortParam(searchParams?.sort);
+
+    const where = getProductWhere(filters);
 
     if (categorySlugs?.length) {
         where.category = {
@@ -49,9 +57,7 @@ export async function getProducts({
             skip,
             take,
 
-            orderBy: {
-                createdAt: 'desc',
-            },
+            orderBy: getProductOrderBy(sort),
         }),
 
         prisma.product.count({

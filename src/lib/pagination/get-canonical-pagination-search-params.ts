@@ -1,7 +1,7 @@
 import type { PaginationSearchParams } from '@/lib/pagination/types';
-import { normalizePageNumber } from '@/lib/pagination/search-params/normalize-page-number';
-import { normalizeViewParam } from '@/lib/pagination/search-params/normalize-view-param';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import { normalizePageNumber } from '@/lib/pagination/normalize/normalize-page-number';
+import { normalizeViewParam } from '@/lib/pagination/normalize/normalize-view-param';
 
 export function getCanonicalPaginationSearchParams(
     searchParams: PaginationSearchParams,

@@ -7,7 +7,6 @@ import {
 } from '@/services/category/category.service';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
-import type { PaginationSearchParams } from '@/lib/pagination/types';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
@@ -18,7 +17,8 @@ import { getCategoryPath } from '@/lib/category/get-category-path';
 import CategoryTags from '@/components/shared/CategoryTags';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 import { createUrl } from '@/lib/url/create-url';
-import { getCanonicalPaginationUrl } from '@/lib/pagination/get-canonical-pagination-url';
+import type { ProductSearchParams } from '@/lib/product/types';
+import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -27,7 +27,7 @@ type PageProps = {
         categorySlug: string;
     }>;
 
-    searchParams: Promise<PaginationSearchParams>;
+    searchParams: Promise<ProductSearchParams>;
 };
 
 export async function generateMetadata({
@@ -55,7 +55,7 @@ export default async function Page({ params, searchParams }: PageProps) {
         searchParams,
     ]);
 
-    const canonicalSearch = getCanonicalPaginationUrl(query);
+    const canonicalSearch = getCanonicalProductListingUrl(query);
     const currentSearch = createUrl({
         searchParams: new URLSearchParams(),
         params: query,
@@ -87,6 +87,7 @@ export default async function Page({ params, searchParams }: PageProps) {
         take,
         skip,
         categorySlugs,
+        searchParams: query,
     });
 
     const totalPages = Math.ceil(totalCount / LIMIT);

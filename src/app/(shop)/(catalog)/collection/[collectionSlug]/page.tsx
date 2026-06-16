@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
-import type { PaginationSearchParams } from '@/lib/pagination/types';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
+import type { ProductSearchParams } from '@/lib/product/types';
+import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
+import { createUrl } from '@/lib/url/create-url';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -17,7 +19,7 @@ type PageProps = {
         collectionSlug: string;
     }>;
 
-    searchParams: Promise<PaginationSearchParams>;
+    searchParams: Promise<ProductSearchParams>;
 };
 
 export async function generateMetadata({
@@ -45,6 +47,16 @@ export default async function Page({ params, searchParams }: PageProps) {
         searchParams,
     ]);
 
+    const canonicalSearch = getCanonicalProductListingUrl(query);
+    const currentSearch = createUrl({
+        searchParams: new URLSearchParams(),
+        params: query,
+    });
+
+    if (canonicalSearch !== currentSearch) {
+        redirect(`${routes.collection(slug)}${canonicalSearch}`);
+    }
+
     const collection: CollectionDto | null = await getCollectionBySlug(slug);
 
     if (!collection) {
@@ -60,6 +72,7 @@ export default async function Page({ params, searchParams }: PageProps) {
         take,
         skip,
         collectionSlug: collection?.slug,
+        searchParams: query,
     });
 
     const totalPages = Math.ceil(totalCount / LIMIT);
