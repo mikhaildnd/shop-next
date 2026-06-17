@@ -1,9 +1,10 @@
-import { DEFAULT_PRODUCT_SORT, PRODUCT_SORTS } from '@/lib/product/sort/consts';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product/sort/consts';
 import type { ProductSort } from '@/lib/product/sort/types';
+import { isProductSort } from '@/lib/product/sort/guards';
 
 export const normalizeSortParam = (value?: string): ProductSort => {
-    if (value && PRODUCT_SORTS.includes(value as ProductSort)) {
-        return value as ProductSort;
+    if (value && isProductSort(value)) {
+        return value;
     }
 
     return DEFAULT_PRODUCT_SORT;

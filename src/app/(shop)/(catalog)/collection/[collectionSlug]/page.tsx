@@ -68,14 +68,14 @@ export default async function Page({ params, searchParams }: PageProps) {
         limit: LIMIT,
     });
 
-    const { products, totalCount } = await getProducts({
+    const { products, filteredProductsCount } = await getProducts({
         take,
         skip,
         collectionSlug: collection?.slug,
         searchParams: query,
     });
 
-    const totalPages = Math.ceil(totalCount / LIMIT);
+    const totalPages = Math.ceil(filteredProductsCount / LIMIT);
 
     if (currentPage > totalPages) {
         notFound();
@@ -84,7 +84,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     return (
         <div className="page-spacing">
             <h1 className="mb-2 catalog-heading xl:mb-3">{collection.title}</h1>
-            {totalCount === 0 ? (
+            {filteredProductsCount === 0 ? (
                 <ProductsListEmpty
                     title="Товары не найдены"
                     description="Попробуйте открыть другую категорию"

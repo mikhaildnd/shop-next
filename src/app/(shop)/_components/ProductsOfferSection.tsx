@@ -1,22 +1,26 @@
 import ProductsSection from '@/components/product/productsSection/ProductsSection';
-import { getProductsSection } from '@/services/product/use-cases/product-section.service';
 import { routes } from '@/lib/routes';
+import { getCollectionBySlug } from '@/services/collection/collection.service';
+import { getProducts } from '@/services/product/product.service';
 
 const ProductsOfferSection = async () => {
-    const section = await getProductsSection({
-        collection: 'promotion',
-        take: 8,
-    });
+    const [collection, productsData] = await Promise.all([
+        getCollectionBySlug('promotion'),
+        getProducts({
+            collectionSlug: 'promotion',
+            take: 8,
+        }),
+    ]);
 
-    if (!section) {
+    if (!collection) {
         return null;
     }
 
     return (
         <ProductsSection
-            title={section.title}
-            link={routes.collection(section.slug)}
-            products={section.products}
+            title={collection.title}
+            link={routes.collection(collection.slug)}
+            products={productsData.products}
         />
     );
 };

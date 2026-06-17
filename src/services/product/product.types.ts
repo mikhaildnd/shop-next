@@ -66,7 +66,14 @@ export type ProductSeed = {
     collections?: string[];
 };
 
+export type ProductFiltersMeta = {
+    minPrice: number;
+    maxPrice: number;
+    totalProductsCount: number;
+};
+
 export type ProductsResponse = {
     products: ProductDto[];
-    totalCount: number;
+    filteredProductsCount: number;
+    filtersMeta: ProductFiltersMeta;
 };

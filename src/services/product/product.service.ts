@@ -3,6 +3,7 @@ import { mapProductToDto } from '@/lib/mappers/product.mapper';
 import { cache } from 'react';
 import type {
     ProductDto,
+    ProductFiltersMeta,
     ProductsResponse,
 } from '@/services/product/product.types';
 import { productInclude } from '@/lib/prisma/product';
@@ -11,6 +12,7 @@ import { getProductWhere } from '@/lib/product/filters/get-product-where';
 import { getProductFilters } from '@/lib/product/filters/get-product-filters';
 import type { ProductSearchParams } from '@/lib/product/types';
 import { normalizeSortParam } from '@/lib/product/sort/normalize/normalize-sort-param';
+import type { Prisma } from '@/generated/prisma/client';
 
 type GetProductsParams = {
     take?: number;
@@ -30,42 +32,74 @@ export async function getProducts({
     const filters = getProductFilters(searchParams ?? {});
     const sort = normalizeSortParam(searchParams?.sort);
 
-    const where = getProductWhere(filters);
+    const filtersWhere = getProductWhere(filters);
+    const metaWhere: Prisma.ProductWhereInput = {};
 
     if (categorySlugs?.length) {
-        where.category = {
+        const categoryWhere = {
             slug: {
                 in: categorySlugs,
             },
         };
+
+        filtersWhere.category = categoryWhere;
+        metaWhere.category = categoryWhere;
     }
 
     if (collectionSlug) {
-        where.collections = {
+        const collectionsWhere = {
             some: {
                 collection: {
                     slug: collectionSlug,
                 },
             },
         };
+
+        filtersWhere.collections = collectionsWhere;
+        metaWhere.collections = collectionsWhere;
     }
 
-    const [products, totalCount] = await Promise.all([
-        prisma.product.findMany({
-            where,
-            include: productInclude,
-            skip,
-            take,
+    const [products, filteredProductsCount, totalProductsCount, priceRange] =
+        await Promise.all([
+            prisma.product.findMany({
+                where: filtersWhere,
+                include: productInclude,
+                skip,
+                take,
 
-            orderBy: getProductOrderBy(sort),
-        }),
+                orderBy: getProductOrderBy(sort),
+            }),
 
-        prisma.product.count({
-            where,
-        }),
-    ]);
+            prisma.product.count({
+                where: filtersWhere,
+            }),
 
-    return { products: products.map(mapProductToDto), totalCount };
+            prisma.product.count({
+                where: metaWhere,
+            }),
+
+            prisma.product.aggregate({
+                where: metaWhere,
+                _min: {
+                    effectivePrice: true,
+                },
+                _max: {
+                    effectivePrice: true,
+                },
+            }),
+        ]);
+
+    const filtersMeta: ProductFiltersMeta = {
+        minPrice: Number(priceRange._min.effectivePrice ?? 0),
+        maxPrice: Number(priceRange._max.effectivePrice ?? 0),
+        totalProductsCount,
+    };
+
+    return {
+        products: products.map(mapProductToDto),
+        filteredProductsCount,
+        filtersMeta,
+    };
 }
 
 export const getProductBySlug = cache(

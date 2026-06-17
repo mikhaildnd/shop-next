@@ -7,7 +7,6 @@ export function mapProductToDto(product: ProductWithRelations): ProductDto {
     }
 
     return {
-        // TODO добавидь zod-валидацию
         id: product.id,
         slug: product.slug,
         title: product.title,

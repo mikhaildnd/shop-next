@@ -19,6 +19,7 @@ import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper
 import { createUrl } from '@/lib/url/create-url';
 import type { ProductSearchParams } from '@/lib/product/types';
 import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
+import ProductFiltersPanel from '@/components/product/productFilters/ProductFiltersPanel';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -83,14 +84,14 @@ export default async function Page({ params, searchParams }: PageProps) {
         limit: LIMIT,
     });
 
-    const { products, totalCount } = await getProducts({
+    const { products, filteredProductsCount, filtersMeta } = await getProducts({
         take,
         skip,
         categorySlugs,
         searchParams: query,
     });
 
-    const totalPages = Math.ceil(totalCount / LIMIT);
+    const totalPages = Math.ceil(filteredProductsCount / LIMIT);
 
     if (totalPages > 0 && currentPage > totalPages) {
         notFound();
@@ -114,22 +115,29 @@ export default async function Page({ params, searchParams }: PageProps) {
             <HorizontalScrollWrapper className="mb-3">
                 <CategoryTags categories={childCategories} />
             </HorizontalScrollWrapper>
-            {totalCount === 0 ? (
-                <ProductsListEmpty
-                    title="Товары не найдены"
-                    description="Попробуйте открыть другую категорию"
+
+            <div className="grid grid-cols-[280px_1fr] items-start gap-4">
+                <ProductFiltersPanel
+                    filtersMeta={filtersMeta}
+                    filteredProductsCount={filteredProductsCount}
                 />
-            ) : (
-                <ProductsListContent
-                    products={products}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    startPage={startPage}
-                    getProductHref={(product) =>
-                        routes.productInCategory(product.slug, slug)
-                    }
-                />
-            )}
+                {filteredProductsCount === 0 ? (
+                    <ProductsListEmpty
+                        title="Товары не найдены"
+                        description="Попробуйте открыть другую категорию"
+                    />
+                ) : (
+                    <ProductsListContent
+                        products={products}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        startPage={startPage}
+                        getProductHref={(product) =>
+                            routes.productInCategory(product.slug, slug)
+                        }
+                    />
+                )}
+            </div>
         </div>
     );
 }

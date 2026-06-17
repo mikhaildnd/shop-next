@@ -40,7 +40,7 @@
 }
 
 @utility wrapper {
-  padding-inline: max(var(--section-padding), calc((100% - 1208px) / 2));
+  padding-inline: max(var(--section-padding), calc((100% - 1400px) / 2));
   width: 100%;
 }
 

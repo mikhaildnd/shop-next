@@ -1,7 +1,6 @@
 import MainSlider from '@/app/(shop)/_components/mainSlider/MainSlider';
 import ProductsOfferSection from '@/app/(shop)/_components/ProductsOfferSection';
 import ProductsNewSection from '@/app/(shop)/_components/ProductsNewSection';
-import ProductsBoughtBeforeSection from '@/app/(shop)/_components/ProductsBoughtBeforeSection';
 import BannerSpecialOffers from '@/components/banners/BannerSpecialOffers';
 import { Suspense } from 'react';
 import ProductsSectionSkeleton from '@/components/product/productsSection/ProductsSectionSkeleton';
@@ -30,11 +29,6 @@ export default async function Page() {
                     <ProductsNewSection />
                 </Suspense>
             </LazySection>
-            {/*<LazySection>*/}
-            {/*    <Suspense fallback={<ProductsSectionSkeleton />}>*/}
-            {/*        <ProductsBoughtBeforeSection />*/}
-            {/*    </Suspense>*/}
-            {/*</LazySection>*/}
             <BannerSpecialOffers />
             <LazySection>
                 <Maps />
