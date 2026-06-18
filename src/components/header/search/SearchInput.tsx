@@ -1,91 +1,22 @@
 'use client';
 
-import { type SubmitEventHandler, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import SearchDropdown from '@/components/header/search/SearchDropdown';
-import { useDebounce } from '@/hooks/useDebounce';
-import { searchProducts } from '@/lib/api/search';
-import type { SearchResponse } from '@/services/search/types';
-import { useDropdownDismiss } from '@/hooks/useDropdownDissmiss';
-import { routes } from '@/lib/routes';
 import { X as IconClose, Search as IconSearch } from 'lucide-react';
+import { useSearchInput } from '@/hooks/useSearchInput';
 
 const SearchInput = () => {
-    const router = useRouter();
-
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    const [query, setQuery] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [results, setResults] = useState<SearchResponse | null>(null);
-
-    const debouncedQuery = useDebounce(query, 300);
-    const searchQuery = query.trim();
-
-    const searchUrl = routes.search(searchQuery);
-
-    const closeDropdown = () => {
-        setIsOpen(false);
-    };
-
-    const resetDropdown = () => {
-        setQuery('');
-        setResults(null);
-        setIsOpen(false);
-    };
-
-    useDropdownDismiss({
-        ref: containerRef,
-        onClickOutside: closeDropdown,
-        onEscape: resetDropdown,
-    });
-
-    useEffect(() => {
-        const debouncedSearchQuery = debouncedQuery.trim();
-
-        const controller = new AbortController();
-
-        if (debouncedSearchQuery.length < 2) {
-            setResults(null);
-            setIsOpen(false);
-            setIsLoading(false);
-
-            return () => controller.abort();
-        }
-
-        setIsLoading(true);
-
-        searchProducts(debouncedSearchQuery, controller.signal)
-            .then((data) => {
-                setResults(data);
-                setIsOpen(true);
-            })
-            .catch((error) => {
-                if (error.name !== 'AbortError') {
-                    console.error(error);
-                }
-            })
-            .finally(() => {
-                if (!controller.signal.aborted) {
-                    setIsLoading(false);
-                }
-            });
-
-        return () => controller.abort();
-    }, [debouncedQuery]);
-
-    const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
-        e.preventDefault();
-
-        if (searchQuery.length < 2) {
-            return;
-        }
-
-        closeDropdown();
-
-        router.push(searchUrl);
-    };
+    const {
+        containerRef,
+        query,
+        isOpen,
+        isLoading,
+        results,
+        searchUrl,
+        setQuery,
+        setIsOpen,
+        resetSearch,
+        handleSubmit,
+    } = useSearchInput();
 
     const iconButtonClass =
         'rounded p-1.5 text-gray-500 transition-colors hover:bg-gray-100 cursor-pointer';
@@ -95,7 +26,10 @@ const SearchInput = () => {
             ref={containerRef}
             className="relative grow"
         >
-            <form onSubmit={handleSubmit}>
+            <form
+                onSubmit={handleSubmit}
+                autoComplete="off"
+            >
                 <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -117,7 +51,7 @@ const SearchInput = () => {
                     {query && (
                         <button
                             type="button"
-                            onClick={resetDropdown}
+                            onClick={resetSearch}
                             aria-label="Очистить поиск"
                             className={iconButtonClass}
                         >
@@ -137,7 +71,7 @@ const SearchInput = () => {
 
             {isOpen && results && (
                 <SearchDropdown
-                    onClose={closeDropdown}
+                    onClose={() => setIsOpen(false)}
                     products={results.products}
                     categories={results.categories}
                     productsCount={results.productsCount}

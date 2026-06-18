@@ -5,6 +5,8 @@ import { searchProducts } from '@/services/search/search-products.service';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import { routes } from '@/lib/routes';
+import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
+import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
 
 // TODO metadata
 
@@ -19,17 +21,27 @@ interface SearchPageProps {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
     const query = await searchParams;
+    const state = normalizeSearchQuery(query[SEARCH_QUERY_PARAM]);
 
-    const searchQuery = query.q?.trim() ?? '';
-
-    if (searchQuery.length < 2) {
+    if (state.status === 'empty') {
         return (
             <ProductsListEmpty
-                title="Введите поисковый запрос"
+                title="Не указана строка поиска"
+                description="Введите название товара или категории"
+            />
+        );
+    }
+
+    if (state.status === 'too-short') {
+        return (
+            <ProductsListEmpty
+                title="Слишком короткий запрос"
                 description="Минимум 2 символа"
             />
         );
     }
+
+    const searchQuery = state.query;
 
     const { currentPage, startPage, take, skip } = getPaginationParams({
         searchParams: query,
