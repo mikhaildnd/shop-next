@@ -1,0 +1,39 @@
+import { Prisma } from '@/generated/prisma/client';
+import type { ProductSort } from '@/lib/product/sort/types';
+
+type ProductsOrderByResult =
+    | Prisma.ProductOrderByWithRelationInput
+    | Prisma.ProductOrderByWithRelationInput[];
+
+export const getProductOrderBy = (sort: ProductSort): ProductsOrderByResult => {
+    switch (sort) {
+        case 'price-asc':
+            return { effectivePrice: 'asc' };
+
+        case 'price-desc':
+            return { effectivePrice: 'desc' };
+
+        case 'name-asc':
+            return { title: 'asc' };
+
+        case 'name-desc':
+            return { title: 'desc' };
+
+        case 'popular':
+            return [
+                {
+                    ratingCount: 'desc',
+                },
+                {
+                    ratingRate: 'desc',
+                },
+                {
+                    createdAt: 'desc',
+                },
+            ];
+
+        case 'newest':
+        default:
+            return { createdAt: 'desc' };
+    }
+};

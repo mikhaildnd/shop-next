@@ -1,11 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import clsx from 'clsx';
-
-export type BreadcrumbItem = {
-    label: string;
-    href?: string;
-};
+import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
 
 type BreadcrumbsProps = {
     items: BreadcrumbItem[];
@@ -20,7 +15,7 @@ export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
     return (
         <nav
             aria-label="Breadcrumb"
-            className={clsx('overflow-x-auto', className)}
+            className={className}
         >
             <ol className="flex items-center gap-2 text-xs whitespace-nowrap md:text-sm">
                 {items.map((item, index) => {

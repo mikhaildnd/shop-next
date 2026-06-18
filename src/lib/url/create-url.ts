@@ -16,5 +16,9 @@ export function createUrl({ searchParams, params }: CreateUrlParams) {
         }
     });
 
-    return `?${nextParams.toString()}`;
+    nextParams.sort();
+
+    const query = nextParams.toString();
+
+    return query ? `?${query}` : '';
 }

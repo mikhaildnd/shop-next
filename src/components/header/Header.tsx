@@ -1,5 +1,5 @@
 import UserMenu from '@/components/header/UserMenu';
-import SearchBar from '@/components/header/SearchBar';
+import SearchBar from '@/components/header/search/SearchBar';
 import Logo from '@/components/logo/Logo';
 
 const Header = () => {

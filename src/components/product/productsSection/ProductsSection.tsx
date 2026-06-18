@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
-import type { ProductDto } from '@/types/product';
 
 import ProductsSlider from '@/components/product/productSlider/ProductsSlider.lazy';
 import ProductsSectionHeader from '@/components/product/productsSection/ProductsSectionHeader';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import ProductsSectionControls from '@/components/product/productsSection/ProductsSectionControls';
 import { cn } from '@/utils/cn';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductSectionProps {
     title: string;

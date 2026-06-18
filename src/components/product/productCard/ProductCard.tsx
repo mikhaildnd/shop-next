@@ -1,10 +1,9 @@
 import Image from 'next/image';
-import type { ProductDto } from '@/types/product';
 import { formatPrice } from '@/utils/formatPrice';
 import StarRating from '@/components/shared/StarRating';
-import { getProductPricing } from '@/lib/productPricing';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
+import type { ProductDto } from '@/services/product/product.types';
 
 type ProductCardProps = {
     product: ProductDto;
@@ -12,17 +11,10 @@ type ProductCardProps = {
 };
 
 const ProductCard = ({ product, href }: ProductCardProps) => {
-    const { title, images, ratingRate, ratingCount, discountPercent } = product;
-
-    const { regularPrice, discountedPrice, hasDiscount } =
-        getProductPricing(product);
-
-    const regularPriceClassnames = hasDiscount
-        ? 'text-xs text-[#606060] line-through md:text-base'
-        : 'text-sm font-bold text-[#414141] md:text-lg';
+    const hasDiscount = product.discountPercent > 0;
 
     //TODO сделать фолбек изображения
-    const mainImage = images[0];
+    const mainImage = product.images[0];
 
     return (
         <article className="flex h-full w-full flex-col overflow-hidden rounded bg-white">
@@ -35,7 +27,7 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
                     {mainImage && (
                         <Image
                             src={mainImage.url}
-                            alt={mainImage.alt ?? title}
+                            alt={mainImage.alt ?? product.title}
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 160px, (max-width: 1280px) 224px, 272px"
@@ -54,7 +46,7 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
                 {/*DISCOUNT PLATE*/}
                 {hasDiscount && (
                     <div className="absolute bottom-2.5 left-2.5 rounded-sm bg-[#ff6633] px-2 py-1 text-sm text-white">
-                        -{discountPercent}%
+                        -{product.discountPercent}%
                     </div>
                 )}
             </div>
@@ -62,20 +54,16 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
             {/*CONTENT SECTION*/}
             <div className="flex flex-1 flex-col gap-y-2 p-2">
                 {/*PRICING SEGMENT*/}
-                <div className="flex items-center justify-between gap-x-2">
-                    {hasDiscount && (
-                        <div className="flex flex-col">
-                            <p className="text-sm font-bold text-[#414141] md:text-lg">
-                                {formatPrice(discountedPrice)} ₸
-                            </p>
-                            <p className="text-[8px] text-[#bfbfbf] md:text-xs">
-                                Со скидкой
-                            </p>
-                        </div>
-                    )}
-                    <p className={regularPriceClassnames}>
-                        {formatPrice(regularPrice)} ₸
+                <div className="flex items-center gap-x-2">
+                    <p className="text-sm font-bold text-[#414141] md:text-lg">
+                        {formatPrice(product.effectivePrice)} ₸
                     </p>
+
+                    {hasDiscount && (
+                        <p className="text-[8px] text-[#bfbfbf] line-through md:text-xs">
+                            {formatPrice(product.regularPrice)} ₸
+                        </p>
+                    )}
                 </div>
 
                 {/*TITLE SEGMENT*/}
@@ -84,14 +72,16 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
                         className="hover:underline"
                         href={href}
                     >
-                        {title}
+                        {product.title}
                     </Link>
                 </h3>
 
                 {/*RATING SEGMENT*/}
                 <div className="flex items-center gap-x-2">
-                    <StarRating rating={ratingRate} />
-                    <span className="text-gray-400">({ratingCount})</span>
+                    <StarRating rating={product.ratingRate} />
+                    <span className="text-gray-400">
+                        ({product.ratingCount})
+                    </span>
                 </div>
 
                 {/*ACTIONS SEGMENT*/}

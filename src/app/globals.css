@@ -40,12 +40,16 @@
 }
 
 @utility wrapper {
-  padding-inline: max(var(--section-padding), calc((100% - 1208px) / 2));
+  padding-inline: max(var(--section-padding), calc((100% - 1400px) / 2));
   width: 100%;
 }
 
 @utility page-spacing {
-  @apply mb-10 md:mt-6 md:mb-20;
+  @apply mb-10 md:mb-20;
+}
+
+@utility catalog-heading {
+  @apply line-clamp-2 grow text-[22px] font-bold text-[#333] xl:text-[32px]
 }
 
 body {

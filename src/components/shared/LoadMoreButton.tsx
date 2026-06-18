@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createLoadMoreUrl } from '@/lib/url/create-catalog-url';
+import { createLoadMoreUrl } from '@/lib/pagination/create-pagination-url';
 
 type LoadMoreButtonProps = {
     nextPage: number;

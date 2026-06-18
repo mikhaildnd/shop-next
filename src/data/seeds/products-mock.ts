@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import type { ProductSeed } from '@/types/product';
+
+import type { ProductSeed } from '@/services/product/product.types';
 
 const products: ProductSeed[] = [
     {
@@ -17,14 +18,15 @@ const products: ProductSeed[] = [
             'пробиотик',
             'клюква',
         ],
-        basePrice: 2310,
-        discountPercent: 10,
+        regularPrice: 2310,
+        salePrice: 2079,
         ratingRate: 4.3,
         ratingCount: 23,
-        categories: ['cooked-food', 'vegetables', 'promotion'],
+        category: 'salads',
         measureType: 'GRAM',
         measureValue: 400,
         stock: 54,
+        collections: ['promotion'],
     },
     {
         slug: 'kimpab-s-tyncom-240g',
@@ -46,13 +48,14 @@ const products: ProductSeed[] = [
             'соль',
             'сахар',
         ],
-        basePrice: 2295,
+        regularPrice: 2295,
         ratingRate: 4.8,
         ratingCount: 374,
-        categories: ['cooked-food', 'new'],
+        category: 'main-dishes',
         measureType: 'GRAM',
         measureValue: 240,
         stock: 78,
+        collections: ['new'],
     },
     {
         slug: 'sup-lapsha-kurinyi-300ml',
@@ -62,9 +65,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Суп-лапша куриный замороженный 300 мл',
         description:
-            'Аромат домашнего супа и насыщенный вкус куриной лапши призваны удовлетворить ваши гастрономические ожидания.\n' +
-            '\n' +
-            'Блюдо готовое, замороженное.',
+            'Аромат домашнего супа и насыщенный вкус куриной лапши призваны удовлетворить ваши гастрономические ожидания.\n\nБлюдо готовое, замороженное.',
         ingredients: [
             'курица',
             'лук репчатый',
@@ -75,13 +76,14 @@ const products: ProductSeed[] = [
             'соль',
             'перец',
         ],
-        basePrice: 1725,
+        regularPrice: 1725,
         ratingRate: 4.5,
         ratingCount: 724,
-        categories: ['cooked-food'],
+        category: 'soups',
         measureType: 'MILLILITER',
         measureValue: 300,
         stock: 32,
+        collections: [],
     },
     {
         slug: 'sparzha-po-koreiski-200g',
@@ -102,16 +104,15 @@ const products: ProductSeed[] = [
             'чеснок',
             'растительное масло',
         ],
-        basePrice: 1465,
-        discountPercent: 15,
-
+        regularPrice: 1465,
+        salePrice: 1245,
         ratingRate: 3.9,
         ratingCount: 215,
-
-        categories: ['cooked-food', 'vegetables', 'promotion'],
+        category: 'salads',
         measureType: 'GRAM',
         measureValue: 200,
         stock: 22,
+        collections: ['promotion'],
     },
     {
         slug: 'pankeiki-s-dzhemom-3sht',
@@ -132,16 +133,15 @@ const products: ProductSeed[] = [
             'разрыхлитель',
             'джем (сахар, ягоды свежемороженные (клубника, клюква, слива))',
         ],
-        basePrice: 1575,
-        discountPercent: 11,
-
+        regularPrice: 1575,
+        salePrice: 1402,
         ratingRate: 4.4,
         ratingCount: 7,
-
-        categories: ['cooked-food', 'frozen', 'new', 'promotion'],
+        category: 'frozen-bakery',
         measureType: 'GRAM',
         measureValue: 200,
         stock: 3,
+        collections: ['new', 'promotion'],
     },
     {
         slug: 'pibimpab-300g',
@@ -163,15 +163,14 @@ const products: ProductSeed[] = [
             'крошка нори',
             'перцовая паста средней остроты',
         ],
-        basePrice: 2975,
-
+        regularPrice: 2975,
         ratingRate: 4.7,
         ratingCount: 81,
-
-        categories: ['cooked-food'],
+        category: 'main-dishes',
         measureType: 'GRAM',
         measureValue: 300,
         stock: 8,
+        collections: [],
     },
     {
         slug: 'kotlety-iz-telytiny-s-kartofelem-330g',
@@ -181,21 +180,16 @@ const products: ProductSeed[] = [
         ],
         title: 'Котлеты из телятины с картофельными дольками замороженные 330 г',
         description:
-            'Это наши котлеты из телятины с картофельными дольками. Мы используем фарш из нежного мяса, свежий картофель и пряные специи. С удобством замороженных продуктов у вас всегда будет вкусный обед или ужин под рукой - быстро и без лишних хлопот.\n' +
-            '\n' +
-            'Состав: говядина, лук репчатый, багет, молоко, яйцо, картофель, соль, перец.\n' +
-            '\n' +
-            'Пищевая и энергетическая ценность на 100 гр.: белки 7,5 гр., жиры 20 гр., углеводы 3,5 гр., 220 кКал.',
+            'Это наши котлеты из телятины с картофельными дольками. Мы используем фарш из нежного мяса, свежий картофель и пряные специи. С удобством замороженных продуктов у вас всегда будет вкусный обед или ужин под рукой - быстро и без лишних хлопот.\n\nСостав: говядина, лук репчатый, багет, молоко, яйцо, картофель, соль, перец.\n\nПищевая и энергетическая ценность на 100 гр.: белки 7,5 гр., жиры 20 гр., углеводы 3,5 гр., 220 кКал.',
         ingredients: ['картофель', 'мясо теленка', 'соль', 'перец', 'яйцо'],
-        basePrice: 2475,
-
+        regularPrice: 2475,
         ratingRate: 5,
         ratingCount: 17,
-
-        categories: ['cooked-food', 'frozen'],
+        category: 'semi-finished-products',
         measureType: 'GRAM',
         measureValue: 330,
         stock: 156,
+        collections: [],
     },
     {
         slug: 'onigiradzu-s-kuritcei-140g',
@@ -215,24 +209,21 @@ const products: ProductSeed[] = [
             'соль',
             'сахар',
         ],
-        basePrice: 1765,
-
+        regularPrice: 1765,
         ratingRate: 4.1,
         ratingCount: 63,
-
-        categories: ['cooked-food'],
+        category: 'sandwiches-bakery',
         measureType: 'GRAM',
         measureValue: 140,
         stock: 40,
+        collections: [],
     },
     {
         slug: 'ponchik-stokson-klubnichnyi-70g',
         images: ['/images/products/ponchik-stokson-klubnichnyi-70g/1.webp'],
         title: 'Донат Dooti Donuts клубничный с начинкой',
         description:
-            'Пончик с натуральной клубничной начинкой и разноцветной посыпкой.\n' +
-            '\n' +
-            'Наши пончики приготовлены с любовью и тщательно отобранными ингредиентами, чтобы дарить вам невероятную свежесть и нежность в каждом кусочке. Яркий, насыщенный вкус и притягательный аромат этой сладкой выпечки прекрасно дополнит любое чаепитие.',
+            'Пончик с натуральной клубничной начинкой и разноцветной посыпкой.\n\nНаши пончики приготовлены с любовью и тщательно отобранными ингредиентами, чтобы дарить вам невероятную свежесть и нежность в каждом кусочке. Яркий, насыщенный вкус и притягательный аромат этой сладкой выпечки прекрасно дополнит любое чаепитие.',
         ingredients: [
             'мука пшеничная',
             'вода',
@@ -240,15 +231,14 @@ const products: ProductSeed[] = [
             'клубничная начинка (вода, глюкознофруктозный сироп, сахар, клубничное пюре, крахмал кукурузный, морковь, концентрированный морковный сок, загуститель Е440, регуляторы кислотности (E330, E333), ароматизатор, краситель Е160a)',
             'красная глазурь',
         ],
-        basePrice: 810,
-
+        regularPrice: 810,
         ratingRate: 4.5,
         ratingCount: 73,
-
-        categories: ['cooked-food'],
+        category: 'desserts',
         measureType: 'GRAM',
         measureValue: 70,
         stock: 146,
+        collections: [],
     },
     {
         slug: 'ponchik-stokson-troinoi-shokoladnyi-69g',
@@ -257,9 +247,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Донат Dooti Donuts тройной шоколад с глазурью, начинкой и посыпкой',
         description:
-            'Донатс с начинкой из шоколадного крема, декорированный глазурью из какао и посыпкой из какао.\n' +
-            '\n' +
-            'Наши пончики приготовлены с любовью и тщательно отобранными ингредиентами, чтобы дарить вам невероятную свежесть и нежность в каждом кусочке. Аппетитный пончик, у которого внутри нежнейшего теста скрывается мягкая кремовая начинка с шоколадом. Пончик покрыт нарядной шоколадной глазурью.',
+            'Донатс с начинкой из шоколадного крема, декорированный глазурью из какао и посыпкой из какао.\n\nНаши пончики приготовлены с любовью и тщательно отобранными ингредиентами, чтобы дарить вам невероятную свежесть и нежность в каждом кусочке. Аппетитный пончик, у которого внутри нежнейшего теста скрывается мягкая кремовая начинка с шоколадом. Пончик покрыт нарядной шоколадной глазурью.',
         ingredients: [
             'мука пшеничная',
             'вода',
@@ -283,15 +271,14 @@ const products: ProductSeed[] = [
             'ароматизатор',
             'продукт может содержать следы орехов',
         ],
-        basePrice: 810,
-
+        regularPrice: 810,
         ratingRate: 4.7,
         ratingCount: 24,
-
-        categories: ['cooked-food'],
+        category: 'desserts',
         measureType: 'GRAM',
         measureValue: 69,
         stock: 203,
+        collections: [],
     },
     {
         slug: 'ris-s-ovoschami-i-kuritcei-300g',
@@ -316,15 +303,14 @@ const products: ProductSeed[] = [
             'морковь свежая',
             'масло растительное',
         ],
-        basePrice: 1765,
-
+        regularPrice: 1765,
         ratingRate: 4.1,
         ratingCount: 63,
-
-        categories: ['cooked-food'],
+        category: 'main-dishes',
         measureType: 'GRAM',
         measureValue: 300,
         stock: 19,
+        collections: [],
     },
     {
         slug: 'zapekanka-tvorozhnaya-s-yablokom-210g',
@@ -333,9 +319,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Запеканка творожная с яблоком замороженная, 210 г',
         description:
-            'Состав: Творог, яйцо куриное, манная крупа, сахар, масло растительное, яблоки карамелизированные яблоки\n' +
-            '\n' +
-            'Блюдо готовое, замороженное.',
+            'Состав: Творог, яйцо куриное, манная крупа, сахар, масло растительное, яблоки карамелизированные яблоки\n\nБлюдо готовое, замороженное.',
         ingredients: [
             'Творог',
             'яйцо куриное',
@@ -344,15 +328,14 @@ const products: ProductSeed[] = [
             'масло растительное',
             'яблоки карамелизированные',
         ],
-        basePrice: 1890,
-
+        regularPrice: 1890,
         ratingRate: 0,
         ratingCount: 0,
-
-        categories: ['cooked-food', 'new', 'frozen'],
+        category: 'frozen-bakery',
         measureType: 'GRAM',
         measureValue: 210,
         stock: 50,
+        collections: ['new'],
     },
     {
         slug: 'syr-lamber-polytverdyi-50p-230g',
@@ -363,12 +346,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Сыр Ламбер полутвердый 50%, 230 г',
         description:
-            'Ламбер – это настоящий сыр, производимый из натурального молока. Именно поэтому он такой вкусный, и каждый его кусочек 30г содержит столько же белка, сколько целый стакан молока.\n' +
-            ' Сыр Ламбер хорош как самостоятельное блюдо, а также для приготовления бутербродов, закусок, холодных и горячих блюд. Импровизируйте и наслаждайтесь!\n' +
-            ' Из 100% натурального молока\n' +
-            'Не содержит растительных жиров, трансжиров и заменителей молочного жира\n' +
-            'Классический сливочный вкус\n' +
-            'Удобный формат упаковки',
+            'Ламбер – это настоящий сыр, производимый из натурального молока. Именно поэтому он такой вкусный, и каждый его кусочек 30г содержит столько же белка, сколько целый стакан молока.\n Сыр Ламбер хорош как самостоятельное блюдо, а также для приготовления бутербродов, закусок, холодных и горячих блюд. Импровизируйте и наслаждайтесь!\n Из 100% натурального молока\nНе содержит растительных жиров, трансжиров и заменителей молочного жира\nКлассический сливочный вкус\nУдобный формат упаковки',
         ingredients: [
             'молоко нормализованное',
             'соль поваренная пищевая',
@@ -377,15 +355,14 @@ const products: ProductSeed[] = [
             'бактериальный концентрат мезофильных и термофильных бактерий',
             'молокосвертывающий ферментный препарат микробного происхождения',
         ],
-        basePrice: 2740,
-
+        regularPrice: 2740,
         ratingRate: 0,
         ratingCount: 0,
-
-        categories: ['dairy'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 230,
         stock: 79,
+        collections: [],
     },
     {
         slug: 'syrok-chudo-glazirovannyi-s-vanilyu-40g',
@@ -394,24 +371,19 @@ const products: ProductSeed[] = [
         ],
         title: 'Сырок Чудо глазированный с ванилью 23%, 40 г',
         description:
-            'Идеальное сочетание и любимый детства вкус!\n' +
-            'Глазированный сырок Чудо это:\n' +
-            '- Хрустящая глазурь и нежный творог\n' +
-            '- Отлично подходит для вкусного перекуса\n' +
-            '- Удобно брать с собой',
+            'Идеальное сочетание и любимый детства вкус!\nГлазированный сырок Чудо это:\n- Хрустящая глазурь и нежный творог\n- Отлично подходит для вкусного перекуса\n- Удобно брать с собой',
         ingredients: [
             'творожная основа (творог, масло сливочное, сахар, загуститель — Е1414, стабилизатор‐альгинат натрия, ароматизатор «Ваниль», консервант‐сорбат калия)',
             'глазурь (сахар, какао‐порошок, заменитель масла какао, заменитель молочного жира (растительные масла, эмульгатор‐ моно‐ и диглицериды жирных кислот, антиокислитель‐Е306, краситель‐каротины), эмульгатор‐ соевый лецитин, ароматизатор)',
         ],
-        basePrice: 425,
-
+        regularPrice: 425,
         ratingRate: 4.3,
         ratingCount: 17,
-
-        categories: ['dairy'],
+        category: 'yogurt-desserts',
         measureType: 'GRAM',
         measureValue: 40,
         stock: 806,
+        collections: [],
     },
     {
         slug: 'syrok-chudo-glazirovannyi-s-shokoladom-40g',
@@ -420,25 +392,20 @@ const products: ProductSeed[] = [
         ],
         title: 'Сырок Чудо глазированный с шоколадом 23%, 40 г',
         description:
-            'Идеальное сочетание и любимый детства вкус!\n' +
-            'Глазированный сырок Чудо это:\n' +
-            '- Хрустящая глазурь и нежный творог\n' +
-            '- Отлично подходит для вкусного перекуса\n' +
-            '- Удобно брать с собой',
+            'Идеальное сочетание и любимый детства вкус!\nГлазированный сырок Чудо это:\n- Хрустящая глазурь и нежный творог\n- Отлично подходит для вкусного перекуса\n- Удобно брать с собой',
         ingredients: [
             'творожная основа (творог, масло сливочное, сахар, какао‐порошок, загуститель — Е1414, стабилизатор — альгинат натрия, консервант — сорбат калия, ароматизатор «Шоколад»)',
             'глазурь (сахар, заменитель масла какао нетемперируемый лауринового типа (пальмоядровый стеарин, эмульгаторы (Е492, Е322)), какао‐порошок, заменитель молочного жира (растительные масла и их фракции в различных соотношениях (пальмовое, соевое, рапсовое, подсолнечное, пальмоядровое), эмульгатор — моно‐ и диглицериды жирных кислот, антиокислитель — Е306, краситель — каротины), эмульгатор — лецитины, ароматизатор).',
         ],
-        basePrice: 425,
-        discountPercent: 7,
-
+        regularPrice: 425,
+        salePrice: 395,
         ratingRate: 4.4,
         ratingCount: 29,
-
-        categories: ['dairy', 'promotion'],
+        category: 'yogurt-desserts',
         measureType: 'GRAM',
         measureValue: 40,
         stock: 739,
+        collections: ['promotion'],
     },
     {
         slug: 'pirozhnoe-kinder-molochnyi-lomtik-s-molochnoi-nachinkoi-28g',
@@ -462,15 +429,14 @@ const products: ProductSeed[] = [
             'ароматизаторы',
             'соль',
         ],
-        basePrice: 435,
-
+        regularPrice: 435,
         ratingRate: 4.9,
         ratingCount: 105,
-
-        categories: ['dairy'],
+        category: 'yogurt-desserts',
         measureType: 'GRAM',
         measureValue: 28,
         stock: 99,
+        collections: [],
     },
     {
         slug: 'yaitso-kazger-kys-otbornoe-30sht',
@@ -478,15 +444,14 @@ const products: ProductSeed[] = [
         title: 'Яйцо Казгер-Құс куриное, отборное, в лотке 30 шт',
         description:
             'Яйца — это универсальный источник питания, который может быть использован в приготовлении различных блюд, обогащая их вкусом, текстурой и питательными веществами.',
-        basePrice: 2415,
-
+        regularPrice: 2415,
         ratingRate: 4.6,
         ratingCount: 7,
-
-        categories: ['dairy'],
+        category: 'eggs-butter',
         measureType: 'PIECE',
         measureValue: 30,
         stock: 1000,
+        collections: [],
     },
     {
         slug: 'president-tvorog-domashnii-9p-450g',
@@ -496,8 +461,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Творог President домашний 9%, 450 г',
         description:
-            'Произведен компанией President, соответствующий по вкусу традиционному ДОМАШНЕМУ творогу.\n' +
-            'Благодаря большому содержанию белков, незаменимых аминокислот и, конечно же, минеральных веществ Творог Домашний от President способствует укреплению костных тканей, улучшает работу нервной системы, положительно влияет на процессы обмена веществ.',
+            'Произведен компанией President, соответствующий по вкусу традиционному ДОМАШНЕМУ творогу.\nБлагодаря большому содержанию белков, незаменимых аминокислот и, конечно же, минеральных веществ Творог Домашний от President способствует укреплению костных тканей, улучшает работу нервной системы, положительно влияет на процессы обмена веществ.',
         ingredients: [
             'молоко нормализованное',
             'восстановленное молоко из сухого обезжиренного молока',
@@ -505,16 +469,15 @@ const products: ProductSeed[] = [
             'молокосвертывающий ферментный препарат микробного происхождения',
             'упаковано в защитной газовой среде',
         ],
-        basePrice: 1165,
-        discountPercent: 20,
-
+        regularPrice: 1165,
+        salePrice: 932,
         ratingRate: 4.7,
         ratingCount: 77,
-
-        categories: ['dairy', 'promotion'],
+        category: 'curd',
         measureType: 'GRAM',
         measureValue: 450,
         stock: 32,
+        collections: ['promotion'],
     },
     {
         slug: 'moloko-lactel-3-2p-1l',
@@ -527,14 +490,14 @@ const products: ProductSeed[] = [
         description:
             'Молоко Lactel обогащено витамином D, который помогает лучше усваиваться кальцию в костях. Это способствует росту детей и здоровью всей семьи.',
         ingredients: ['молоко нормализованное', 'витамин D3'],
-        basePrice: 850,
+        regularPrice: 850,
         ratingRate: 4.9,
         ratingCount: 203,
-
-        categories: ['dairy'],
+        category: 'milk',
         measureType: 'MILLILITER',
         measureValue: 1000,
         stock: 505,
+        collections: [],
     },
     {
         slug: 'syr-sirtaki-original-200g',
@@ -560,16 +523,15 @@ const products: ProductSeed[] = [
             'стабилизатор (гуаровая камедь)',
             'молокосвертывающий фермент микробного происхождения',
         ],
-        basePrice: 1160,
-        discountPercent: 10,
-
+        regularPrice: 1160,
+        salePrice: 1044,
         ratingRate: 4.4,
         ratingCount: 69,
-
-        categories: ['dairy', 'promotion'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 200,
         stock: 2,
+        collections: ['promotion'],
     },
     {
         slug: 'syr-sirtaki-classic-200g',
@@ -595,15 +557,14 @@ const products: ProductSeed[] = [
             'стабилизатор (гуаровая камедь)',
             'молокосвертывающий фермент микробного происхождения',
         ],
-        basePrice: 1160,
-
+        regularPrice: 1160,
         ratingRate: 4.7,
         ratingCount: 108,
-
-        categories: ['dairy'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 200,
         stock: 2,
+        collections: [],
     },
     {
         slug: 'syr-zoloto-evropy-maasdam-narezka-125g',
@@ -623,15 +584,14 @@ const products: ProductSeed[] = [
             'ферментный препарат животного происхождения - лизоцим',
             'добавка комплексная пищевая (регулятор кислотности – гидроксид натрия, краситель норбиксин)',
         ],
-        basePrice: 1875,
-
+        regularPrice: 1875,
         ratingRate: 3.8,
         ratingCount: 5,
-
-        categories: ['dairy', 'new'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 125,
         stock: 48,
+        collections: ['new'],
     },
     {
         slug: 'syr-zoloto-evropy-gauda-narezka-400g',
@@ -649,15 +609,14 @@ const products: ProductSeed[] = [
             'уплотнитель — хлорид кальция',
             'закваска на основе мезофильных молочнокислых культур, консервант — нитрат натрия',
         ],
-        basePrice: 4640,
-
+        regularPrice: 4640,
         ratingRate: 4.1,
         ratingCount: 8,
-
-        categories: ['dairy'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 400,
         stock: 13,
+        collections: [],
     },
     {
         slug: 'syr-dolce-granto-parmezan-narezka-175g',
@@ -675,16 +634,15 @@ const products: ProductSeed[] = [
             'уплотнитель хлорид кальция',
             'комплексный молокосвертывающий фермент микробного происхождения - химозин',
         ],
-        basePrice: 3200,
-        discountPercent: 3,
-
+        regularPrice: 3200,
+        salePrice: 3104,
         ratingRate: 5,
         ratingCount: 2,
-
-        categories: ['dairy', 'promotion'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 175,
         stock: 26,
+        collections: ['promotion'],
     },
     {
         slug: 'syr-tysyacha-ozer-bezlaktoznyi-180g',
@@ -705,15 +663,14 @@ const products: ProductSeed[] = [
             'ферментный препарат животного происхождения лизоцим',
             'краситель аннато',
         ],
-        basePrice: 2300,
-
+        regularPrice: 2300,
         ratingRate: 4,
         ratingCount: 21,
-
-        categories: ['dairy'],
+        category: 'cheese',
         measureType: 'GRAM',
         measureValue: 180,
         stock: 74,
+        collections: [],
     },
     {
         slug: 'pivnoi-napitok-kirin-green-s-free-bezalkogolnyi-350ml',
@@ -731,16 +688,15 @@ const products: ProductSeed[] = [
             'пищевые волокна',
             'углекислый газ',
         ],
-        basePrice: 890,
-        discountPercent: 13,
-
+        regularPrice: 890,
+        salePrice: 774,
         ratingRate: 4.6,
         ratingCount: 7,
-
-        categories: ['drinks', 'promotion'],
+        category: 'non-alcoholic-beverages',
         measureType: 'MILLILITER',
         measureValue: 350,
         stock: 402,
+        collections: ['promotion'],
     },
     {
         slug: 'pivnoi-napitok-kirin-lager-zero-bezalkogolnyi-350ml',
@@ -758,16 +714,15 @@ const products: ProductSeed[] = [
             'пищевые волокна',
             'углекислый газ',
         ],
-        basePrice: 920,
-        discountPercent: 13,
-
+        regularPrice: 920,
+        salePrice: 800,
         ratingRate: 4.6,
         ratingCount: 8,
-
-        categories: ['drinks', 'promotion'],
+        category: 'non-alcoholic-beverages',
         measureType: 'MILLILITER',
         measureValue: 350,
         stock: 238,
+        collections: ['promotion'],
     },
     {
         slug: 'napitok-schweppes-tonik-450ml',
@@ -791,15 +746,14 @@ const products: ProductSeed[] = [
             'подсластители E950 и E951',
             'содержит источник фенилаланина',
         ],
-        basePrice: 525,
-
+        regularPrice: 525,
         ratingRate: 4.4,
         ratingCount: 85,
-
-        categories: ['drinks'],
+        category: 'carbonated-drinks',
         measureType: 'MILLILITER',
         measureValue: 450,
         stock: 2684,
+        collections: [],
     },
     {
         slug: 'sok-rich-apelsinovyi-1l',
@@ -819,15 +773,14 @@ const products: ProductSeed[] = [
             'антиокислитель - аскорбиновая кислота',
             'вода',
         ],
-        basePrice: 2444,
-
+        regularPrice: 2444,
         ratingRate: 4.8,
         ratingCount: 74,
-
-        categories: ['drinks'],
+        category: 'juice',
         measureType: 'MILLILITER',
         measureValue: 1000,
         stock: 302,
+        collections: [],
     },
     {
         slug: 'voda-asem-ai-saryagash-gazirovannaya-1l',
@@ -847,15 +800,14 @@ const products: ProductSeed[] = [
             'хлорид',
             'нитрат',
         ],
-        basePrice: 335,
-
+        regularPrice: 335,
         ratingRate: 5,
         ratingCount: 123,
-
-        categories: ['drinks'],
+        category: 'water',
         measureType: 'MILLILITER',
         measureValue: 1000,
         stock: 200,
+        collections: [],
     },
     {
         slug: 'sok-gracio-yabloko-950ml',
@@ -875,15 +827,14 @@ const products: ProductSeed[] = [
             'минерал (Zn)',
             'вода',
         ],
-        basePrice: 1129,
-
+        regularPrice: 1129,
         ratingRate: 4.7,
         ratingCount: 505,
-
-        categories: ['drinks'],
+        category: 'juice',
         measureType: 'MILLILITER',
         measureValue: 950,
         stock: 395,
+        collections: [],
     },
     {
         slug: 'sok-gracio-apelsin-950ml',
@@ -902,16 +853,15 @@ const products: ProductSeed[] = [
             'минерал (Zn)',
             'вода',
         ],
-        basePrice: 1269,
-        discountPercent: 15,
-
+        regularPrice: 1269,
+        salePrice: 1079,
         ratingRate: 4.9,
         ratingCount: 471,
-
-        categories: ['drinks', 'promotion'],
+        category: 'juice',
         measureType: 'MILLILITER',
         measureValue: 950,
         stock: 36,
+        collections: ['promotion'],
     },
     {
         slug: 'limonad-natahtari-apelsin-2l',
@@ -921,8 +871,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Напиток Натахтари с ароматом апельсина и мандарина, 2 л',
         description:
-            'Освежающий и яркий вкус лета в каждой бутылке!\n' +
-            'Натахтари Апельсин-Мандарин — это традиционный грузинский лимонад, сочетающий в себе сладость спелого апельсина и лёгкую кислинку сочного мандарина. Газированный, ароматный и по-настоящему вкусный — он идеально утолит жажду и подарит заряд бодрости.',
+            'Освежающий и яркий вкус лета в каждой бутылке!\nНатахтари Апельсин-Мандарин — это традиционный грузинский лимонад, сочетающий в себе сладость спелого апельсина и лёгкую кислинку сочного мандарина. Газированный, ароматный и по-настоящему вкусный — он идеально утолит жажду и подарит заряд бодрости.',
         ingredients: [
             'вода',
             'сахар',
@@ -930,15 +879,14 @@ const products: ProductSeed[] = [
             'регулятор кислотности',
             'красящий концентратиз ароматизатор "Апельсин и Мандарин"',
         ],
-        basePrice: 1430,
-
+        regularPrice: 1430,
         ratingRate: 4.5,
         ratingCount: 96,
-
-        categories: ['drinks'],
+        category: 'carbonated-drinks',
         measureType: 'MILLILITER',
         measureValue: 2000,
         stock: 20,
+        collections: [],
     },
     {
         slug: 'voda-fiuggi-mineralnaya-gagazirovannaya-prirodnaya-500ml',
@@ -957,15 +905,14 @@ const products: ProductSeed[] = [
             'сульфаты: менее 5',
             'кремний: 12–15',
         ],
-        basePrice: 1125,
-
+        regularPrice: 1125,
         ratingRate: 3.7,
         ratingCount: 10,
-
-        categories: ['drinks'],
+        category: 'water',
         measureType: 'MILLILITER',
         measureValue: 500,
         stock: 211,
+        collections: [],
     },
     {
         slug: 'chai-fuse-tea-chernyi-s-limonom-1l',
@@ -983,15 +930,14 @@ const products: ProductSeed[] = [
             'натуральные ароматизаторы',
             'соль',
         ],
-        basePrice: 685,
-
+        regularPrice: 685,
         ratingRate: 4.5,
         ratingCount: 37,
-
-        categories: ['drinks'],
+        category: 'tea-mors-compote',
         measureType: 'MILLILITER',
         measureValue: 1000,
         stock: 800,
+        collections: [],
     },
     {
         slug: 'limonad-fanta-2l',
@@ -1001,9 +947,7 @@ const products: ProductSeed[] = [
         ],
         title: 'Напиток Fanta газированный, 2 л',
         description:
-            '«Фанта» Апельсин» — это газированный безалкогольный напиток со фруктовым вкусом, содержащий 3% апельсинового сока.\n' +
-            '\n' +
-            '«Фанта» Апельсин» создаёт игривое настроение и обладает восхитительным, бодрящим и насыщенным вкусом. Это газированный напиток для тех, кто молод телом и душой. Fanta — это спонтанность: дома, в дороге и в компании друзей, и отличное дополнение к перекусу.',
+            '«Фанта» Апельсин» — это газированный безалкогольный напиток со фруктовым вкусом, содержащий 3% апельсинового сока.\n\n«Фанта» Апельсин» создаёт игривое настроение и обладает восхитительным, бодрящим и насыщенным вкусом. Это газированный напиток для тех, кто молод телом и душой. Fanta — это спонтанность: дома, в дороге и в компании друзей, и отличное дополнение к перекусу.',
         ingredients: [
             'вода',
             'сахар',
@@ -1015,15 +959,14 @@ const products: ProductSeed[] = [
             'антиокислитель аскорбиновая кислота',
             'краситель бета-каротин',
         ],
-        basePrice: 925,
-
+        regularPrice: 925,
         ratingRate: 4.9,
         ratingCount: 1024,
-
-        categories: ['drinks'],
+        category: 'carbonated-drinks',
         measureType: 'MILLILITER',
         measureValue: 2000,
         stock: 1685,
+        collections: [],
     },
     {
         slug: 'limonad-buratino-2l',
@@ -1041,16 +984,15 @@ const products: ProductSeed[] = [
             'ароматизатор “Лимонад” идентичный натуральному',
             'консерванты (бензоат натрия, сорбат калия)',
         ],
-        basePrice: 900,
-        discountPercent: 20,
-
+        regularPrice: 900,
+        salePrice: 720,
         ratingRate: 4.8,
         ratingCount: 41,
-
-        categories: ['drinks', 'promotion'],
+        category: 'carbonated-drinks',
         measureType: 'MILLILITER',
         measureValue: 2000,
         stock: 569,
+        collections: ['promotion'],
     },
     {
         slug: 'limonad-sprite-2l',
@@ -1069,15 +1011,14 @@ const products: ProductSeed[] = [
             ' натуральные ароматизаторы',
             '* Аспартам содержит источник фенилаланина',
         ],
-        basePrice: 1009,
-
+        regularPrice: 1009,
         ratingRate: 5,
         ratingCount: 205,
-
-        categories: ['drinks'],
+        category: 'carbonated-drinks',
         measureType: 'MILLILITER',
         measureValue: 2000,
         stock: 479,
+        collections: [],
     },
 ];
 
