@@ -12,11 +12,11 @@ export function buildCollectionBreadcrumbs({
     return [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: collection.title,
-            href: routes.collection(collection.slug),
+            href: routes.collectionPage(collection.slug),
         },
     ];
 }

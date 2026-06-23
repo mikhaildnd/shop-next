@@ -15,11 +15,11 @@ export function buildProductBreadcrumbs({
     const items: BreadcrumbItem[] = [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: 'Каталог',
-            href: routes.catalog(),
+            href: routes.catalogPage(),
         },
     ];
 
@@ -27,7 +27,7 @@ export function buildProductBreadcrumbs({
         items.push({
             label: category.title,
 
-            href: routes.category(category.slug),
+            href: routes.categoryPage(category.slug),
         });
     });
 

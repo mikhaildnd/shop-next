@@ -15,7 +15,7 @@ export default function CategoryCard({
         <div className="flex flex-col rounded-2xl border border-gray-200 p-2">
             <h2 className="font-medium">
                 <Link
-                    href={routes.category(category.slug)}
+                    href={routes.categoryPage(category.slug)}
                     className=""
                 >
                     {category.title}
@@ -27,7 +27,7 @@ export default function CategoryCard({
                     {childCategories.map((child: CategoryDto) => (
                         <Link
                             key={child.id}
-                            href={routes.category(child.slug)}
+                            href={routes.categoryPage(child.slug)}
                             className="block"
                         >
                             {child.title}

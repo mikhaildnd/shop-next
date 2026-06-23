@@ -59,7 +59,7 @@ export default async function CollectionPage({
     });
 
     if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.collection(slug)}${canonicalSearch}`);
+        redirect(`${routes.collectionPage(slug)}${canonicalSearch}`);
     }
 
     const collection: CollectionDto | null = await getCollectionBySlug(slug);

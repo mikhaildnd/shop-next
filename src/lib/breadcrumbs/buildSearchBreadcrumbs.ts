@@ -5,11 +5,11 @@ export function buildSearchBreadcrumbs(): BreadcrumbItem[] {
     return [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: 'Поиск',
-            href: '/search',
+            href: routes.searchPage(),
         },
     ];
 }

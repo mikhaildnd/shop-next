@@ -64,7 +64,7 @@ export default async function CategoryPage({
     });
 
     if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.category(slug)}${canonicalSearch}`);
+        redirect(`${routes.categoryPage(slug)}${canonicalSearch}`);
     }
 
     const categories = await getCategories();

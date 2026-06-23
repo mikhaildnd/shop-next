@@ -31,11 +31,11 @@ export default async function CatalogPage() {
     const breadcrumbs = [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: 'Каталог',
-            href: routes.catalog(),
+            href: routes.catalogPage(),
         },
     ];
 

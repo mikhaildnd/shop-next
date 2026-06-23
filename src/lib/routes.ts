@@ -2,24 +2,24 @@ import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 import { buildUrl } from '@/lib/url/build-url';
 
 export const routes = {
-    home: () => '/',
+    homePage: () => '/',
 
-    catalog: () => '/catalog',
+    catalogPage: () => '/catalog',
 
-    category: (slug: string) => `/catalog/${slug}`,
+    categoryPage: (slug: string) => `/catalog/${slug}`,
 
-    collection: (slug: string) => `/collection/${slug}`,
+    collectionPage: (slug: string) => `/collection/${slug}`,
 
-    product: (slug: string) => `/product/${slug}`,
+    productPage: (slug: string) => `/product/${slug}`,
 
     productInCategory: (productSlug: string, categorySlug: string) => {
         return buildUrl({
-            pathname: routes.product(productSlug),
+            pathname: routes.productPage(productSlug),
             params: { category: categorySlug },
         });
     },
 
-    search: (query: string) => {
+    searchPage: (query?: string) => {
         return buildUrl({
             pathname: '/search',
             params: {

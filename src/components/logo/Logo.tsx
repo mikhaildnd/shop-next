@@ -7,7 +7,7 @@ import { routes } from '@/lib/routes';
 const Logo = ({ className }: { className?: string }) => {
     return (
         <Link
-            href={routes.home()}
+            href={routes.homePage()}
             aria-label="На главную"
             className={clsx('flex items-center', className)}
         >

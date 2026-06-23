@@ -76,7 +76,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     currentPage={currentPage}
                     totalPages={totalPages}
                     startPage={startPage}
-                    getProductHref={(product) => routes.product(product.slug)}
+                    getProductHref={(product) =>
+                        routes.productPage(product.slug)
+                    }
                 />
             )}
         </ProductListingLayout>

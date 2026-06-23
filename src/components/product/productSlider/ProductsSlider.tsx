@@ -36,7 +36,7 @@ const ProductsSlider = ({
                 >
                     <ProductCard
                         product={product}
-                        href={routes.product(product.slug)}
+                        href={routes.productPage(product.slug)}
                     />
                 </SwiperSlide>
             ))}

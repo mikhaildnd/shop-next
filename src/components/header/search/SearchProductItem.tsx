@@ -18,7 +18,7 @@ const SearchProductItem = ({ product, onClose }: SearchProductItemProps) => {
         <li>
             <Link
                 onClick={onClose}
-                href={routes.product(product.slug)}
+                href={routes.productPage(product.slug)}
                 className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-gray-50"
             >
                 <div className="relative size-14 shrink-0 overflow-hidden rounded border border-gray-100">

@@ -23,7 +23,7 @@ const SearchCategories = ({ categories, onClose }: SearchCategoriesProps) => {
                     <li key={category.id}>
                         <Link
                             onClick={onClose}
-                            href={routes.category(category.slug)}
+                            href={routes.categoryPage(category.slug)}
                             className="rounded-full bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200"
                         >
                             {category.title}
