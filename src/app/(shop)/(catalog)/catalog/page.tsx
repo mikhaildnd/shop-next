@@ -10,10 +10,9 @@ export const metadata: Metadata = {
     description: 'Каталог товаров интернет-магазина',
 };
 
-export default async function Page() {
+export default async function CatalogPage() {
     const categories = await getCategories();
 
-    // Страница не существует
     if (!categories.length) {
         notFound();
     }

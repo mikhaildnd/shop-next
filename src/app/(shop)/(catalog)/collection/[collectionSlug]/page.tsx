@@ -16,7 +16,7 @@ import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBre
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
-type PageProps = {
+type CollectionPageProps = {
     params: Promise<{
         collectionSlug: string;
     }>;
@@ -26,7 +26,7 @@ type PageProps = {
 
 export async function generateMetadata({
     params,
-}: PageProps): Promise<Metadata> {
+}: CollectionPageProps): Promise<Metadata> {
     const { collectionSlug: slug } = await params;
 
     const collection = await getCollectionBySlug(slug);
@@ -39,11 +39,14 @@ export async function generateMetadata({
 
     return {
         title: collection.title,
-        description: `Каталог | ${collection.title}`,
+        description: `Коллекция | ${collection.title}`,
     };
 }
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function CollectionPage({
+    params,
+    searchParams,
+}: CollectionPageProps) {
     const [{ collectionSlug: slug }, query] = await Promise.all([
         params,
         searchParams,
