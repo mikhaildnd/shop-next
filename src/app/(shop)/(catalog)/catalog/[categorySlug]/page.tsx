@@ -9,17 +9,15 @@ import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
 import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrumbs';
 import { routes } from '@/lib/routes';
 import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import CategoryTags from '@/components/shared/CategoryTags';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
-import { createUrl } from '@/lib/url/create-url';
+import { updateSearchParams } from '@/lib/url/update-search-params';
 import type { ProductSearchParams } from '@/lib/product/types';
 import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
-import ProductFiltersPanel from '@/components/product/productFilters/ProductFiltersPanel';
+import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -57,7 +55,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     ]);
 
     const canonicalSearch = getCanonicalProductListingUrl(query);
-    const currentSearch = createUrl({
+    const currentSearch = updateSearchParams({
         searchParams: new URLSearchParams(),
         params: query,
     });
@@ -101,43 +99,32 @@ export default async function Page({ params, searchParams }: PageProps) {
         categoryPath,
     });
 
+    const tags = <CategoryTags categories={childCategories} />;
+
     return (
-        <div className="page-spacing">
-            <HorizontalScrollWrapper>
-                <Breadcrumbs
-                    items={breadcrumbs}
-                    className="py-4"
+        <ProductListingLayout
+            filtersMeta={filtersMeta}
+            filteredProductsCount={filteredProductsCount}
+            breadcrumbs={breadcrumbs}
+            title={category.title}
+            tags={tags}
+        >
+            {filteredProductsCount === 0 ? (
+                <ProductsListEmpty
+                    title="Товары не найдены"
+                    description="Попробуйте открыть другую категорию"
                 />
-            </HorizontalScrollWrapper>
-
-            <h1 className="mb-2 catalog-heading xl:mb-3">{category.title}</h1>
-
-            <HorizontalScrollWrapper className="mb-3">
-                <CategoryTags categories={childCategories} />
-            </HorizontalScrollWrapper>
-
-            <div className="grid grid-cols-[280px_1fr] items-start gap-4">
-                <ProductFiltersPanel
-                    filtersMeta={filtersMeta}
-                    filteredProductsCount={filteredProductsCount}
+            ) : (
+                <ProductsListContent
+                    products={products}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    startPage={startPage}
+                    getProductHref={(product) =>
+                        routes.productInCategory(product.slug, slug)
+                    }
                 />
-                {filteredProductsCount === 0 ? (
-                    <ProductsListEmpty
-                        title="Товары не найдены"
-                        description="Попробуйте открыть другую категорию"
-                    />
-                ) : (
-                    <ProductsListContent
-                        products={products}
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        startPage={startPage}
-                        getProductHref={(product) =>
-                            routes.productInCategory(product.slug, slug)
-                        }
-                    />
-                )}
-            </div>
-        </div>
+            )}
+        </ProductListingLayout>
     );
 }

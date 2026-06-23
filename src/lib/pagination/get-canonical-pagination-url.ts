@@ -1,6 +1,6 @@
 // мб удалить, сейчас не используется
 
-import { createUrl } from '@/lib/url/create-url';
+import { updateSearchParams } from '@/lib/url/update-search-params';
 import type { PaginationSearchParams } from '@/lib/pagination/types';
 import { getCanonicalPaginationSearchParams } from '@/lib/pagination/get-canonical-pagination-search-params';
 
@@ -9,7 +9,7 @@ export function getCanonicalPaginationUrl(
 ): string {
     const canonical = getCanonicalPaginationSearchParams(searchParams);
 
-    return createUrl({
+    return updateSearchParams({
         searchParams: new URLSearchParams(),
         params: canonical,
     });

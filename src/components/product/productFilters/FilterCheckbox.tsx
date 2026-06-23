@@ -14,6 +14,7 @@ const FilterCheckbox = ({
     return (
         <div className="flex gap-x-2">
             <input
+                autoComplete="off"
                 id={id}
                 type="checkbox"
                 checked={checked}

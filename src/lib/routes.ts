@@ -1,3 +1,6 @@
+import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
+import { buildUrl } from '@/lib/url/build-url';
+
 export const routes = {
     home: () => '/',
 
@@ -10,18 +13,29 @@ export const routes = {
     product: (slug: string) => `/product/${slug}`,
 
     productInCategory: (productSlug: string, categorySlug: string) => {
-        const params = new URLSearchParams({
-            category: categorySlug,
+        return buildUrl({
+            pathname: routes.product(productSlug),
+            params: { category: categorySlug },
         });
-
-        return `${routes.product(productSlug)}?${params}`;
     },
 
     search: (query: string) => {
-        const params = new URLSearchParams({
-            q: query,
+        return buildUrl({
+            pathname: '/search',
+            params: {
+                [SEARCH_QUERY_PARAM]: query,
+            },
         });
+    },
 
-        return `/search?${params}`;
+    api: {
+        search: (query: string) => {
+            return buildUrl({
+                pathname: '/api/search',
+                params: {
+                    [SEARCH_QUERY_PARAM]: query,
+                },
+            });
+        },
     },
 };

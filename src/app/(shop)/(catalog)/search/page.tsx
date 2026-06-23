@@ -1,27 +1,27 @@
 import { notFound } from 'next/navigation';
 import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { searchProducts } from '@/services/search/search-products.service';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import { routes } from '@/lib/routes';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
+import { getProducts } from '@/services/product/product.service';
+import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
+import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
+import type { ProductSearchParams } from '@/lib/product/types';
 
 // TODO metadata
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
 interface SearchPageProps {
-    searchParams: Promise<{
-        q?: string;
-        page?: string;
-    }>;
+    searchParams: Promise<ProductSearchParams>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-    const query = await searchParams;
-    const state = normalizeSearchQuery(query[SEARCH_QUERY_PARAM]);
+    const params = await searchParams;
+    const state = normalizeSearchQuery(params[SEARCH_QUERY_PARAM]);
 
     if (state.status === 'empty') {
         return (
@@ -41,51 +41,46 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    const searchQuery = state.query;
-
     const { currentPage, startPage, take, skip } = getPaginationParams({
-        searchParams: query,
+        searchParams: params,
         limit: LIMIT,
     });
 
-    const { products, totalCount } = await searchProducts({
-        query: searchQuery,
+    const { products, filteredProductsCount, filtersMeta } = await getProducts({
+        searchParams: params,
         take,
         skip,
     });
 
-    if (totalCount === 0) {
-        return (
-            <ProductsListEmpty
-                title="Товары не найдены"
-                description={`По запросу "${searchQuery}" ничего не найдено`}
-            />
-        );
-    }
-
-    const totalPages = Math.ceil(totalCount / LIMIT);
+    const totalPages = Math.max(1, Math.ceil(filteredProductsCount / LIMIT));
 
     if (currentPage > totalPages) {
         notFound();
     }
 
+    const breadcrumbs = buildSearchBreadcrumbs();
+
     return (
-        <div className="page-spacing">
-            <h1 className="mb-6 text-2xl font-bold">
-                Результаты поиска: "{searchQuery}"
-            </h1>
-
-            <p className="text-muted-foreground mb-6">
-                Найдено товаров: {totalCount}
-            </p>
-
-            <ProductsListContent
-                products={products}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                startPage={startPage}
-                getProductHref={(product) => routes.product(product.slug)}
-            />
-        </div>
+        <ProductListingLayout
+            filtersMeta={filtersMeta}
+            filteredProductsCount={filteredProductsCount}
+            title="Результаты поиска"
+            breadcrumbs={breadcrumbs}
+        >
+            {filteredProductsCount === 0 ? (
+                <ProductsListEmpty
+                    title="Товары не найдены"
+                    description={`По запросу "${state.query}" ничего не найдено`}
+                />
+            ) : (
+                <ProductsListContent
+                    products={products}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    startPage={startPage}
+                    getProductHref={(product) => routes.product(product.slug)}
+                />
+            )}
+        </ProductListingLayout>
     );
 }

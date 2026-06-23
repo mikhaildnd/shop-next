@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import FilterSection from '@/components/product/productFilters/FilterSection';
@@ -35,16 +35,10 @@ const ProductPriceFilter = ({
     const updateFilters = useUpdateProductFilters();
 
     const urlPriceFrom = searchParams.get('priceFrom') ?? String(minPrice);
-
     const urlPriceTo = searchParams.get('priceTo') ?? String(maxPrice);
 
     const [priceFrom, setPriceFrom] = useState(urlPriceFrom);
     const [priceTo, setPriceTo] = useState(urlPriceTo);
-
-    useEffect(() => {
-        setPriceFrom(urlPriceFrom);
-        setPriceTo(urlPriceTo);
-    }, [urlPriceFrom, urlPriceTo]);
 
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
         const normalizedFrom =
@@ -118,6 +112,7 @@ const ProductPriceFilter = ({
 
             <div className="flex gap-4 text-sm">
                 <input
+                    autoComplete="off"
                     className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
                     type="text"
                     inputMode="numeric"
@@ -129,6 +124,7 @@ const ProductPriceFilter = ({
                 />
 
                 <input
+                    autoComplete="off"
                     className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
                     type="text"
                     inputMode="numeric"
