@@ -6,15 +6,22 @@ export function getProductWhere(
 ): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = {};
 
-    if (filters.saleOnly) {
+    if (filters.query) {
+        where.title = {
+            contains: filters.query,
+            mode: 'insensitive',
+        };
+    }
+
+    if (filters.sale) {
         where.salePrice = {
             not: null,
         };
     }
 
-    if (filters.minDiscount !== null) {
+    if (filters.discount !== null) {
         where.discountPercent = {
-            gte: filters.minDiscount,
+            gte: filters.discount,
         };
     }
 

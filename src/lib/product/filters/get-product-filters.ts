@@ -3,17 +3,17 @@ import type { ProductSearchParams } from '@/lib/product/types';
 import { normalizeSaleParam } from '@/lib/product/filters/normalize/normalize-sale-param';
 import { normalizeDiscountParam } from '@/lib/product/filters/normalize/normalize-discount-param';
 import { normalizePriceParam } from '@/lib/product/filters/normalize/normalize-price-param';
+import { normalizeQueryParam } from '@/lib/product/filters/normalize/normalize-query-param';
+import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 
 export function getProductFilters(
     searchParams: ProductSearchParams,
 ): ProductFilters {
     return {
-        saleOnly: normalizeSaleParam(searchParams.sale),
-
-        minDiscount: normalizeDiscountParam(searchParams.discount),
-
+        query: normalizeQueryParam(searchParams[SEARCH_QUERY_PARAM]),
+        sale: normalizeSaleParam(searchParams.sale),
+        discount: normalizeDiscountParam(searchParams.discount),
         priceFrom: normalizePriceParam(searchParams.priceFrom),
-
         priceTo: normalizePriceParam(searchParams.priceTo),
     };
 }
