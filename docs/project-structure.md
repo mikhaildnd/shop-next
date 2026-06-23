@@ -1,40 +1,122 @@
 # Project Structure
 
-app/
+## app/
+
 Маршруты Next.js.
 
-components/
+Page-specific компоненты располагаются рядом с page.tsx.
+
+Общие компоненты нескольких страниц могут располагаться выше.
+
+Например:
+
+```text
+app/
+└── (shop)
+    └── (catalog)
+        ├── category
+        ├── collection
+        ├── search
+        └── _components
+```
+
+---
+
+## components/
+
 Переиспользуемые UI-компоненты.
 
-hooks/
-Переиспользуемые и feature-хуки.
+Структура строится по доменам:
 
-services/
-Доменная логика.
+```text
+components/
+├── header
+├── footer
+├── product
+├── shared
+```
 
-lib/
+---
+
+## hooks/
+
+Переиспользуемые хуки.
+
+Feature-хуки допускаются и со временем могут перемещаться ближе к своему домену.
+
+---
+
+## services/
+
+Доменная логика и работа с данными.
+
+Структура домена может включать:
+
+```text
+product/
+├── product.service.ts
+├── product.types.ts
+├── product.mapper.ts
+└── use-cases
+```
+
+---
+
+## lib/
+
 Чистые функции и константы.
 
-data/
+Структура строится по доменам.
+
+Например:
+
+```text
+lib/
+├── breadcrumbs
+├── pagination
+├── product
+├── search
+├── url
+```
+
+Избегать глобальных папок:
+
+- helpers
+- common
+- utils
+
+---
+
+## data/
+
 Статические данные и seed-моки.
 
-generated/
+---
+
+## generated/
+
 Сгенерированный код.
+
 Не редактируется вручную.
 
-docs/
+---
+
+## docs/
+
 Документация проекта.
 
-public/
+Основные документы:
+
+- current-state.md
+- progress.md
+- architecture.md
+- style-guide.md
+- naming.md
+- principles.md
+- project-structure.md
+
+---
+
+## public/
+
 Статические файлы.
-
-types/
-Общие типы, которые невозможно отнести к конкретному домену.
-
-consts/
-Глобальные константы.
-Предпочтительно постепенно переносить их ближе к доменам.
-
-utils/
-Общие утилиты.
-Предпочтительно постепенно переносить их в lib.

@@ -1,51 +1,126 @@
-# Style Guide
+# Architecture
 
-## Functions
+## app
 
-Предпочитать:
-
-export function
-
-для:
-
-* компонентов;
-* хуков;
-* utils;
-* services;
-* guards;
-* normalizers;
-* mappers.
-
-Допускается использование export const, если это делает код более читаемым.
-
-## Props
-
-Props компонентов оформляются через interface.
+Page-specific компоненты располагаются рядом с page.tsx.
 
 Пример:
 
-interface ProductCardProps {
-product: ProductDto;
-}
+```text
+product/[productSlug]
+├── page.tsx
+└── _components
+```
 
-## Остальные структуры
+Общие компоненты нескольких страниц могут располагаться выше.
 
-Предпочитать type.
+Например:
 
-Пример:
+```text
+(shop)/(catalog)/_components
+```
 
-type CreateUrlParams = {
-searchParams: SearchParams;
-};
+---
 
-## Local functions
+## Components
 
-Локальные функции внутри компонентов обычно оформляются через const.
+Переиспользуемые компоненты располагаются в `components`.
 
-Пример:
+Компоненты, используемые только одной страницей, располагаются рядом с page.tsx.
 
-const handleSubmit = () => {};
+Избегать преждевременного выноса компонентов в глобальные папки.
 
-## Constants
+---
 
-Константы оформляются через export const.
+## Hooks
+
+Папка hooks предназначена преимущественно для переиспользуемых хуков.
+
+Feature-хуки допускаются и со временем могут перемещаться ближе к своему домену.
+
+---
+
+## Services
+
+services содержат доменную логику и работу с данными.
+
+Структура домена может включать:
+
+- *.service.ts
+- *.types.ts
+- *.mapper.ts
+- use-cases/
+
+use-cases добавляются только при реальной необходимости.
+
+Избегать преждевременного дробления сервисов.
+
+---
+
+## Types
+
+Типы предпочтительно располагать рядом с доменом.
+
+Избегать глобальной папки types, если тип относится к конкретной feature.
+
+---
+
+## lib
+
+lib содержит чистые функции и константы.
+
+lib не содержит:
+
+- React;
+- JSX;
+- запросов к базе данных.
+
+Структура lib строится по доменам.
+
+Например:
+
+```text
+product/
+pagination/
+search/
+url/
+breadcrumbs/
+```
+
+Избегать глобальных папок:
+
+- helpers
+- common
+- utils
+
+---
+
+## Routes
+
+Маршруты описываются через routes.ts.
+
+Page routes и API routes разделяются.
+
+Например:
+
+```ts
+routes.homePage()
+routes.categoryPage()
+
+routes.api.search()
+```
+
+URL строятся через buildUrl().
+
+---
+
+## Principles
+
+Предпочтение отдаётся:
+
+- composition over abstraction;
+- постепенному развитию архитектуры;
+- небольшим локальным рефакторингам;
+- маленьким коммитам.
+
+Избегать рефакторинга ради рефакторинга.
