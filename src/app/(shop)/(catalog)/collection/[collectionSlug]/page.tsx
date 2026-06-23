@@ -10,7 +10,9 @@ import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
 import type { ProductSearchParams } from '@/lib/product/types';
 import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
-import { createUrl } from '@/lib/url/create-url';
+import { updateSearchParams } from '@/lib/url/update-search-params';
+import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
+import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
@@ -48,7 +50,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     ]);
 
     const canonicalSearch = getCanonicalProductListingUrl(query);
-    const currentSearch = createUrl({
+    const currentSearch = updateSearchParams({
         searchParams: new URLSearchParams(),
         params: query,
     });
@@ -68,7 +70,7 @@ export default async function Page({ params, searchParams }: PageProps) {
         limit: LIMIT,
     });
 
-    const { products, filteredProductsCount } = await getProducts({
+    const { products, filteredProductsCount, filtersMeta } = await getProducts({
         take,
         skip,
         collectionSlug: collection?.slug,
@@ -81,9 +83,17 @@ export default async function Page({ params, searchParams }: PageProps) {
         notFound();
     }
 
+    const breadcrumbs = buildCollectionBreadcrumbs({
+        collection,
+    });
+
     return (
-        <div className="page-spacing">
-            <h1 className="mb-2 catalog-heading xl:mb-3">{collection.title}</h1>
+        <ProductListingLayout
+            filtersMeta={filtersMeta}
+            filteredProductsCount={filteredProductsCount}
+            title={collection.title}
+            breadcrumbs={breadcrumbs}
+        >
             {filteredProductsCount === 0 ? (
                 <ProductsListEmpty
                     title="Товары не найдены"
@@ -100,6 +110,6 @@ export default async function Page({ params, searchParams }: PageProps) {
                     }
                 />
             )}
-        </div>
+        </ProductListingLayout>
     );
 }
