@@ -48,7 +48,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function Page({
+export default async function CategoryPage({
     params,
     searchParams,
 }: CategoryPageProps) {
