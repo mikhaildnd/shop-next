@@ -1,14 +1,11 @@
-import type { SearchResponse } from '@/services/search/types';
+import type { SearchResponse } from '@/lib/api/search.types';
+import { routes } from '@/lib/routes';
 
-export async function searchProducts(
+export async function fetchSearch(
     query: string,
     signal?: AbortSignal,
 ): Promise<SearchResponse> {
-    const params = new URLSearchParams({
-        q: query,
-    });
-
-    const response = await fetch(`/api/search?${params}`, {
+    const response = await fetch(routes.api.search(query), {
         signal,
     });
 

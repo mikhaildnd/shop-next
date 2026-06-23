@@ -24,3 +24,21 @@ export const getCategories = cache(async (): Promise<CategoryDto[]> => {
         select: categorySelect,
     });
 });
+
+export const findCategories = async (
+    query: string,
+    take: number,
+): Promise<CategoryDto[]> => {
+    const normalizedQuery = query.trim();
+
+    return prisma.category.findMany({
+        where: {
+            title: {
+                contains: normalizedQuery,
+                mode: 'insensitive',
+            },
+        },
+        select: categorySelect,
+        take,
+    });
+};
