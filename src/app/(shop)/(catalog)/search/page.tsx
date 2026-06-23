@@ -11,8 +11,6 @@ import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductList
 import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
 import type { ProductSearchParams } from '@/lib/product/types';
 
-// TODO metadata
-
 const LIMIT = PRODUCTS_PER_PAGE;
 
 interface SearchPageProps {

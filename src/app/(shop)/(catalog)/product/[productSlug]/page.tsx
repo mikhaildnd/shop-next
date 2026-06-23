@@ -47,7 +47,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         notFound();
     }
 
-    //TODO сделать проверку константы в месте использования, убрать []
     const categoryPath = product.category
         ? getCategoryPath(categories, product.category.id)
         : [];
