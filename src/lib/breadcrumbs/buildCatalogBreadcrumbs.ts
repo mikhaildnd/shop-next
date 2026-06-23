@@ -12,11 +12,11 @@ export function buildCatalogBreadcrumbs({
     const items: BreadcrumbItem[] = [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: 'Каталог',
-            href: routes.catalog(),
+            href: routes.catalogPage(),
         },
     ];
 
@@ -26,7 +26,7 @@ export function buildCatalogBreadcrumbs({
         items.push({
             label: category.title,
 
-            href: isLast ? undefined : routes.category(category.slug),
+            href: isLast ? undefined : routes.categoryPage(category.slug),
         });
     });
 

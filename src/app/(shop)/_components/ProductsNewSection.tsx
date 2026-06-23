@@ -19,7 +19,7 @@ const ProductsNewSection = async () => {
     return (
         <ProductsSection
             title={collection.title}
-            link={routes.collection(collection.slug)}
+            link={routes.collectionPage(collection.slug)}
             products={productsData.products}
         />
     );

@@ -10,10 +10,9 @@ export const metadata: Metadata = {
     description: 'Каталог товаров интернет-магазина',
 };
 
-export default async function Page() {
+export default async function CatalogPage() {
     const categories = await getCategories();
 
-    // Страница не существует
     if (!categories.length) {
         notFound();
     }
@@ -32,11 +31,11 @@ export default async function Page() {
     const breadcrumbs = [
         {
             label: 'Главная',
-            href: routes.home(),
+            href: routes.homePage(),
         },
         {
             label: 'Каталог',
-            href: routes.catalog(),
+            href: routes.catalogPage(),
         },
     ];
 

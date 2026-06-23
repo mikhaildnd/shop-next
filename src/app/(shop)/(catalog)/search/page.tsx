@@ -11,8 +11,6 @@ import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductList
 import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
 import type { ProductSearchParams } from '@/lib/product/types';
 
-// TODO metadata
-
 const LIMIT = PRODUCTS_PER_PAGE;
 
 interface SearchPageProps {
@@ -78,7 +76,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     currentPage={currentPage}
                     totalPages={totalPages}
                     startPage={startPage}
-                    getProductHref={(product) => routes.product(product.slug)}
+                    getProductHref={(product) =>
+                        routes.productPage(product.slug)
+                    }
                 />
             )}
         </ProductListingLayout>

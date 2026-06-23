@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     description: 'Internet shop Next',
 };
 
-export default function RootLayout({
-    children,
-}: Readonly<{
+interface RootLayoutProps {
     children: ReactNode;
-}>) {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="ru">
             <body

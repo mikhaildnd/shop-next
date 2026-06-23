@@ -33,7 +33,7 @@ const SearchInput = () => {
 
     const [query, setQuery] = useState(urlQuery);
     const trimmedQuery = query.trim();
-    const searchUrl = routes.search(trimmedQuery);
+    const searchUrl = routes.searchPage(trimmedQuery);
 
     const [results, setResults] = useState<SearchResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);

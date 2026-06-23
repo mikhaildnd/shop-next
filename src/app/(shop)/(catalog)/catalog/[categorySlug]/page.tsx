@@ -21,7 +21,7 @@ import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductList
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
-type PageProps = {
+type CategoryPageProps = {
     params: Promise<{
         categorySlug: string;
     }>;
@@ -31,7 +31,7 @@ type PageProps = {
 
 export async function generateMetadata({
     params,
-}: PageProps): Promise<Metadata> {
+}: CategoryPageProps): Promise<Metadata> {
     const { categorySlug: slug } = await params;
 
     const category = await getCategoryBySlug(slug);
@@ -48,7 +48,10 @@ export async function generateMetadata({
     };
 }
 
-export default async function Page({ params, searchParams }: PageProps) {
+export default async function CategoryPage({
+    params,
+    searchParams,
+}: CategoryPageProps) {
     const [{ categorySlug: slug }, query] = await Promise.all([
         params,
         searchParams,
@@ -61,7 +64,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     });
 
     if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.category(slug)}${canonicalSearch}`);
+        redirect(`${routes.categoryPage(slug)}${canonicalSearch}`);
     }
 
     const categories = await getCategories();

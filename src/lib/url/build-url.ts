@@ -1,6 +1,6 @@
 type BuildUrlParams = {
     pathname: string;
-    params?: Record<string, string | number | undefined>;
+    params?: Record<string, string | number | boolean | undefined>;
 };
 
 export function buildUrl({ pathname, params = {} }: BuildUrlParams) {
