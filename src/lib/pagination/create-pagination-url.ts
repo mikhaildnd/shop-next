@@ -3,21 +3,24 @@ import type { SearchParams } from '@/lib/url/types';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
 type CreatePaginationUrlParams = {
+    pathname: string;
     searchParams: SearchParams;
     page: number;
 };
 
 type CreateLoadMoreUrlParams = {
+    pathname: string;
     searchParams: SearchParams;
     page: number;
     from: number;
 };
 
 export function createPaginationUrl({
+    pathname,
     searchParams,
     page,
 }: CreatePaginationUrlParams) {
-    return updateSearchParams({
+    const query = updateSearchParams({
         searchParams,
         params: {
             page: page > 1 ? page : undefined,
@@ -25,14 +28,17 @@ export function createPaginationUrl({
             from: undefined,
         },
     });
+
+    return `${pathname}${query}`;
 }
 
 export function createLoadMoreUrl({
+    pathname,
     searchParams,
     page,
     from,
 }: CreateLoadMoreUrlParams) {
-    return updateSearchParams({
+    const query = updateSearchParams({
         searchParams,
         params: {
             page,
@@ -40,4 +46,6 @@ export function createLoadMoreUrl({
             from,
         },
     });
+
+    return `${pathname}${query}`;
 }

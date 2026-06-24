@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { buildPagination } from '@/lib/pagination/build-pagination';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { createPaginationUrl } from '@/lib/pagination/create-pagination-url';
 
 type PaginationProps = {
@@ -14,6 +14,7 @@ export default function Pagination({
     currentPage,
     totalPages,
 }: PaginationProps) {
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const pages = buildPagination(currentPage, totalPages);
 
@@ -21,6 +22,7 @@ export default function Pagination({
         <nav className="flex items-center gap-2">
             <Link
                 href={createPaginationUrl({
+                    pathname,
                     searchParams,
                     page: currentPage - 1,
                 })}
@@ -52,6 +54,7 @@ export default function Pagination({
                     <Link
                         key={page}
                         href={createPaginationUrl({
+                            pathname,
                             searchParams,
                             page,
                         })}
@@ -68,6 +71,7 @@ export default function Pagination({
 
             <Link
                 href={createPaginationUrl({
+                    pathname,
                     searchParams,
                     page: currentPage + 1,
                 })}
