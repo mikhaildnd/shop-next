@@ -111,7 +111,6 @@ lib/
 - progress.md
 - architecture.md
 - style-guide.md
-- naming.md
 - principles.md
 - project-structure.md
 
