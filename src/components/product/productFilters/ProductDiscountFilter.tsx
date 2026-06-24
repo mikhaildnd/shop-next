@@ -1,12 +1,17 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { DISCOUNT_FILTER_VALUES } from '@/lib/product/filters/consts';
 import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import FilterSection from '@/components/product/productFilters/FilterSection';
 import FilterChip from '@/components/product/productFilters/FilterChip';
 
-const ProductDiscountFilter = () => {
+interface ProductDiscountFilterProps {
+    availableDiscounts: number[];
+}
+
+const ProductDiscountFilter = ({
+    availableDiscounts,
+}: ProductDiscountFilterProps) => {
     const searchParams = useSearchParams();
     const updateFilters = useUpdateProductFilters();
 
@@ -22,10 +27,14 @@ const ProductDiscountFilter = () => {
         });
     };
 
+    if (!availableDiscounts.length) {
+        return null;
+    }
+
     return (
         <FilterSection title="Скидка">
             <div className="flex items-start gap-2">
-                {DISCOUNT_FILTER_VALUES.map((value) => {
+                {availableDiscounts.map((value) => {
                     const active = currentDiscount === String(value);
 
                     return (
