@@ -144,7 +144,7 @@ Page-specific компоненты располагаются рядом с page
 
 Переиспользуемые компоненты находятся в `components`.
 
-Общие компоненты product listing располагаются в:
+Общие компоненты нескольких страниц могут располагаться выше page-specific компонентов.
 
 ```text
 app/(shop)/(catalog)/_components
@@ -154,15 +154,9 @@ app/(shop)/(catalog)/_components
 
 ## Hooks
 
-В hooks находятся только переиспользуемые хуки.
+В hooks находятся преимущественно переиспользуемые хуки.
 
-Используются:
-
-- useClickOutside
-- useEscapeKey
-- useDismiss
-- useSliderNavigation
-- useUpdateProductFilters
+Feature-хуки допускаются и могут располагаться рядом со своим доменом.
 
 ---
 
