@@ -113,7 +113,7 @@ const ProductPriceFilter = ({
             <div className="flex gap-4 text-sm">
                 <input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
+                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
                     inputMode="numeric"
                     value={priceFrom}
@@ -125,7 +125,7 @@ const ProductPriceFilter = ({
 
                 <input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
+                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
                     inputMode="numeric"
                     value={priceTo}
