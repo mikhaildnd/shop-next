@@ -7,7 +7,7 @@ interface FilterChipProps {
     onClick: () => void;
 }
 
-const FilterChip = ({ active, children, onClick }: FilterChipProps) => {
+function FilterChip({ active, children, onClick }: FilterChipProps) {
     return (
         <button
             type="button"
@@ -22,6 +22,6 @@ const FilterChip = ({ active, children, onClick }: FilterChipProps) => {
             {children}
         </button>
     );
-};
+}
 
 export default FilterChip;

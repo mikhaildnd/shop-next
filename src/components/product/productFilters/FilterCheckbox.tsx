@@ -29,7 +29,7 @@ function FilterCheckbox({ id, checked, label, onChange }: FilterCheckboxProps) {
                 <Check className="h-3.5 w-3.5 text-white" />
             </span>
 
-            <span>{label}</span>
+            <span className="text-base text-gray-700">{label}</span>
         </label>
     );
 }
