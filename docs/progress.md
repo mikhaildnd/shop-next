@@ -4,31 +4,34 @@
 
 ### Search
 
-- refactor(search): unify search endpoint
-- refactor(search): move search logic into SearchInput
-- refactor(search): remove useSearchInput
-- refactor(search): simplify SearchDropdown responsibilities
+- поиск использует единый API-эндпоинт
+- логика поиска перенесена в `SearchInput`
+- удалён хук `useSearchInput`
+- `SearchDropdown` отвечает только за отображение результатов
 
 ### URL
 
-- refactor(url): unify URL builders
-- refactor(url): support boolean query params
+- унифицировано построение URL
+- добавлена поддержка boolean-параметров
 
 ### Product Listing
 
-- refactor(catalog): use ProductListingLayout
-- refactor(product): use common filters for search
-- feat(breadcrumbs): add collection and search breadcrumbs
+- используется общий `ProductListingLayout`
+- поиск использует общие фильтры каталога
+- добавлены хлебные крошки для коллекций и страницы поиска
+- фильтр скидок получает доступные значения с сервера
 
 ### Categories
 
-- Category использует древовидную структуру
-- добавлены categoryPath и descendantSlugs
+- категории используют древовидную структуру
+- добавлены `categoryPath` и `descendantSlugs`
 
 ### Pagination
 
 - добавлены page и view=append
 - реализованы canonical URL
+- улучшена навигация пагинации
+- активная страница больше не является ссылкой
 
 ### Architecture
 

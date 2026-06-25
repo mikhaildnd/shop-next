@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import { routes } from '@/lib/routes';
@@ -13,6 +12,7 @@ import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canon
 import { updateSearchParams } from '@/lib/url/update-search-params';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
+import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 

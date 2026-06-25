@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { PRODUCTS_PER_PAGE } from '@/consts/pagination';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
@@ -10,6 +9,7 @@ import { getProducts } from '@/services/product/product.service';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
 import type { ProductSearchParams } from '@/lib/product/types';
+import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 

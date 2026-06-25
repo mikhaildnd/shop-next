@@ -10,9 +10,11 @@ interface ProductFiltersPanelProps {
 
 const ProductFiltersPanel = ({ filtersMeta }: ProductFiltersPanelProps) => {
     return (
-        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col gap-y-4 overflow-y-auto rounded-xl bg-gray-100 p-2">
+        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col gap-y-4 overflow-y-auto rounded-xl bg-gray-50 px-4 py-6">
             <ProductSaleFilter />
-            <ProductDiscountFilter />
+            <ProductDiscountFilter
+                availableDiscounts={filtersMeta.availableDiscounts}
+            />
             <ProductPriceFilter
                 minPrice={filtersMeta.minPrice}
                 maxPrice={filtersMeta.maxPrice}

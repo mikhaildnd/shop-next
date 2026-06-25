@@ -70,6 +70,7 @@ export type ProductFiltersMeta = {
     minPrice: number;
     maxPrice: number;
     totalProductsCount: number;
+    availableDiscounts: number[];
 };
 
 export type ProductsResponse = {
