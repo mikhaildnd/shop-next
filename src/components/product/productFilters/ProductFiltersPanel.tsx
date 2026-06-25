@@ -2,25 +2,27 @@ import ProductSaleFilter from '@/components/product/productFilters/ProductSaleFi
 import ProductDiscountFilter from '@/components/product/productFilters/ProductDiscountFilter';
 import ProductPriceFilter from '@/components/product/productFilters/ProductPriceFilter';
 import type { ProductFiltersMeta } from '@/services/product/product.types';
+import ProductInStockFilter from '@/components/product/productFilters/ProductInStockFilter';
 
 interface ProductFiltersPanelProps {
     filtersMeta: ProductFiltersMeta;
     filteredProductsCount: number;
 }
 
-const ProductFiltersPanel = ({ filtersMeta }: ProductFiltersPanelProps) => {
+function ProductFiltersPanel({ filtersMeta }: ProductFiltersPanelProps) {
     return (
-        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col gap-y-4 overflow-y-auto rounded-xl bg-gray-50 px-4 py-6">
-            <ProductSaleFilter />
-            <ProductDiscountFilter
-                availableDiscounts={filtersMeta.availableDiscounts}
-            />
+        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-xl bg-white">
             <ProductPriceFilter
                 minPrice={filtersMeta.minPrice}
                 maxPrice={filtersMeta.maxPrice}
             />
+            <ProductSaleFilter />
+            <ProductInStockFilter />
+            <ProductDiscountFilter
+                availableDiscounts={filtersMeta.availableDiscounts}
+            />
         </aside>
     );
-};
+}
 
 export default ProductFiltersPanel;

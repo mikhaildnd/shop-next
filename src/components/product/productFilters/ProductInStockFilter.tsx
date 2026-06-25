@@ -6,15 +6,15 @@ import FilterCheckbox from '@/components/product/productFilters/FilterCheckbox';
 import { PRODUCT_FILTER_PARAMS } from '@/lib/product/filters/consts';
 import FilterSection from '@/components/product/productFilters/FilterSection';
 
-function ProductSaleFilter() {
+function ProductInStockFilter() {
     const searchParams = useSearchParams();
     const updateFilters = useUpdateProductFilters();
 
-    const checked = searchParams.get(PRODUCT_FILTER_PARAMS.sale) === 'true';
+    const checked = searchParams.get(PRODUCT_FILTER_PARAMS.inStock) === 'true';
 
     const handleChange = () => {
         updateFilters({
-            sale: checked ? undefined : 'true',
+            inStock: checked ? undefined : 'true',
             page: undefined,
         });
     };
@@ -22,13 +22,13 @@ function ProductSaleFilter() {
     return (
         <FilterSection>
             <FilterCheckbox
-                id="sale"
+                id="in-stock"
                 checked={checked}
-                label="Только со скидкой"
+                label="В наличии"
                 onChange={handleChange}
             />
         </FilterSection>
     );
 }
 
-export default ProductSaleFilter;
+export default ProductInStockFilter;

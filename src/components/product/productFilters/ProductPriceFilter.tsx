@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import FilterSection from '@/components/product/productFilters/FilterSection';
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product/filters/consts';
 
 interface ProductPriceFilterProps {
     minPrice: number;
@@ -27,15 +28,14 @@ function normalizePrice(
     return String(number);
 }
 
-const ProductPriceFilter = ({
-    minPrice,
-    maxPrice,
-}: ProductPriceFilterProps) => {
+function ProductPriceFilter({ minPrice, maxPrice }: ProductPriceFilterProps) {
     const searchParams = useSearchParams();
     const updateFilters = useUpdateProductFilters();
 
-    const urlPriceFrom = searchParams.get('priceFrom') ?? String(minPrice);
-    const urlPriceTo = searchParams.get('priceTo') ?? String(maxPrice);
+    const urlPriceFrom =
+        searchParams.get(PRODUCT_FILTER_PARAMS.priceFrom) ?? String(minPrice);
+    const urlPriceTo =
+        searchParams.get(PRODUCT_FILTER_PARAMS.priceTo) ?? String(maxPrice);
 
     const [priceFrom, setPriceFrom] = useState(urlPriceFrom);
     const [priceTo, setPriceTo] = useState(urlPriceTo);
@@ -47,9 +47,11 @@ const ProductPriceFilter = ({
         const normalizedTo =
             Number(nextPriceTo) === maxPrice ? undefined : nextPriceTo;
 
-        const currentFrom = searchParams.get('priceFrom') ?? undefined;
+        const currentFrom =
+            searchParams.get(PRODUCT_FILTER_PARAMS.priceFrom) ?? undefined;
 
-        const currentTo = searchParams.get('priceTo') ?? undefined;
+        const currentTo =
+            searchParams.get(PRODUCT_FILTER_PARAMS.priceTo) ?? undefined;
 
         if (currentFrom === normalizedFrom && currentTo === normalizedTo) {
             return;
@@ -62,28 +64,7 @@ const ProductPriceFilter = ({
         });
     };
 
-    const handlePriceFromBlur = () => {
-        const normalizedFrom = normalizePrice(
-            priceFrom,
-            minPrice,
-            minPrice,
-            maxPrice,
-        );
-
-        const normalizedTo = normalizePrice(
-            priceTo,
-            maxPrice,
-            minPrice,
-            maxPrice,
-        );
-
-        setPriceFrom(normalizedFrom);
-        setPriceTo(normalizedTo);
-
-        applyFilters(normalizedFrom, normalizedTo);
-    };
-
-    const handlePriceToBlur = () => {
+    const handleBlur = () => {
         const normalizedFrom = normalizePrice(
             priceFrom,
             minPrice,
@@ -106,21 +87,15 @@ const ProductPriceFilter = ({
 
     return (
         <FilterSection title="Цена">
-            <div className="mb-2 text-xs text-gray-500">
-                От {minPrice} до {maxPrice}
-            </div>
-
-            <div className="flex gap-4 text-sm">
+            <div className="flex gap-4 text-sm text-gray-700">
                 <input
                     autoComplete="off"
                     className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
                     inputMode="numeric"
                     value={priceFrom}
-                    onChange={(e) => {
-                        setPriceFrom(e.target.value);
-                    }}
-                    onBlur={handlePriceFromBlur}
+                    onChange={(e) => setPriceFrom(e.target.value)}
+                    onBlur={handleBlur}
                 />
 
                 <input
@@ -129,14 +104,12 @@ const ProductPriceFilter = ({
                     type="text"
                     inputMode="numeric"
                     value={priceTo}
-                    onChange={(e) => {
-                        setPriceTo(e.target.value);
-                    }}
-                    onBlur={handlePriceToBlur}
+                    onChange={(e) => setPriceTo(e.target.value)}
+                    onBlur={handleBlur}
                 />
             </div>
         </FilterSection>
     );
-};
+}
 
 export default ProductPriceFilter;

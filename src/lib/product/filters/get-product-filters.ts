@@ -5,6 +5,7 @@ import { normalizeDiscountParam } from '@/lib/product/filters/normalize/normaliz
 import { normalizePriceParam } from '@/lib/product/filters/normalize/normalize-price-param';
 import { normalizeQueryParam } from '@/lib/product/filters/normalize/normalize-query-param';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
+import { normalizeInStockParam } from '@/lib/product/filters/normalize/normalize-in-stock-param';
 
 export function getProductFilters(
     searchParams: ProductSearchParams,
@@ -15,5 +16,6 @@ export function getProductFilters(
         discount: normalizeDiscountParam(searchParams.discount),
         priceFrom: normalizePriceParam(searchParams.priceFrom),
         priceTo: normalizePriceParam(searchParams.priceTo),
+        inStock: normalizeInStockParam(searchParams.inStock),
     };
 }

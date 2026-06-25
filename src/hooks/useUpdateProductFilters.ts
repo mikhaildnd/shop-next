@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 
 type ProductFilterUpdates = {
     sale?: string;
+    inStock?: string;
     discount?: string;
     priceFrom?: string;
     priceTo?: string;

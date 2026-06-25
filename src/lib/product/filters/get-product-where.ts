@@ -19,6 +19,12 @@ export function getProductWhere(
         };
     }
 
+    if (filters.inStock) {
+        where.stock = {
+            gt: 0,
+        };
+    }
+
     if (filters.discount !== null) {
         where.discountPercent = {
             gte: filters.discount,

@@ -4,6 +4,7 @@ import { normalizeSaleParam } from '@/lib/product/filters/normalize/normalize-sa
 import { normalizeDiscountParam } from '@/lib/product/filters/normalize/normalize-discount-param';
 import { normalizePriceParam } from '@/lib/product/filters/normalize/normalize-price-param';
 import { normalizeSortParam } from '@/lib/product/sort/normalize/normalize-sort-param';
+import { normalizeInStockParam } from '@/lib/product/filters/normalize/normalize-in-stock-param';
 
 export function getCanonicalProductSearchParams(
     searchParams: ProductSearchParams,
@@ -20,6 +21,12 @@ export function getCanonicalProductSearchParams(
 
     if (sale) {
         result.sale = 'true';
+    }
+
+    const inStock = normalizeInStockParam(searchParams.inStock);
+
+    if (inStock) {
+        result.inStock = 'true';
     }
 
     const discount = normalizeDiscountParam(searchParams.discount);
