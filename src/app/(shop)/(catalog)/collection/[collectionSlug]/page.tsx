@@ -12,7 +12,7 @@ import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canon
 import { updateSearchParams } from '@/lib/url/update-search-params';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
-import { PRODUCTS_PER_PAGE } from '@/lib/pagination/consts';
+import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 

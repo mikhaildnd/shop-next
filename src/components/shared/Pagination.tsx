@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { buildPagination } from '@/lib/pagination/build-pagination';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { createPaginationUrl } from '@/lib/pagination/create-pagination-url';
+import { cn } from '@/utils/cn';
 
 type PaginationProps = {
     currentPage: number;
@@ -18,30 +19,35 @@ export default function Pagination({
     const searchParams = useSearchParams();
     const pages = buildPagination(currentPage, totalPages);
 
+    const baseStyles =
+        'border border-(--color-primary) size-10 transition-colors flex items-center justify-center text-(--color-primary)';
+    const disabledStyles = 'opacity-50 select-none';
+    const activeStyles = 'bg-(--color-primary) text-white select-none';
+    const hoverStyles = 'hover:bg-(--color-primary) hover:text-white';
+
     return (
         <nav className="flex items-center gap-2">
-            <Link
-                href={createPaginationUrl({
-                    pathname,
-                    searchParams,
-                    page: currentPage - 1,
-                })}
-                aria-disabled={currentPage === 1}
-                className={`border border-(--color-primary) px-3 py-2 text-(--color-primary) transition-colors ${
-                    currentPage === 1
-                        ? 'pointer-events-none opacity-50'
-                        : 'hover:bg-(--color-primary) hover:text-white'
-                }`}
-            >
-                ←
-            </Link>
+            {currentPage === 1 ? (
+                <span className={cn(baseStyles, disabledStyles)}>←</span>
+            ) : (
+                <Link
+                    href={createPaginationUrl({
+                        pathname,
+                        searchParams,
+                        page: currentPage - 1,
+                    })}
+                    className={cn(baseStyles, hoverStyles)}
+                >
+                    ←
+                </Link>
+            )}
 
             {pages.map((page, index) => {
                 if (page === '...') {
                     return (
                         <span
                             key={`dots-${index}`}
-                            className="px-2 text-(--color-primary)"
+                            className="px-2 text-(--color-primary) select-none"
                         >
                             ...
                         </span>
@@ -49,6 +55,18 @@ export default function Pagination({
                 }
 
                 const isActive = currentPage === page;
+
+                if (isActive) {
+                    return (
+                        <span
+                            key={page}
+                            className={cn(baseStyles, activeStyles)}
+                            aria-current="page"
+                        >
+                            {page}
+                        </span>
+                    );
+                }
 
                 return (
                     <Link
@@ -58,32 +76,27 @@ export default function Pagination({
                             searchParams,
                             page,
                         })}
-                        className={`border border-(--color-primary) px-4 py-2 transition-colors ${
-                            isActive
-                                ? 'bg-(--color-primary) text-white'
-                                : 'text-(--color-primary) hover:bg-(--color-primary) hover:text-white'
-                        }`}
+                        className={cn(baseStyles, hoverStyles)}
                     >
                         {page}
                     </Link>
                 );
             })}
 
-            <Link
-                href={createPaginationUrl({
-                    pathname,
-                    searchParams,
-                    page: currentPage + 1,
-                })}
-                aria-disabled={currentPage === totalPages}
-                className={`border border-(--color-primary) px-3 py-2 text-(--color-primary) transition-colors ${
-                    currentPage === totalPages
-                        ? 'pointer-events-none opacity-50'
-                        : 'hover:bg-(--color-primary) hover:text-white'
-                }`}
-            >
-                →
-            </Link>
+            {currentPage === totalPages ? (
+                <span className={cn(baseStyles, disabledStyles)}>→</span>
+            ) : (
+                <Link
+                    href={createPaginationUrl({
+                        pathname,
+                        searchParams,
+                        page: currentPage + 1,
+                    })}
+                    className={cn(baseStyles, hoverStyles)}
+                >
+                    →
+                </Link>
+            )}
         </nav>
     );
 }

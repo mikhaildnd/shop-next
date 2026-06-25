@@ -17,7 +17,7 @@ import { updateSearchParams } from '@/lib/url/update-search-params';
 import type { ProductSearchParams } from '@/lib/product/types';
 import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
-import { PRODUCTS_PER_PAGE } from '@/lib/pagination/consts';
+import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 

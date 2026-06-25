@@ -9,7 +9,7 @@ import { getProducts } from '@/services/product/product.service';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
 import type { ProductSearchParams } from '@/lib/product/types';
-import { PRODUCTS_PER_PAGE } from '@/lib/pagination/consts';
+import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
 
 const LIMIT = PRODUCTS_PER_PAGE;
 
