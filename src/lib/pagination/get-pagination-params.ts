@@ -1,7 +1,11 @@
-import type { PaginationSearchParams } from '@/lib/pagination/types';
-import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
-import { normalizePageNumber } from '@/lib/pagination/normalize/normalize-page-number';
-import { normalizeViewParam } from '@/lib/pagination/normalize/normalize-view-param';
+import type {
+    PaginationParams,
+    PaginationSearchParams,
+} from '@/lib/pagination/types';
+import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import { parsePageParam } from '@/lib/pagination/parse/parse-page-param';
+import { parseViewParam } from '@/lib/pagination/parse/parse-view-param';
+import { isDefined } from '@/utils/type-guards/is-defined';
 
 type GetPaginationParamsOptions = {
     searchParams: PaginationSearchParams;
@@ -11,27 +15,43 @@ type GetPaginationParamsOptions = {
 export function getPaginationParams({
     searchParams,
     limit,
-}: GetPaginationParamsOptions) {
-    const currentPage = normalizePageNumber(searchParams.page);
+}: GetPaginationParamsOptions): PaginationParams {
+    const currentPage = parsePageParam({
+        value: searchParams.page,
+        issue: PAGINATION_ISSUES.INVALID_PAGE,
+    });
 
-    const view = normalizeViewParam(searchParams.view);
+    const view = parseViewParam(searchParams.view);
+    const isAppendMode = view.value === PAGINATION_VIEWS.APPEND;
 
-    const isAppendMode = view === PAGINATION_VIEWS.APPEND;
+    const fromPage = searchParams.from
+        ? parsePageParam({
+              value: searchParams.from,
+              issue: PAGINATION_ISSUES.INVALID_FROM,
+          })
+        : undefined;
 
-    const startPage = isAppendMode
-        ? normalizePageNumber(searchParams.from)
-        : currentPage;
+    const startPage = fromPage?.value ?? currentPage.value;
 
-    const normalizedStartPage = Math.min(startPage, currentPage);
+    const effectiveStartPage = Math.min(startPage, currentPage.value);
 
-    const pagesToLoad = currentPage - normalizedStartPage + 1;
+    const pagesToLoad = currentPage.value - effectiveStartPage + 1;
     const take = pagesToLoad * limit;
-    const skip = (normalizedStartPage - 1) * limit;
+    const skip = (effectiveStartPage - 1) * limit;
+
+    const collectedIssues = [currentPage.issue, view.issue, fromPage?.issue];
+
+    if (!isAppendMode && fromPage !== undefined) {
+        collectedIssues.push(PAGINATION_ISSUES.FROM_WITHOUT_APPEND);
+    }
+
+    const issues = [...new Set(collectedIssues.filter(isDefined))];
 
     return {
-        currentPage,
-        startPage: normalizedStartPage,
+        currentPage: currentPage.value,
+        startPage: effectiveStartPage,
         take,
         skip,
+        issues,
     };
 }

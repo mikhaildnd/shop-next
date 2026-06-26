@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import {
     getCategoryBySlug,
@@ -13,13 +13,15 @@ import { routes } from '@/lib/routes';
 import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import CategoryTags from '@/components/shared/CategoryTags';
-import { buildSearchParams } from '@/lib/url/build-search-params';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { getCanonicalPaginationSearchParams } from '@/lib/pagination/get-canonical-pagination-search-params';
 import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { getCanonicalProductSearchParams } from '@/lib/product-listing/canonical/get-canonical-product-search-params';
 import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
+import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
+
+// TODO: restore canonical redirect after serializer refactor.
 
 interface CategoryPageProps {
     params: Promise<{
@@ -57,21 +59,7 @@ export default async function CategoryPage({
         searchParams,
     ]);
 
-    const { filters, sort } = parseProductListing(query);
-
-    const canonicalSearch = buildSearchParams({
-        params: {
-            ...getCanonicalPaginationSearchParams(query),
-            ...getCanonicalProductSearchParams(query),
-        },
-    });
-    const currentSearch = buildSearchParams({
-        params: query,
-    });
-
-    if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.categoryPage(slug)}${canonicalSearch}`);
-    }
+    const listing = parseProductListing(query);
 
     const categories = await getCategories();
     const category = categories.find((category) => category.slug === slug);
@@ -86,23 +74,72 @@ export default async function CategoryPage({
         (childCategory) => childCategory.parentId === category.id,
     );
 
-    const { currentPage, startPage, take, skip } = getPaginationParams({
+    const { currentPage, startPage, take, skip, issues } = getPaginationParams({
         searchParams: query,
         limit: PRODUCTS_PER_PAGE,
     });
+
+    if (issues.includes(PAGINATION_ISSUES.INVALID_PAGE)) {
+        return <div>InvalidPaginationState: INVALID PAGE</div>;
+    }
+
+    if (issues.includes(PAGINATION_ISSUES.INVALID_FROM)) {
+        return <div>InvalidPaginationState: INVALID_FROM</div>;
+    }
+
+    if (issues.includes(PAGINATION_ISSUES.INVALID_VIEW)) {
+        return <div>InvalidPaginationState: INVALID_VIEW</div>;
+    }
+
+    if (issues.includes(PAGINATION_ISSUES.FROM_WITHOUT_APPEND)) {
+        return <div>InvalidPaginationState: FROM_WITHOUT_APPEND</div>;
+    }
+
+    if (listing.issues.includes(PRODUCT_SORT_LISTING_ISSUES.INVALID_SORT)) {
+        return <div>InvalidSortState</div>;
+    }
+
+    if (listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_SALE)) {
+        return <div>InvalidSale</div>;
+    }
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_DISCOUNT)
+    ) {
+        return <div>InvalidDiscount</div>;
+    }
+
+    if (
+        listing.issues.includes(
+            PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_FROM,
+        )
+    ) {
+        return <div>InvalidPriceFrom</div>;
+    }
+
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_TO)
+    ) {
+        return <div>InvalidPriceTo</div>;
+    }
+
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_IN_STOCK)
+    ) {
+        return <div>InvalidInStock</div>;
+    }
 
     const { products, filteredProductsCount, filtersMeta } = await getProducts({
         take,
         skip,
         categorySlugs,
-        filters,
-        sort,
+        filters: listing.filters,
+        sort: listing.sort,
     });
 
     const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
 
-    if (totalPages > 0 && currentPage > totalPages) {
-        notFound();
+    if (currentPage > totalPages && filteredProductsCount > 0) {
+        return <div>PageOutOfRangeState</div>;
     }
 
     const breadcrumbs = buildCatalogBreadcrumbs({
@@ -113,6 +150,7 @@ export default async function CategoryPage({
 
     return (
         <ProductListingLayout
+            sort={listing.sort}
             filtersMeta={filtersMeta}
             filteredProductsCount={filteredProductsCount}
             breadcrumbs={breadcrumbs}

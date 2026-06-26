@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
@@ -7,14 +7,13 @@ import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsList
 import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import { buildSearchParams } from '@/lib/url/build-search-params';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
 import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
 import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { getCanonicalPaginationSearchParams } from '@/lib/pagination/get-canonical-pagination-search-params';
-import { getCanonicalProductSearchParams } from '@/lib/product-listing/canonical/get-canonical-product-search-params';
 import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+
+// TODO: restore canonical redirect after serializer refactor.
 
 interface CollectionPageProps {
     params: Promise<{
@@ -54,21 +53,6 @@ export default async function CollectionPage({
 
     const { filters, sort } = parseProductListing(query);
 
-    const canonicalSearch = buildSearchParams({
-        params: {
-            ...getCanonicalPaginationSearchParams(query),
-            ...getCanonicalProductSearchParams(query),
-        },
-    });
-
-    const currentSearch = buildSearchParams({
-        params: query,
-    });
-
-    if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.collectionPage(slug)}${canonicalSearch}`);
-    }
-
     const collection: CollectionDto | null = await getCollectionBySlug(slug);
 
     if (!collection) {
@@ -100,6 +84,7 @@ export default async function CollectionPage({
 
     return (
         <ProductListingLayout
+            sort={sort}
             filtersMeta={filtersMeta}
             filteredProductsCount={filteredProductsCount}
             title={collection.title}

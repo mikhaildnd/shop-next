@@ -32,3 +32,7 @@ export const PRODUCT_SORT_ITEMS = [
     value: ProductSort;
     label: string;
 }[];
+
+export const PRODUCT_SORT_LISTING_ISSUES = {
+    INVALID_SORT: 'invalid-sort',
+} as const;

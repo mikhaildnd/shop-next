@@ -1,4 +1,7 @@
-import { DISCOUNT_FILTER_VALUES } from '@/lib/product-listing/filters/consts';
+import {
+    DISCOUNT_FILTER_VALUES,
+    PRODUCT_FILTER_LISTING_ISSUES,
+} from '@/lib/product-listing/filters/consts';
 
 export type ProductFilters = {
     query: string | null;
@@ -10,3 +13,11 @@ export type ProductFilters = {
 };
 
 export type DiscountFilterValue = (typeof DISCOUNT_FILTER_VALUES)[number];
+
+export type ProductFilterListingIssue =
+    (typeof PRODUCT_FILTER_LISTING_ISSUES)[keyof typeof PRODUCT_FILTER_LISTING_ISSUES];
+
+export type ProductFilterParseResult<T> = {
+    value: T;
+    issue?: ProductFilterListingIssue;
+};

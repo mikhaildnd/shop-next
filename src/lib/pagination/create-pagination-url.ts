@@ -2,6 +2,8 @@ import { buildSearchParams } from '../url/build-search-params';
 import type { SearchParams } from '@/lib/url/types';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
+// TODO refactor
+
 type CreatePaginationUrlParams = {
     pathname: string;
     searchParams: SearchParams;
@@ -23,7 +25,7 @@ export function createPaginationUrl({
     const query = buildSearchParams({
         searchParams,
         params: {
-            page: page > 1 ? page : undefined,
+            page,
             view: undefined,
             from: undefined,
         },
