@@ -3,7 +3,7 @@
 import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import { useSearchParams } from 'next/navigation';
 import FilterCheckbox from '@/components/product/productFilters/FilterCheckbox';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product/filters/consts';
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import FilterSection from '@/components/product/productFilters/FilterSection';
 
 function ProductInStockFilter() {

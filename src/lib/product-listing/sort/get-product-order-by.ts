@@ -1,5 +1,5 @@
 import { Prisma } from '@/generated/prisma/client';
-import type { ProductSort } from '@/lib/product/sort/types';
+import type { ProductSort } from '@/lib/product-listing/sort/types';
 
 type ProductsOrderByResult =
     | Prisma.ProductOrderByWithRelationInput
@@ -12,12 +12,6 @@ export const getProductOrderBy = (sort: ProductSort): ProductsOrderByResult => {
 
         case 'price-desc':
             return { effectivePrice: 'desc' };
-
-        case 'name-asc':
-            return { title: 'asc' };
-
-        case 'name-desc':
-            return { title: 'desc' };
 
         case 'popular':
             return [

@@ -1,5 +1,5 @@
-import type { DiscountFilterValue } from '@/lib/product/filters/types';
-import { isDiscountFilterValue } from '@/lib/product/filters/guard';
+import type { DiscountFilterValue } from '@/lib/product-listing/filters/types';
+import { isDiscountFilterValue } from '@/lib/product-listing/filters/guard';
 
 export function normalizeDiscountParam(
     value?: string,

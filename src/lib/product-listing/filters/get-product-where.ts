@@ -1,4 +1,4 @@
-import type { ProductFilters } from '@/lib/product/filters/types';
+import type { ProductFilters } from '@/lib/product-listing/filters/types';
 import { Prisma } from '@/generated/prisma/client';
 
 export function getProductWhere(

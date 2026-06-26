@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { updateSearchParams } from '@/lib/url/update-search-params';
+import { buildSearchParams } from '@/lib/url/build-search-params';
 import { useCallback } from 'react';
 
 type ProductFilterUpdates = {
@@ -22,7 +22,7 @@ export function useUpdateProductFilters() {
     return useCallback(
         (params: ProductFilterUpdates) => {
             router.replace(
-                `${pathname}${updateSearchParams({
+                `${pathname}${buildSearchParams({
                     searchParams,
                     params,
                 })}`,

@@ -1,5 +1,5 @@
-import { PRODUCT_SORTS } from '@/lib/product/sort/consts';
-import type { ProductSort } from '@/lib/product/sort/types';
+import { PRODUCT_SORTS } from '@/lib/product-listing/sort/consts';
+import type { ProductSort } from '@/lib/product-listing/sort/types';
 
 const PRODUCT_SORT_SET = new Set<string>(PRODUCT_SORTS);
 

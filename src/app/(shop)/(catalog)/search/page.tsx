@@ -8,13 +8,12 @@ import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
 import { getProducts } from '@/services/product/product.service';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
-import type { ProductSearchParams } from '@/lib/product/types';
-import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
-
-const LIMIT = PRODUCTS_PER_PAGE;
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 
 interface SearchPageProps {
-    searchParams: Promise<ProductSearchParams>;
+    searchParams: Promise<ProductListingSearchParams>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
@@ -39,18 +38,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
+    const { filters, sort } = parseProductListing(params);
+
     const { currentPage, startPage, take, skip } = getPaginationParams({
         searchParams: params,
-        limit: LIMIT,
+        limit: PRODUCTS_PER_PAGE,
     });
 
     const { products, filteredProductsCount, filtersMeta } = await getProducts({
-        searchParams: params,
         take,
         skip,
+        filters,
+        sort,
     });
 
-    const totalPages = Math.max(1, Math.ceil(filteredProductsCount / LIMIT));
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE),
+    );
 
     if (currentPage > totalPages) {
         notFound();

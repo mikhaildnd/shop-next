@@ -1,14 +1,14 @@
 import type { SearchParams } from '@/lib/url/types';
 
-type UpdateSearchParamsType = {
-    searchParams: SearchParams;
+type BuildSearchParamsType = {
+    searchParams?: SearchParams;
     params: Record<string, string | number | undefined>;
 };
 
-export function updateSearchParams({
-    searchParams,
+export function buildSearchParams({
+    searchParams = new URLSearchParams(),
     params,
-}: UpdateSearchParamsType) {
+}: BuildSearchParamsType) {
     const nextParams = new URLSearchParams(searchParams.toString());
 
     Object.entries(params).forEach(([key, value]) => {

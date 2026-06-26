@@ -10,11 +10,11 @@ import { getCategoryPath } from '@/lib/category/get-category-path';
 import { getCategories } from '@/services/category/category.service';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 
-type ProductPageProps = {
+interface ProductPageProps {
     params: Promise<{
         productSlug: string;
     }>;
-};
+}
 
 export async function generateMetadata({
     params,

@@ -1,9 +1,9 @@
-import type { PaginationSearchParams } from '@/lib/pagination/types';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product/filters/consts';
-import { PRODUCT_SORT_PARAM } from '@/lib/product/sort/consts';
+import { PRODUCT_SORT_PARAM } from '@/lib/product-listing/sort/consts';
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
+import { PaginationSearchParams } from '@/lib/pagination/types';
 
-export type ProductSearchParams = PaginationSearchParams & {
+export type ProductSearchParams = {
     [SEARCH_QUERY_PARAM]?: string;
     [PRODUCT_SORT_PARAM]?: string;
     [PRODUCT_FILTER_PARAMS.sale]?: string;
@@ -12,3 +12,6 @@ export type ProductSearchParams = PaginationSearchParams & {
     [PRODUCT_FILTER_PARAMS.priceTo]?: string;
     [PRODUCT_FILTER_PARAMS.inStock]?: string;
 };
+
+export type ProductListingSearchParams = PaginationSearchParams &
+    ProductSearchParams;

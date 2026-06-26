@@ -1,4 +1,4 @@
-import { DISCOUNT_FILTER_VALUES } from '@/lib/product/filters/consts';
+import { DISCOUNT_FILTER_VALUES } from '@/lib/product-listing/filters/consts';
 
 export type ProductFilters = {
     query: string | null;

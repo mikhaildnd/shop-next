@@ -7,22 +7,22 @@ import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsList
 import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import type { ProductSearchParams } from '@/lib/product/types';
-import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
-import { updateSearchParams } from '@/lib/url/update-search-params';
+import { buildSearchParams } from '@/lib/url/build-search-params';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
 import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
-import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
+import { getCanonicalPaginationSearchParams } from '@/lib/pagination/get-canonical-pagination-search-params';
+import { getCanonicalProductSearchParams } from '@/lib/product-listing/canonical/get-canonical-product-search-params';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 
-const LIMIT = PRODUCTS_PER_PAGE;
-
-type CollectionPageProps = {
+interface CollectionPageProps {
     params: Promise<{
         collectionSlug: string;
     }>;
 
-    searchParams: Promise<ProductSearchParams>;
-};
+    searchParams: Promise<ProductListingSearchParams>;
+}
 
 export async function generateMetadata({
     params,
@@ -52,9 +52,16 @@ export default async function CollectionPage({
         searchParams,
     ]);
 
-    const canonicalSearch = getCanonicalProductListingUrl(query);
-    const currentSearch = updateSearchParams({
-        searchParams: new URLSearchParams(),
+    const { filters, sort } = parseProductListing(query);
+
+    const canonicalSearch = buildSearchParams({
+        params: {
+            ...getCanonicalPaginationSearchParams(query),
+            ...getCanonicalProductSearchParams(query),
+        },
+    });
+
+    const currentSearch = buildSearchParams({
         params: query,
     });
 
@@ -70,17 +77,18 @@ export default async function CollectionPage({
 
     const { currentPage, startPage, take, skip } = getPaginationParams({
         searchParams: query,
-        limit: LIMIT,
+        limit: PRODUCTS_PER_PAGE,
     });
 
     const { products, filteredProductsCount, filtersMeta } = await getProducts({
         take,
         skip,
         collectionSlug: collection?.slug,
-        searchParams: query,
+        filters,
+        sort,
     });
 
-    const totalPages = Math.ceil(filteredProductsCount / LIMIT);
+    const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
 
     if (currentPage > totalPages) {
         notFound();

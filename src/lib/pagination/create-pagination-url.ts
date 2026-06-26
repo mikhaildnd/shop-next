@@ -1,4 +1,4 @@
-import { updateSearchParams } from '../url/update-search-params';
+import { buildSearchParams } from '../url/build-search-params';
 import type { SearchParams } from '@/lib/url/types';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
@@ -20,7 +20,7 @@ export function createPaginationUrl({
     searchParams,
     page,
 }: CreatePaginationUrlParams) {
-    const query = updateSearchParams({
+    const query = buildSearchParams({
         searchParams,
         params: {
             page: page > 1 ? page : undefined,
@@ -38,7 +38,7 @@ export function createLoadMoreUrl({
     page,
     from,
 }: CreateLoadMoreUrlParams) {
-    const query = updateSearchParams({
+    const query = buildSearchParams({
         searchParams,
         params: {
             page,

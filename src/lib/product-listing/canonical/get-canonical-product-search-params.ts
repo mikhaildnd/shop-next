@@ -1,10 +1,10 @@
-import type { ProductSearchParams } from '@/lib/product/types';
-import { DEFAULT_PRODUCT_SORT } from '@/lib/product/sort/consts';
-import { normalizeSaleParam } from '@/lib/product/filters/normalize/normalize-sale-param';
-import { normalizeDiscountParam } from '@/lib/product/filters/normalize/normalize-discount-param';
-import { normalizePriceParam } from '@/lib/product/filters/normalize/normalize-price-param';
-import { normalizeSortParam } from '@/lib/product/sort/normalize/normalize-sort-param';
-import { normalizeInStockParam } from '@/lib/product/filters/normalize/normalize-in-stock-param';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
+import { normalizeSaleParam } from '@/lib/product-listing/filters/normalize/normalize-sale-param';
+import { normalizeDiscountParam } from '@/lib/product-listing/filters/normalize/normalize-discount-param';
+import { normalizePriceParam } from '@/lib/product-listing/filters/normalize/normalize-price-param';
+import { normalizeSortParam } from '@/lib/product-listing/sort/normalize/normalize-sort-param';
+import { normalizeInStockParam } from '@/lib/product-listing/filters/normalize/normalize-in-stock-param';
+import { ProductSearchParams } from '@/lib/product-listing/types';
 
 export function getCanonicalProductSearchParams(
     searchParams: ProductSearchParams,

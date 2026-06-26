@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import FilterSection from '@/components/product/productFilters/FilterSection';
 import FilterChip from '@/components/product/productFilters/FilterChip';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product/filters/consts';
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 
 interface ProductDiscountFilterProps {
     availableDiscounts: number[];

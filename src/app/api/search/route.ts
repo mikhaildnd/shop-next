@@ -5,6 +5,7 @@ import {
 } from '@/lib/search/consts';
 import { getProducts } from '@/services/product/product.service';
 import { findCategories } from '@/services/category/category.service';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 
 const SEARCH_PRODUCTS_LIMIT = 5;
 const SEARCH_CATEGORIES_LIMIT = 5;
@@ -23,13 +24,14 @@ export async function GET(request: Request) {
         });
     }
 
+    const listing = parseProductListing({
+        [SEARCH_QUERY_PARAM]: normalizedQuery,
+    });
+
     const [productsResult, categories] = await Promise.all([
         getProducts({
-            searchParams: {
-                [SEARCH_QUERY_PARAM]: normalizedQuery,
-            },
+            ...listing,
             take: SEARCH_PRODUCTS_LIMIT,
-            skip: 0,
         }),
 
         findCategories(normalizedQuery, SEARCH_CATEGORIES_LIMIT),

@@ -7,58 +7,35 @@ import type {
     ProductsResponse,
 } from '@/services/product/product.types';
 import { productInclude } from '@/lib/prisma/product';
-import { getProductOrderBy } from '@/lib/product/sort/get-product-order-by';
-import { getProductWhere } from '@/lib/product/filters/get-product-where';
-import { getProductFilters } from '@/lib/product/filters/get-product-filters';
-import type { ProductSearchParams } from '@/lib/product/types';
-import { normalizeSortParam } from '@/lib/product/sort/normalize/normalize-sort-param';
-import type { Prisma } from '@/generated/prisma/client';
-import { DISCOUNT_FILTER_VALUES } from '@/lib/product/filters/consts';
+import { getProductOrderBy } from '@/lib/product-listing/sort/get-product-order-by';
+import { DISCOUNT_FILTER_VALUES } from '@/lib/product-listing/filters/consts';
+import type { ProductFilters } from '@/lib/product-listing/filters/types';
+import type { ProductSort } from '@/lib/product-listing/sort/types';
+import { buildProductQuery } from '@/lib/product-listing/build-product-query';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
 type GetProductsParams = {
+    filters?: ProductFilters;
+    sort?: ProductSort;
     take?: number;
     skip?: number;
     categorySlugs?: string[];
     collectionSlug?: string;
-    searchParams?: ProductSearchParams;
 };
 
 export async function getProducts({
     take,
-    skip,
+    skip = 0,
     categorySlugs,
     collectionSlug,
-    searchParams,
+    sort = DEFAULT_PRODUCT_SORT,
+    filters,
 }: GetProductsParams): Promise<ProductsResponse> {
-    const filters = getProductFilters(searchParams ?? {});
-    const sort = normalizeSortParam(searchParams?.sort);
-
-    const filtersWhere = getProductWhere(filters);
-    const metaWhere: Prisma.ProductWhereInput = {};
-
-    if (categorySlugs?.length) {
-        const categoryWhere = {
-            slug: {
-                in: categorySlugs,
-            },
-        };
-
-        filtersWhere.category = categoryWhere;
-        metaWhere.category = categoryWhere;
-    }
-
-    if (collectionSlug) {
-        const collectionsWhere = {
-            some: {
-                collection: {
-                    slug: collectionSlug,
-                },
-            },
-        };
-
-        filtersWhere.collections = collectionsWhere;
-        metaWhere.collections = collectionsWhere;
-    }
+    const { listingWhere, filtersWhere } = buildProductQuery({
+        filters,
+        categorySlugs,
+        collectionSlug,
+    });
 
     const [
         products,
@@ -81,11 +58,11 @@ export async function getProducts({
         }),
 
         prisma.product.count({
-            where: metaWhere,
+            where: listingWhere,
         }),
 
         prisma.product.aggregate({
-            where: metaWhere,
+            where: listingWhere,
             _min: {
                 effectivePrice: true,
             },
@@ -95,7 +72,7 @@ export async function getProducts({
         }),
 
         prisma.product.aggregate({
-            where: metaWhere,
+            where: listingWhere,
             _max: {
                 discountPercent: true,
             },
