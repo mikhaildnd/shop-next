@@ -4,7 +4,7 @@ import { normalizeDiscountParam } from '@/lib/product-listing/filters/normalize/
 import { normalizePriceParam } from '@/lib/product-listing/filters/normalize/normalize-price-param';
 import { normalizeSortParam } from '@/lib/product-listing/sort/normalize/normalize-sort-param';
 import { normalizeInStockParam } from '@/lib/product-listing/filters/normalize/normalize-in-stock-param';
-import { ProductSearchParams } from '@/lib/product-listing/types';
+import type { ProductSearchParams } from '@/lib/product-listing/types';
 
 export function getCanonicalProductSearchParams(
     searchParams: ProductSearchParams,

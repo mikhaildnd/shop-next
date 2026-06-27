@@ -1,4 +1,4 @@
-import { Prisma } from '@/generated/prisma/client';
+import type { Prisma } from '@/generated/prisma/client';
 import type { ProductSort } from '@/lib/product-listing/sort/types';
 
 type ProductsOrderByResult =

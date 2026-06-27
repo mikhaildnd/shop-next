@@ -65,6 +65,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     return (
         <ProductListingLayout
+            sort={sort}
             filtersMeta={filtersMeta}
             filteredProductsCount={filteredProductsCount}
             title="Результаты поиска"

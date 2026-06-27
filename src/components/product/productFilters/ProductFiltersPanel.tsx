@@ -11,13 +11,13 @@ interface ProductFiltersPanelProps {
 
 function ProductFiltersPanel({ filtersMeta }: ProductFiltersPanelProps) {
     return (
-        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-xl bg-white">
+        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-xl border border-gray-100 bg-white">
             <ProductPriceFilter
                 minPrice={filtersMeta.minPrice}
                 maxPrice={filtersMeta.maxPrice}
             />
-            <ProductSaleFilter />
             <ProductInStockFilter />
+            <ProductSaleFilter />
             <ProductDiscountFilter
                 availableDiscounts={filtersMeta.availableDiscounts}
             />

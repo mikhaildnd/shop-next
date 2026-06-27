@@ -4,8 +4,11 @@ import type { ReactNode } from 'react';
 import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
+import ProductSortDropdown from '@/components/product/productFilters/ProductSortDropdown';
+import type { ProductSort } from '@/lib/product-listing/sort/types';
 
 interface ProductListingLayoutProps {
+    sort: ProductSort;
     filtersMeta: ProductFiltersMeta;
     filteredProductsCount: number;
     title: string;
@@ -15,6 +18,7 @@ interface ProductListingLayoutProps {
 }
 
 function ProductListingLayout({
+    sort,
     filtersMeta,
     filteredProductsCount,
     title,
@@ -44,7 +48,12 @@ function ProductListingLayout({
                     filtersMeta={filtersMeta}
                     filteredProductsCount={filteredProductsCount}
                 />
-                {children}
+                <div className="flex flex-col">
+                    <div className="mb-4 flex">
+                        <ProductSortDropdown value={sort} />
+                    </div>
+                    {children}
+                </div>
             </div>
         </div>
     );
