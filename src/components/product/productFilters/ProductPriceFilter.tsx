@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
+import { useEffect, useState } from 'react';
 import FilterSection from '@/components/product/productFilters/FilterSection';
+import { useProductListing } from '@/hooks/useProductListing';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
 interface ProductPriceFilterProps {
     minPrice: number;
@@ -27,63 +27,46 @@ function normalizePrice(
     return String(number);
 }
 
-const ProductPriceFilter = ({
-    minPrice,
-    maxPrice,
-}: ProductPriceFilterProps) => {
-    const searchParams = useSearchParams();
-    const updateFilters = useUpdateProductFilters();
+function ProductPriceFilter({ minPrice, maxPrice }: ProductPriceFilterProps) {
+    const {
+        filters: { priceFrom: currentPriceFrom, priceTo: currentPriceTo },
+    } = useProductListing();
 
-    const urlPriceFrom = searchParams.get('priceFrom') ?? String(minPrice);
-    const urlPriceTo = searchParams.get('priceTo') ?? String(maxPrice);
+    const updateProductListing = useUpdateProductListing();
 
-    const [priceFrom, setPriceFrom] = useState(urlPriceFrom);
-    const [priceTo, setPriceTo] = useState(urlPriceTo);
+    const [priceFrom, setPriceFrom] = useState(
+        String(currentPriceFrom ?? minPrice),
+    );
+    const [priceTo, setPriceTo] = useState(String(currentPriceTo ?? maxPrice));
+
+    useEffect(() => {
+        setPriceFrom(String(currentPriceFrom ?? minPrice));
+        setPriceTo(String(currentPriceTo ?? maxPrice));
+    }, [currentPriceFrom, currentPriceTo, minPrice, maxPrice]);
 
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
         const normalizedFrom =
-            Number(nextPriceFrom) === minPrice ? undefined : nextPriceFrom;
+            Number(nextPriceFrom) === minPrice ? null : Number(nextPriceFrom);
 
         const normalizedTo =
-            Number(nextPriceTo) === maxPrice ? undefined : nextPriceTo;
+            Number(nextPriceTo) === maxPrice ? null : Number(nextPriceTo);
 
-        const currentFrom = searchParams.get('priceFrom') ?? undefined;
-
-        const currentTo = searchParams.get('priceTo') ?? undefined;
-
-        if (currentFrom === normalizedFrom && currentTo === normalizedTo) {
+        if (
+            currentPriceFrom === normalizedFrom &&
+            currentPriceTo === normalizedTo
+        ) {
             return;
         }
 
-        updateFilters({
-            priceFrom: normalizedFrom,
-            priceTo: normalizedTo,
-            page: undefined,
+        updateProductListing({
+            filters: {
+                priceFrom: normalizedFrom,
+                priceTo: normalizedTo,
+            },
         });
     };
 
-    const handlePriceFromBlur = () => {
-        const normalizedFrom = normalizePrice(
-            priceFrom,
-            minPrice,
-            minPrice,
-            maxPrice,
-        );
-
-        const normalizedTo = normalizePrice(
-            priceTo,
-            maxPrice,
-            minPrice,
-            maxPrice,
-        );
-
-        setPriceFrom(normalizedFrom);
-        setPriceTo(normalizedTo);
-
-        applyFilters(normalizedFrom, normalizedTo);
-    };
-
-    const handlePriceToBlur = () => {
+    const handleBlur = () => {
         const normalizedFrom = normalizePrice(
             priceFrom,
             minPrice,
@@ -106,37 +89,29 @@ const ProductPriceFilter = ({
 
     return (
         <FilterSection title="Цена">
-            <div className="mb-2 text-xs text-gray-500">
-                От {minPrice} до {maxPrice}
-            </div>
-
-            <div className="flex gap-4 text-sm">
+            <div className="flex gap-4 text-sm text-gray-700">
                 <input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
+                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
                     inputMode="numeric"
                     value={priceFrom}
-                    onChange={(e) => {
-                        setPriceFrom(e.target.value);
-                    }}
-                    onBlur={handlePriceFromBlur}
+                    onChange={(e) => setPriceFrom(e.target.value)}
+                    onBlur={handleBlur}
                 />
 
                 <input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1"
+                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
                     inputMode="numeric"
                     value={priceTo}
-                    onChange={(e) => {
-                        setPriceTo(e.target.value);
-                    }}
-                    onBlur={handlePriceToBlur}
+                    onChange={(e) => setPriceTo(e.target.value)}
+                    onBlur={handleBlur}
                 />
             </div>
         </FilterSection>
     );
-};
+}
 
 export default ProductPriceFilter;

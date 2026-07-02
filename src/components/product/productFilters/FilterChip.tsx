@@ -7,13 +7,13 @@ interface FilterChipProps {
     onClick: () => void;
 }
 
-const FilterChip = ({ active, children, onClick }: FilterChipProps) => {
+function FilterChip({ active, children, onClick }: FilterChipProps) {
     return (
         <button
             type="button"
             onClick={onClick}
             className={cn(
-                'rounded-2xl px-2 py-1 text-sm',
+                'cursor-pointer rounded-2xl px-2 py-1 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none',
                 active
                     ? 'bg-(--color-primary) text-white'
                     : 'border border-(--color-primary)',
@@ -22,6 +22,6 @@ const FilterChip = ({ active, children, onClick }: FilterChipProps) => {
             {children}
         </button>
     );
-};
+}
 
 export default FilterChip;

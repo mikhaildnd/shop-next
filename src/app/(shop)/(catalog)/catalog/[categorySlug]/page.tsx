@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import {
     getCategoryBySlug,
@@ -13,21 +13,22 @@ import { routes } from '@/lib/routes';
 import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import CategoryTags from '@/components/shared/CategoryTags';
-import { updateSearchParams } from '@/lib/url/update-search-params';
-import type { ProductSearchParams } from '@/lib/product/types';
-import { getCanonicalProductListingUrl } from '@/lib/product/canonical/get-canonical-product-listing-url';
 import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
-import { PRODUCTS_PER_PAGE } from '@/lib/product/consts';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
+import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
+import ProductListingIssue from '@/components/product/productFilters/ProductListingIssue';
 
-const LIMIT = PRODUCTS_PER_PAGE;
-
-type CategoryPageProps = {
+interface CategoryPageProps {
     params: Promise<{
         categorySlug: string;
     }>;
 
-    searchParams: Promise<ProductSearchParams>;
-};
+    searchParams: Promise<ProductListingSearchParams>;
+}
 
 export async function generateMetadata({
     params,
@@ -57,15 +58,12 @@ export default async function CategoryPage({
         searchParams,
     ]);
 
-    const canonicalSearch = getCanonicalProductListingUrl(query);
-    const currentSearch = updateSearchParams({
-        searchParams: new URLSearchParams(),
-        params: query,
-    });
+    const listing = parseProductListing(query);
 
-    if (canonicalSearch !== currentSearch) {
-        redirect(`${routes.categoryPage(slug)}${canonicalSearch}`);
-    }
+    const pagination = getPaginationParams({
+        searchParams: query,
+        limit: PRODUCTS_PER_PAGE,
+    });
 
     const categories = await getCategories();
     const category = categories.find((category) => category.slug === slug);
@@ -80,22 +78,133 @@ export default async function CategoryPage({
         (childCategory) => childCategory.parentId === category.id,
     );
 
-    const { currentPage, startPage, take, skip } = getPaginationParams({
-        searchParams: query,
-        limit: LIMIT,
-    });
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_PAGE)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
 
-    const { products, filteredProductsCount, filtersMeta } = await getProducts({
-        take,
-        skip,
-        categorySlugs,
-        searchParams: query,
-    });
+    if (pagination.issues.includes(PAGINATION_ISSUES.FROM_GREATER_THAN_PAGE)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
 
-    const totalPages = Math.ceil(filteredProductsCount / LIMIT);
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_FROM)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
 
-    if (totalPages > 0 && currentPage > totalPages) {
-        notFound();
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_VIEW)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (pagination.issues.includes(PAGINATION_ISSUES.FROM_WITHOUT_APPEND)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (listing.issues.includes(PRODUCT_SORT_LISTING_ISSUES.INVALID_SORT)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр сортировки"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_SALE)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_DISCOUNT)
+    ) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (
+        listing.issues.includes(
+            PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_FROM,
+        )
+    ) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_TO)
+    ) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (
+        listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_IN_STOCK)
+    ) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    const { products, filteredProductsCount, listingStats } = await getProducts(
+        {
+            take: pagination.take,
+            skip: pagination.skip,
+            categorySlugs,
+            filters: listing.filters,
+            sort: listing.sort,
+        },
+    );
+
+    const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
+
+    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+        return (
+            <ProductListingIssue
+                title="Такой страницы не существует"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     const breadcrumbs = buildCatalogBreadcrumbs({
@@ -106,7 +215,8 @@ export default async function CategoryPage({
 
     return (
         <ProductListingLayout
-            filtersMeta={filtersMeta}
+            sort={listing.sort}
+            listingStats={listingStats}
             filteredProductsCount={filteredProductsCount}
             breadcrumbs={breadcrumbs}
             title={category.title}
@@ -120,9 +230,9 @@ export default async function CategoryPage({
             ) : (
                 <ProductsListContent
                     products={products}
-                    currentPage={currentPage}
+                    currentPage={pagination.currentPage}
                     totalPages={totalPages}
-                    startPage={startPage}
+                    startPage={pagination.startPage}
                     getProductHref={(product) =>
                         routes.productInCategory(product.slug, slug)
                     }

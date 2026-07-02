@@ -16,6 +16,10 @@
 
 ### Product Listing
 
+- выделен отдельный домен `lib/product-listing`
+- `getProducts()` больше не зависит от URL
+- парсинг URL вынесен в `parseProductListing()`
+- построение Prisma query вынесено в `buildProductQuery()`
 - используется общий `ProductListingLayout`
 - поиск использует общие фильтры каталога
 - добавлены хлебные крошки для коллекций и страницы поиска

@@ -39,7 +39,6 @@ export default function ProductsListContent({
                         <LoadMoreButton
                             nextPage={currentPage + 1}
                             from={startPage}
-                            hasMore={hasMore}
                         />
                     )}
 

@@ -80,7 +80,7 @@ lib не содержит:
 Например:
 
 ```text
-product/
+product-listing/
 pagination/
 search/
 url/

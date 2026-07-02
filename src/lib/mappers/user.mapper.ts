@@ -1,5 +1,5 @@
 import type { User } from '@/generated/prisma/client';
-import type { UserDto } from '@/types/user';
+import type { UserDto } from '@/services/user/user.types';
 
 export function mapUserToDto(user: User): UserDto {
     return {

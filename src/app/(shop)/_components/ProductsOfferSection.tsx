@@ -2,6 +2,7 @@ import ProductsSection from '@/components/product/productsSection/ProductsSectio
 import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import { getProducts } from '@/services/product/product.service';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
 const ProductsOfferSection = async () => {
     const [collection, productsData] = await Promise.all([
@@ -9,6 +10,7 @@ const ProductsOfferSection = async () => {
         getProducts({
             collectionSlug: 'promotion',
             take: 8,
+            sort: DEFAULT_PRODUCT_SORT,
         }),
     ]);
 
