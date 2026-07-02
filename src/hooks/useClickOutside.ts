@@ -1,9 +1,9 @@
 import { type RefObject, useEffect } from 'react';
 
-interface UseClickOutsideOptions<T extends HTMLElement> {
+type UseClickOutsideOptions<T extends HTMLElement> = {
     ref: RefObject<T | null>;
     onClickOutside: () => void;
-}
+};
 
 export function useClickOutside<T extends HTMLElement>({
     ref,

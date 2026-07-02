@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
-interface UseEscapeKeyOptions {
+type UseEscapeKeyOptions = {
     onEscape: () => void;
-}
+};
 
 export function useEscapeKey({ onEscape }: UseEscapeKeyOptions) {
     useEffect(() => {
