@@ -1,8 +1,7 @@
 import { buildSearchParams } from '../url/build-search-params';
 import type { SearchParams } from '@/lib/url/types';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
-
-// TODO refactor
+import { appendPaginationSearchParams } from '@/lib/pagination/append-pagination-search-params';
 
 type CreatePaginationUrlParams = {
     pathname: string;
@@ -22,16 +21,18 @@ export function createPaginationUrl({
     searchParams,
     page,
 }: CreatePaginationUrlParams) {
-    const query = buildSearchParams({
-        searchParams,
-        params: {
-            page,
-            view: undefined,
-            from: undefined,
+    const params = new URLSearchParams(searchParams);
+
+    appendPaginationSearchParams({
+        params,
+        pagination: {
+            currentPage: page,
+            startPage: page,
+            view: PAGINATION_VIEWS.SINGLE,
         },
     });
 
-    return `${pathname}${query}`;
+    return `${pathname}${buildSearchParams(params)}`;
 }
 
 export function createLoadMoreUrl({
@@ -40,14 +41,16 @@ export function createLoadMoreUrl({
     page,
     from,
 }: CreateLoadMoreUrlParams) {
-    const query = buildSearchParams({
-        searchParams,
-        params: {
-            page,
+    const params = new URLSearchParams(searchParams);
+
+    appendPaginationSearchParams({
+        params,
+        pagination: {
+            currentPage: page,
+            startPage: from,
             view: PAGINATION_VIEWS.APPEND,
-            from,
         },
     });
 
-    return `${pathname}${query}`;
+    return `${pathname}${buildSearchParams(params)}`;
 }

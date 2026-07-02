@@ -1,35 +1,27 @@
-import {
+import type {
     ProductSortListingIssue,
     ProductSort,
 } from '@/lib/product-listing/sort/types';
-import {
-    DEFAULT_PRODUCT_SORT,
-    PRODUCT_SORT_LISTING_ISSUES,
-} from '@/lib/product-listing/sort/consts';
+import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
 import { isProductSort } from '@/lib/product-listing/sort/guards';
 
-export interface ParseSortParamResult {
-    value: ProductSort;
+type ParseSortParamResult = {
+    value?: ProductSort;
     issue?: ProductSortListingIssue;
-}
+};
 
-export function parseSortParam(
-    value: string | undefined,
-): ParseSortParamResult {
+export function parseSortParam(value?: string): ParseSortParamResult {
     if (value === undefined) {
-        return {
-            value: DEFAULT_PRODUCT_SORT,
-        };
+        return {};
     }
 
-    if (isProductSort(value)) {
+    if (!isProductSort(value)) {
         return {
-            value,
+            issue: PRODUCT_SORT_LISTING_ISSUES.INVALID_SORT,
         };
     }
 
     return {
-        value: DEFAULT_PRODUCT_SORT,
-        issue: PRODUCT_SORT_LISTING_ISSUES.INVALID_SORT,
+        value,
     };
 }

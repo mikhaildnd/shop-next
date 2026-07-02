@@ -1,4 +1,5 @@
 import type {
+    PaginationIssue,
     PaginationParams,
     PaginationSearchParams,
 } from '@/lib/pagination/types';
@@ -6,6 +7,7 @@ import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
 import { parsePageParam } from '@/lib/pagination/parse/parse-page-param';
 import { parseViewParam } from '@/lib/pagination/parse/parse-view-param';
 import { isDefined } from '@/utils/type-guards/is-defined';
+import { parseFromParam } from '@/lib/pagination/parse/parse-from-param';
 
 type GetPaginationParamsOptions = {
     searchParams: PaginationSearchParams;
@@ -16,40 +18,52 @@ export function getPaginationParams({
     searchParams,
     limit,
 }: GetPaginationParamsOptions): PaginationParams {
-    const currentPage = parsePageParam({
-        value: searchParams.page,
-        issue: PAGINATION_ISSUES.INVALID_PAGE,
-    });
-
+    const page = parsePageParam(searchParams.page);
     const view = parseViewParam(searchParams.view);
-    const isAppendMode = view.value === PAGINATION_VIEWS.APPEND;
+    const fromPage = parseFromParam(searchParams.from);
 
-    const fromPage = searchParams.from
-        ? parsePageParam({
-              value: searchParams.from,
-              issue: PAGINATION_ISSUES.INVALID_FROM,
-          })
-        : undefined;
+    const collectedIssues: PaginationIssue[] = [];
 
-    const startPage = fromPage?.value ?? currentPage.value;
+    if (page.issue) {
+        collectedIssues.push(page.issue);
+    }
 
-    const effectiveStartPage = Math.min(startPage, currentPage.value);
+    if (fromPage.issue) {
+        collectedIssues.push(fromPage.issue);
+    }
 
-    const pagesToLoad = currentPage.value - effectiveStartPage + 1;
-    const take = pagesToLoad * limit;
-    const skip = (effectiveStartPage - 1) * limit;
+    if (view.issue) {
+        collectedIssues.push(view.issue);
+    }
 
-    const collectedIssues = [currentPage.issue, view.issue, fromPage?.issue];
+    const currentPage = page.value ?? 1;
 
-    if (!isAppendMode && fromPage !== undefined) {
+    const viewMode = view.value ?? PAGINATION_VIEWS.SINGLE;
+    const isAppendMode = viewMode === PAGINATION_VIEWS.APPEND;
+
+    const startPage = fromPage.value ?? currentPage;
+
+    const hasFromAfterPage = startPage > currentPage;
+
+    if (fromPage.value !== undefined && !isAppendMode) {
         collectedIssues.push(PAGINATION_ISSUES.FROM_WITHOUT_APPEND);
+    }
+
+    if (hasFromAfterPage) {
+        collectedIssues.push(PAGINATION_ISSUES.FROM_GREATER_THAN_PAGE);
     }
 
     const issues = [...new Set(collectedIssues.filter(isDefined))];
 
+    const pagesToLoad = Math.max(0, currentPage - startPage + 1);
+
+    const take = pagesToLoad * limit;
+    const skip = Math.max(0, (startPage - 1) * limit);
+
     return {
-        currentPage: currentPage.value,
-        startPage: effectiveStartPage,
+        currentPage,
+        startPage,
+        view: viewMode,
         take,
         skip,
         issues,

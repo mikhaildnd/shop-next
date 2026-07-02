@@ -20,8 +20,7 @@ import { parseProductListing } from '@/lib/product-listing/parse-product-listing
 import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
 import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
 import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
-
-// TODO: restore canonical redirect after serializer refactor.
+import ProductListingIssue from '@/components/product/productFilters/ProductListingIssue';
 
 interface CategoryPageProps {
     params: Promise<{
@@ -61,6 +60,11 @@ export default async function CategoryPage({
 
     const listing = parseProductListing(query);
 
+    const pagination = getPaginationParams({
+        searchParams: query,
+        limit: PRODUCTS_PER_PAGE,
+    });
+
     const categories = await getCategories();
     const category = categories.find((category) => category.slug === slug);
 
@@ -74,38 +78,77 @@ export default async function CategoryPage({
         (childCategory) => childCategory.parentId === category.id,
     );
 
-    const { currentPage, startPage, take, skip, issues } = getPaginationParams({
-        searchParams: query,
-        limit: PRODUCTS_PER_PAGE,
-    });
-
-    if (issues.includes(PAGINATION_ISSUES.INVALID_PAGE)) {
-        return <div>InvalidPaginationState: INVALID PAGE</div>;
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_PAGE)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
-    if (issues.includes(PAGINATION_ISSUES.INVALID_FROM)) {
-        return <div>InvalidPaginationState: INVALID_FROM</div>;
+    if (pagination.issues.includes(PAGINATION_ISSUES.FROM_GREATER_THAN_PAGE)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
-    if (issues.includes(PAGINATION_ISSUES.INVALID_VIEW)) {
-        return <div>InvalidPaginationState: INVALID_VIEW</div>;
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_FROM)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
-    if (issues.includes(PAGINATION_ISSUES.FROM_WITHOUT_APPEND)) {
-        return <div>InvalidPaginationState: FROM_WITHOUT_APPEND</div>;
+    if (pagination.issues.includes(PAGINATION_ISSUES.INVALID_VIEW)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
+    }
+
+    if (pagination.issues.includes(PAGINATION_ISSUES.FROM_WITHOUT_APPEND)) {
+        return (
+            <ProductListingIssue
+                title="Неверный параметр страницы"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     if (listing.issues.includes(PRODUCT_SORT_LISTING_ISSUES.INVALID_SORT)) {
-        return <div>InvalidSortState</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр сортировки"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     if (listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_SALE)) {
-        return <div>InvalidSale</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
     if (
         listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_DISCOUNT)
     ) {
-        return <div>InvalidDiscount</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     if (
@@ -113,33 +156,55 @@ export default async function CategoryPage({
             PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_FROM,
         )
     ) {
-        return <div>InvalidPriceFrom</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     if (
         listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_TO)
     ) {
-        return <div>InvalidPriceTo</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     if (
         listing.issues.includes(PRODUCT_FILTER_LISTING_ISSUES.INVALID_IN_STOCK)
     ) {
-        return <div>InvalidInStock</div>;
+        return (
+            <ProductListingIssue
+                title="Неверный параметр фильтрации"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
-    const { products, filteredProductsCount, filtersMeta } = await getProducts({
-        take,
-        skip,
-        categorySlugs,
-        filters: listing.filters,
-        sort: listing.sort,
-    });
+    const { products, filteredProductsCount, listingStats } = await getProducts(
+        {
+            take: pagination.take,
+            skip: pagination.skip,
+            categorySlugs,
+            filters: listing.filters,
+            sort: listing.sort,
+        },
+    );
 
     const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
 
-    if (currentPage > totalPages && filteredProductsCount > 0) {
-        return <div>PageOutOfRangeState</div>;
+    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+        return (
+            <ProductListingIssue
+                title="Такой страницы не существует"
+                description="Попробуйте обновить или сбросить фильтры"
+            />
+        );
     }
 
     const breadcrumbs = buildCatalogBreadcrumbs({
@@ -151,7 +216,7 @@ export default async function CategoryPage({
     return (
         <ProductListingLayout
             sort={listing.sort}
-            filtersMeta={filtersMeta}
+            listingStats={listingStats}
             filteredProductsCount={filteredProductsCount}
             breadcrumbs={breadcrumbs}
             title={category.title}
@@ -165,9 +230,9 @@ export default async function CategoryPage({
             ) : (
                 <ProductsListContent
                     products={products}
-                    currentPage={currentPage}
+                    currentPage={pagination.currentPage}
                     totalPages={totalPages}
-                    startPage={startPage}
+                    startPage={pagination.startPage}
                     getProductHref={(product) =>
                         routes.productInCategory(product.slug, slug)
                     }

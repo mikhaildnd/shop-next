@@ -38,26 +38,28 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    const { filters, sort } = parseProductListing(params);
+    const listing = parseProductListing(params);
 
-    const { currentPage, startPage, take, skip } = getPaginationParams({
+    const pagination = getPaginationParams({
         searchParams: params,
         limit: PRODUCTS_PER_PAGE,
     });
 
-    const { products, filteredProductsCount, filtersMeta } = await getProducts({
-        take,
-        skip,
-        filters,
-        sort,
-    });
+    const { products, filteredProductsCount, listingStats } = await getProducts(
+        {
+            take: pagination.take,
+            skip: pagination.skip,
+            filters: listing.filters,
+            sort: listing.sort,
+        },
+    );
 
     const totalPages = Math.max(
         1,
         Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE),
     );
 
-    if (currentPage > totalPages) {
+    if (pagination.currentPage > totalPages) {
         notFound();
     }
 
@@ -65,8 +67,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     return (
         <ProductListingLayout
-            sort={sort}
-            filtersMeta={filtersMeta}
+            sort={listing.sort}
+            listingStats={listingStats}
             filteredProductsCount={filteredProductsCount}
             title="Результаты поиска"
             breadcrumbs={breadcrumbs}
@@ -79,9 +81,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ) : (
                 <ProductsListContent
                     products={products}
-                    currentPage={currentPage}
+                    currentPage={pagination.currentPage}
                     totalPages={totalPages}
-                    startPage={startPage}
+                    startPage={pagination.startPage}
                     getProductHref={(product) =>
                         routes.productPage(product.slug)
                     }

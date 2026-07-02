@@ -5,7 +5,7 @@ type ProductsOrderByResult =
     | Prisma.ProductOrderByWithRelationInput
     | Prisma.ProductOrderByWithRelationInput[];
 
-export const getProductOrderBy = (sort: ProductSort): ProductsOrderByResult => {
+export function getProductOrderBy(sort: ProductSort): ProductsOrderByResult {
     switch (sort) {
         case 'price-asc':
             return { effectivePrice: 'asc' };
@@ -30,4 +30,4 @@ export const getProductOrderBy = (sort: ProductSort): ProductsOrderByResult => {
         default:
             return { createdAt: 'desc' };
     }
-};
+}

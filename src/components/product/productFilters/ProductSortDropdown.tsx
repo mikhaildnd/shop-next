@@ -3,10 +3,10 @@
 import { useRef, useState } from 'react';
 import { PRODUCT_SORT_ITEMS } from '@/lib/product-listing/sort/consts';
 import { useDismiss } from '@/hooks/useDismiss';
-import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
 import type { ProductSort } from '@/lib/product-listing/sort/types';
 import { cn } from '@/utils/cn';
 import { Check, ChevronDown } from 'lucide-react';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
 interface ProductSortDropdownProps {
     value: ProductSort;
@@ -17,7 +17,7 @@ function ProductSortDropdown({ value }: ProductSortDropdownProps) {
 
     const rootRef = useRef<HTMLDivElement>(null);
 
-    const updateFilters = useUpdateProductFilters();
+    const updateProductListing = useUpdateProductListing();
 
     const selectedOption =
         PRODUCT_SORT_ITEMS.find((option) => option.value === value) ??
@@ -26,9 +26,8 @@ function ProductSortDropdown({ value }: ProductSortDropdownProps) {
     const handleSelect = (sort: ProductSort) => {
         if (sort === selectedOption.value) return;
 
-        updateFilters({
+        updateProductListing({
             sort,
-            page: undefined,
         });
 
         setIsOpen(false);

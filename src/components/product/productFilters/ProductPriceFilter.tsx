@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
+import { useEffect, useState } from 'react';
 import FilterSection from '@/components/product/productFilters/FilterSection';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
+import { useProductListing } from '@/hooks/useProductListing';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
 interface ProductPriceFilterProps {
     minPrice: number;
@@ -29,38 +28,41 @@ function normalizePrice(
 }
 
 function ProductPriceFilter({ minPrice, maxPrice }: ProductPriceFilterProps) {
-    const searchParams = useSearchParams();
-    const updateFilters = useUpdateProductFilters();
+    const {
+        filters: { priceFrom: currentPriceFrom, priceTo: currentPriceTo },
+    } = useProductListing();
 
-    const urlPriceFrom =
-        searchParams.get(PRODUCT_FILTER_PARAMS.priceFrom) ?? String(minPrice);
-    const urlPriceTo =
-        searchParams.get(PRODUCT_FILTER_PARAMS.priceTo) ?? String(maxPrice);
+    const updateProductListing = useUpdateProductListing();
 
-    const [priceFrom, setPriceFrom] = useState(urlPriceFrom);
-    const [priceTo, setPriceTo] = useState(urlPriceTo);
+    const [priceFrom, setPriceFrom] = useState(
+        String(currentPriceFrom ?? minPrice),
+    );
+    const [priceTo, setPriceTo] = useState(String(currentPriceTo ?? maxPrice));
+
+    useEffect(() => {
+        setPriceFrom(String(currentPriceFrom ?? minPrice));
+        setPriceTo(String(currentPriceTo ?? maxPrice));
+    }, [currentPriceFrom, currentPriceTo, minPrice, maxPrice]);
 
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
         const normalizedFrom =
-            Number(nextPriceFrom) === minPrice ? undefined : nextPriceFrom;
+            Number(nextPriceFrom) === minPrice ? null : Number(nextPriceFrom);
 
         const normalizedTo =
-            Number(nextPriceTo) === maxPrice ? undefined : nextPriceTo;
+            Number(nextPriceTo) === maxPrice ? null : Number(nextPriceTo);
 
-        const currentFrom =
-            searchParams.get(PRODUCT_FILTER_PARAMS.priceFrom) ?? undefined;
-
-        const currentTo =
-            searchParams.get(PRODUCT_FILTER_PARAMS.priceTo) ?? undefined;
-
-        if (currentFrom === normalizedFrom && currentTo === normalizedTo) {
+        if (
+            currentPriceFrom === normalizedFrom &&
+            currentPriceTo === normalizedTo
+        ) {
             return;
         }
 
-        updateFilters({
-            priceFrom: normalizedFrom,
-            priceTo: normalizedTo,
-            page: undefined,
+        updateProductListing({
+            filters: {
+                priceFrom: normalizedFrom,
+                priceTo: normalizedTo,
+            },
         });
     };
 

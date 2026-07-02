@@ -1,18 +1,11 @@
 import type {
-    ProductListingIssue,
+    ParsedProductListing,
     ProductSearchParams,
 } from '@/lib/product-listing/types';
-import { parseProductFilters } from '@/lib/product-listing/filters/parse/parse-product-filters';
-import type { ProductFilters } from '@/lib/product-listing/filters/types';
-import type { ProductSort } from '@/lib/product-listing/sort/types';
+import { parseProductFilters } from '@/lib/product-listing/filters/parse-product-filters';
 import { parseSortParam } from '@/lib/product-listing/sort/parse/parse-sort-param';
 import { isDefined } from '@/utils/type-guards/is-defined';
-
-export interface ParsedProductListing {
-    filters: ProductFilters;
-    sort: ProductSort;
-    issues: ProductListingIssue[];
-}
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
 export function parseProductListing(
     searchParams: ProductSearchParams = {},
@@ -26,7 +19,7 @@ export function parseProductListing(
 
     return {
         filters: filters.value,
-        sort: sort.value,
+        sort: sort.value ?? DEFAULT_PRODUCT_SORT,
         issues,
     };
 }

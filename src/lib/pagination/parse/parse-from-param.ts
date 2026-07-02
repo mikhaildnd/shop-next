@@ -1,12 +1,12 @@
 import type { PaginationIssue } from '@/lib/pagination/types';
 import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
 
-type ParsePageParamResult = {
+type ParseFromParamResult = {
     value?: number;
     issue?: PaginationIssue;
 };
 
-export function parsePageParam(value?: string): ParsePageParamResult {
+export function parseFromParam(value?: string): ParseFromParamResult {
     if (value === undefined) {
         return {};
     }
@@ -15,7 +15,7 @@ export function parsePageParam(value?: string): ParsePageParamResult {
 
     if (!Number.isInteger(page) || page < 1) {
         return {
-            issue: PAGINATION_ISSUES.INVALID_PAGE,
+            issue: PAGINATION_ISSUES.INVALID_FROM,
         };
     }
 

@@ -7,14 +7,12 @@ import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 import type { ProductSearchParams } from '@/lib/product-listing/types';
 import { parseSaleParam } from '@/lib/product-listing/filters/parse/parse-sale-param';
 import { parseDiscountParam } from '@/lib/product-listing/filters/parse/parse-discount-param';
-import {
-    parsePriceFromParam,
-    parsePriceToParam,
-} from '@/lib/product-listing/filters/parse/parse-price-param';
 import { parseInStockParam } from '@/lib/product-listing/filters/parse/parse-in-stock-param';
 import { isDefined } from '@/utils/type-guards/is-defined';
+import { parsePriceFromParam } from '@/lib/product-listing/filters/parse/parse-price-from-param';
+import { parsePriceToParam } from '@/lib/product-listing/filters/parse/parse-price-to-param';
 
-export type ParsedProductFilters = {
+type ParsedProductFilters = {
     value: ProductFilters;
     issues: ProductFilterListingIssue[];
 };

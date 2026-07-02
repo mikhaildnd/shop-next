@@ -1,21 +1,20 @@
 'use client';
 
-import { useUpdateProductFilters } from '@/hooks/useUpdateProductFilters';
-import { useSearchParams } from 'next/navigation';
 import FilterCheckbox from '@/components/product/productFilters/FilterCheckbox';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import FilterSection from '@/components/product/productFilters/FilterSection';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
+import { useProductListing } from '@/hooks/useProductListing';
 
 function ProductInStockFilter() {
-    const searchParams = useSearchParams();
-    const updateFilters = useUpdateProductFilters();
+    const updateProductListing = useUpdateProductListing();
 
-    const checked = searchParams.get(PRODUCT_FILTER_PARAMS.inStock) === 'true';
+    const { filters } = useProductListing();
 
     const handleChange = () => {
-        updateFilters({
-            inStock: checked ? undefined : 'true',
-            page: undefined,
+        updateProductListing({
+            filters: {
+                inStock: !filters.inStock,
+            },
         });
     };
 
@@ -23,7 +22,7 @@ function ProductInStockFilter() {
         <FilterSection>
             <FilterCheckbox
                 id="in-stock"
-                checked={checked}
+                checked={filters.inStock}
                 label="В наличии"
                 onChange={handleChange}
             />

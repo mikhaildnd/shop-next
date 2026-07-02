@@ -1,28 +1,26 @@
 import type { PaginationIssue, PaginationView } from '@/lib/pagination/types';
 import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
-export interface ParseViewParamResult {
-    value: PaginationView;
+type ParseViewParamResult = {
+    value?: PaginationView;
     issue?: PaginationIssue;
-}
+};
 
-export function parseViewParam(
-    value: string | undefined,
-): ParseViewParamResult {
+export function parseViewParam(value?: string): ParseViewParamResult {
     if (value === undefined) {
-        return {
-            value: PAGINATION_VIEWS.SINGLE,
-        };
+        return {};
     }
 
-    if (value === PAGINATION_VIEWS.APPEND) {
+    if (
+        value !== PAGINATION_VIEWS.SINGLE &&
+        value !== PAGINATION_VIEWS.APPEND
+    ) {
         return {
-            value: PAGINATION_VIEWS.APPEND,
+            issue: PAGINATION_ISSUES.INVALID_VIEW,
         };
     }
 
     return {
-        value: PAGINATION_VIEWS.SINGLE,
-        issue: PAGINATION_ISSUES.INVALID_VIEW,
+        value,
     };
 }

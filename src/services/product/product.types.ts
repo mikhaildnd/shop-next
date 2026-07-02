@@ -66,15 +66,15 @@ export type ProductSeed = {
     collections?: string[];
 };
 
-export type ProductFiltersMeta = {
+export type ProductListingStats = {
     minPrice: number;
     maxPrice: number;
     totalProductsCount: number;
-    availableDiscounts: number[];
+    maxDiscount: number;
 };
 
 export type ProductsResponse = {
     products: ProductDto[];
     filteredProductsCount: number;
-    filtersMeta: ProductFiltersMeta;
+    listingStats: ProductListingStats;
 };

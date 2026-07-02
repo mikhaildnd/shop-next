@@ -13,8 +13,6 @@ import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
 import type { ProductListingSearchParams } from '@/lib/product-listing/types';
 import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 
-// TODO: restore canonical redirect after serializer refactor.
-
 interface CollectionPageProps {
     params: Promise<{
         collectionSlug: string;
@@ -51,7 +49,12 @@ export default async function CollectionPage({
         searchParams,
     ]);
 
-    const { filters, sort } = parseProductListing(query);
+    const listing = parseProductListing(query);
+
+    const pagination = getPaginationParams({
+        searchParams: query,
+        limit: PRODUCTS_PER_PAGE,
+    });
 
     const collection: CollectionDto | null = await getCollectionBySlug(slug);
 
@@ -59,22 +62,19 @@ export default async function CollectionPage({
         notFound();
     }
 
-    const { currentPage, startPage, take, skip } = getPaginationParams({
-        searchParams: query,
-        limit: PRODUCTS_PER_PAGE,
-    });
-
-    const { products, filteredProductsCount, filtersMeta } = await getProducts({
-        take,
-        skip,
-        collectionSlug: collection?.slug,
-        filters,
-        sort,
-    });
+    const { products, filteredProductsCount, listingStats } = await getProducts(
+        {
+            take: pagination.take,
+            skip: pagination.skip,
+            collectionSlug: collection?.slug,
+            filters: listing.filters,
+            sort: listing.sort,
+        },
+    );
 
     const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
 
-    if (currentPage > totalPages) {
+    if (pagination.currentPage > totalPages) {
         notFound();
     }
 
@@ -84,8 +84,8 @@ export default async function CollectionPage({
 
     return (
         <ProductListingLayout
-            sort={sort}
-            filtersMeta={filtersMeta}
+            sort={listing.sort}
+            listingStats={listingStats}
             filteredProductsCount={filteredProductsCount}
             title={collection.title}
             breadcrumbs={breadcrumbs}
@@ -98,9 +98,9 @@ export default async function CollectionPage({
             ) : (
                 <ProductsListContent
                     products={products}
-                    currentPage={currentPage}
+                    currentPage={pagination.currentPage}
                     totalPages={totalPages}
-                    startPage={startPage}
+                    startPage={pagination.startPage}
                     getProductHref={(product) =>
                         routes.productInCategory(product.slug, slug)
                     }

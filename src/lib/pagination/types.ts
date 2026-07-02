@@ -1,6 +1,7 @@
-import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
+import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
-export type PaginationView = 'single' | 'append';
+export type PaginationView =
+    (typeof PAGINATION_VIEWS)[keyof typeof PAGINATION_VIEWS];
 
 export type PaginationSearchParams = {
     page?: string;
@@ -11,10 +12,14 @@ export type PaginationSearchParams = {
 export type PaginationIssue =
     (typeof PAGINATION_ISSUES)[keyof typeof PAGINATION_ISSUES];
 
-export interface PaginationParams {
+export type PaginationState = {
     currentPage: number;
     startPage: number;
+    view: PaginationView;
+};
+
+export type PaginationParams = PaginationState & {
     take: number;
     skip: number;
     issues: PaginationIssue[];
-}
+};

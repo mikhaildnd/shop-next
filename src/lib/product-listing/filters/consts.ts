@@ -1,11 +1,11 @@
 export const DISCOUNT_FILTER_VALUES = [10, 20, 30] as const;
 
 export const PRODUCT_FILTER_PARAMS = {
-    sale: 'sale',
-    inStock: 'inStock',
-    discount: 'discount',
-    priceFrom: 'priceFrom',
-    priceTo: 'priceTo',
+    SALE: 'sale',
+    IN_STOCK: 'inStock',
+    DISCOUNT: 'discount',
+    PRICE_FROM: 'priceFrom',
+    PRICE_TO: 'priceTo',
 } as const;
 
 export const PRODUCT_FILTER_LISTING_ISSUES = {

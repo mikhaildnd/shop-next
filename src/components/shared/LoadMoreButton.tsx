@@ -4,16 +4,14 @@ import { useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createLoadMoreUrl } from '@/lib/pagination/create-pagination-url';
 
-type LoadMoreButtonProps = {
+interface LoadMoreButtonProps {
     nextPage: number;
     from: number;
-    hasMore: boolean;
-};
+}
 
 export default function LoadMoreButton({
     nextPage,
     from,
-    hasMore,
 }: LoadMoreButtonProps) {
     const pathname = usePathname();
     const router = useRouter();
@@ -22,7 +20,7 @@ export default function LoadMoreButton({
     const [isPending, startTransition] = useTransition();
 
     function handleClick() {
-        if (!hasMore || isPending) {
+        if (isPending) {
             return;
         }
 
@@ -42,11 +40,11 @@ export default function LoadMoreButton({
     return (
         <button
             type="button"
+            disabled={isPending}
             onClick={handleClick}
-            disabled={!hasMore || isPending}
             className={`flex w-full items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity ${
-                !hasMore || isPending
-                    ? 'cursor-not-allowed opacity-50'
+                isPending
+                    ? 'cursor-progress opacity-50'
                     : 'cursor-pointer hover:opacity-90'
             }`}
         >
@@ -55,10 +53,8 @@ export default function LoadMoreButton({
                     <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     Загрузка...
                 </>
-            ) : hasMore ? (
-                'Показать ещё'
             ) : (
-                'Товаров больше нет'
+                'Показать ещё'
             )}
         </button>
     );

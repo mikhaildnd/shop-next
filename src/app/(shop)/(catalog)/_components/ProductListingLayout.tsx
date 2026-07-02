@@ -1,5 +1,5 @@
 import ProductFiltersPanel from '@/components/product/productFilters/ProductFiltersPanel';
-import type { ProductFiltersMeta } from '@/services/product/product.types';
+import type { ProductListingStats } from '@/services/product/product.types';
 import type { ReactNode } from 'react';
 import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
 import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
@@ -9,7 +9,7 @@ import type { ProductSort } from '@/lib/product-listing/sort/types';
 
 interface ProductListingLayoutProps {
     sort: ProductSort;
-    filtersMeta: ProductFiltersMeta;
+    listingStats: ProductListingStats;
     filteredProductsCount: number;
     title: string;
     breadcrumbs: BreadcrumbItem[];
@@ -19,7 +19,7 @@ interface ProductListingLayoutProps {
 
 function ProductListingLayout({
     sort,
-    filtersMeta,
+    listingStats,
     filteredProductsCount,
     title,
     breadcrumbs,
@@ -45,7 +45,7 @@ function ProductListingLayout({
 
             <div className="grid grid-cols-[280px_1fr] items-start gap-4">
                 <ProductFiltersPanel
-                    filtersMeta={filtersMeta}
+                    listingStats={listingStats}
                     filteredProductsCount={filteredProductsCount}
                 />
                 <div className="flex flex-col">
