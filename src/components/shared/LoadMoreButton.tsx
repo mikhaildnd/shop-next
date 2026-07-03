@@ -1,7 +1,8 @@
 'use client';
 
-import { useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
+
 import { createLoadMoreUrl } from '@/lib/pagination/create-pagination-url';
 import { cn } from '@/utils/cn';
 
@@ -10,10 +11,7 @@ interface LoadMoreButtonProps {
     from: number;
 }
 
-export default function LoadMoreButton({
-    nextPage,
-    from,
-}: LoadMoreButtonProps) {
+export function LoadMoreButton({ nextPage, from }: LoadMoreButtonProps) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();

@@ -1,8 +1,10 @@
-import LoyaltyCardImage from '../../../public/images/banners/loyalty_card_proto.png';
-import BannerCard from '@/components/banners/BannerCard';
 import Image from 'next/image';
 
-const BannerSpecialOffers = () => {
+import { BannerCard } from '@/components/banners/BannerCard';
+
+import LoyaltyCardImage from '../../../public/images/banners/loyalty_card_proto.png';
+
+export function BannerSpecialOffers() {
     return (
         <section>
             <div className="flex flex-col text-[#414141]">
@@ -43,6 +45,4 @@ const BannerSpecialOffers = () => {
             </div>
         </section>
     );
-};
-
-export default BannerSpecialOffers;
+}

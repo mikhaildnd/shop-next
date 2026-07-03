@@ -1,9 +1,14 @@
 import dynamic from 'next/dynamic';
-import ProductsSliderSkeleton from '@/components/product/productSlider/ProductsSliderSkeleton';
 
-const ProductsSliderLazy = dynamic(() => import('./ProductsSlider'), {
-    ssr: false,
-    loading: () => <ProductsSliderSkeleton />,
-});
+import { ProductsSliderSkeleton } from '@/components/product/productSlider/ProductsSliderSkeleton';
 
-export default ProductsSliderLazy;
+export const ProductsSliderLazy = dynamic(
+    () =>
+        import('./ProductsSlider').then((module) => ({
+            default: module.ProductsSlider,
+        })),
+    {
+        ssr: false,
+        loading: () => <ProductsSliderSkeleton />,
+    },
+);

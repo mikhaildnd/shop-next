@@ -5,7 +5,7 @@ interface FilterSectionProps {
     children?: ReactNode;
 }
 
-function FilterSection({ title, children }: FilterSectionProps) {
+export function FilterSection({ title, children }: FilterSectionProps) {
     return (
         <section className="border-b border-gray-100 px-4 py-5 last:border-b-0">
             {title && (
@@ -19,5 +19,3 @@ function FilterSection({ title, children }: FilterSectionProps) {
         </section>
     );
 }
-
-export default FilterSection;

@@ -1,6 +1,6 @@
-import type { ProductDto } from '@/services/product/product.types';
-import ProductCard from '@/components/product/productCard/ProductCard';
+import { ProductCard } from '@/components/product/productCard/ProductCard';
 import { routes } from '@/lib/routes';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductGridProps {
     products: ProductDto[];

@@ -1,17 +1,15 @@
 import Link from 'next/link';
+
 import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
 import type { CategoryDto } from '@/services/category/category.types';
+import { cn } from '@/utils/cn';
 
 interface CategoryTagsProps {
     categories: CategoryDto[];
     className?: string;
 }
 
-export default function CategoryTags({
-    categories,
-    className,
-}: CategoryTagsProps) {
+export function CategoryTags({ categories, className }: CategoryTagsProps) {
     if (!categories.length) {
         return null;
     }

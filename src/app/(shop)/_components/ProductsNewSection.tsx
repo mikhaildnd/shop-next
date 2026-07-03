@@ -1,10 +1,10 @@
-import ProductsSection from '@/components/product/productsSection/ProductsSection';
+import { ProductsSection } from '@/components/product/productsSection/ProductsSection';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import { getProducts } from '@/services/product/product.service';
-import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
-const ProductsNewSection = async () => {
+export async function ProductsNewSection() {
     const [collection, productsData] = await Promise.all([
         getCollectionBySlug('new'),
         getProducts({
@@ -25,6 +25,4 @@ const ProductsNewSection = async () => {
             products={productsData.products}
         />
     );
-};
-
-export default ProductsNewSection;
+}

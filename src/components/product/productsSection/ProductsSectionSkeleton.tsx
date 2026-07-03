@@ -1,7 +1,7 @@
-import ProductsSliderSkeleton from '@/components/product/productSlider/ProductsSliderSkeleton';
-import ProductsSectionHeaderSkeleton from '@/components/product/productsSection/ProductsSectionHeaderSkeleton';
+import { ProductsSliderSkeleton } from '@/components/product/productSlider/ProductsSliderSkeleton';
+import { ProductsSectionHeaderSkeleton } from '@/components/product/productsSection/ProductsSectionHeaderSkeleton';
 
-const ProductsSectionSkeleton = () => {
+export function ProductsSectionSkeleton() {
     return (
         <section className="flex flex-col">
             <ProductsSectionHeaderSkeleton />
@@ -11,6 +11,4 @@ const ProductsSectionSkeleton = () => {
             </div>
         </section>
     );
-};
-
-export default ProductsSectionSkeleton;
+}

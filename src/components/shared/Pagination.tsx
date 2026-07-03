@@ -1,20 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { buildPagination } from '@/lib/pagination/build-pagination';
 import { usePathname, useSearchParams } from 'next/navigation';
+
+import { buildPagination } from '@/lib/pagination/build-pagination';
 import { createPaginationUrl } from '@/lib/pagination/create-pagination-url';
 import { cn } from '@/utils/cn';
 
-type PaginationProps = {
+interface PaginationProps {
     currentPage: number;
     totalPages: number;
-};
+}
 
-export default function Pagination({
-    currentPage,
-    totalPages,
-}: PaginationProps) {
+export function Pagination({ currentPage, totalPages }: PaginationProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const pages = buildPagination(currentPage, totalPages);

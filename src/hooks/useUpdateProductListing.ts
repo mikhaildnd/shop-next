@@ -1,17 +1,18 @@
 'use client';
 
-import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import { appendProductListingSearchParams } from '@/lib/product-listing/append-product-listing-search-params';
+import { useCallback } from 'react';
+
 import { appendPaginationSearchParams } from '@/lib/pagination/append-pagination-search-params';
-import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { applyProductListingUpdates } from '@/lib/product-listing/apply-product-listing-updates';
-import type { PaginationParams } from '@/lib/pagination/types';
-import { getProductSearchParams } from '@/lib/product-listing/get-product-search-params';
-import { getPaginationSearchParams } from '@/lib/pagination/get-pagination-search-params';
 import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
+import { getPaginationSearchParams } from '@/lib/pagination/get-pagination-search-params';
+import type { PaginationParams } from '@/lib/pagination/types';
+import { appendProductListingSearchParams } from '@/lib/product-listing/append-product-listing-search-params';
+import { applyProductListingUpdates } from '@/lib/product-listing/apply-product-listing-updates';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import { getProductSearchParams } from '@/lib/product-listing/get-product-search-params';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 import type { ProductListingUpdates } from '@/lib/product-listing/types';
 import { buildSearchParams } from '@/lib/url/build-search-params';
 

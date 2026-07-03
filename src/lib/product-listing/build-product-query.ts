@@ -1,6 +1,6 @@
+import type { Prisma } from '@/generated/prisma/client';
 import { getProductWhere } from '@/lib/product-listing/filters/get-product-where';
 import type { ProductFilters } from '@/lib/product-listing/filters/types';
-import type { Prisma } from '@/generated/prisma/client';
 
 type BuildProductQueryOptions = {
     filters?: ProductFilters;

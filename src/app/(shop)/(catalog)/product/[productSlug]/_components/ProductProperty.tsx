@@ -6,11 +6,11 @@ interface ProductPropertyProps {
     className?: string;
 }
 
-const ProductProperty = ({
+export function ProductProperty({
     title,
     content,
     className,
-}: ProductPropertyProps) => {
+}: ProductPropertyProps) {
     return (
         <section className={cn('space-y-1', className)}>
             <h2 className="text-xl font-semibold">{title}:</h2>
@@ -18,6 +18,4 @@ const ProductProperty = ({
             <p className="text-md leading-6 text-neutral-700">{content}</p>
         </section>
     );
-};
-
-export default ProductProperty;
+}

@@ -1,8 +1,8 @@
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import {
     DEFAULT_PRODUCT_SORT,
     PRODUCT_SORT_PARAM,
 } from '@/lib/product-listing/sort/consts';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import type { ParsedProductListing } from '@/lib/product-listing/types';
 
 type AppendProductListingSearchParamsOptions = {

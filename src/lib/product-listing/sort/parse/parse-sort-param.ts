@@ -1,9 +1,9 @@
-import type {
-    ProductSortListingIssue,
-    ProductSort,
-} from '@/lib/product-listing/sort/types';
 import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
 import { isProductSort } from '@/lib/product-listing/sort/guards';
+import type {
+    ProductSort,
+    ProductSortListingIssue,
+} from '@/lib/product-listing/sort/types';
 
 type ParseSortParamResult = {
     value?: ProductSort;

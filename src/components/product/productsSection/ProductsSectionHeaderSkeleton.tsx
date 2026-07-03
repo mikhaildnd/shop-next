@@ -1,4 +1,4 @@
-const ProductsSectionHeaderSkeleton = () => {
+export function ProductsSectionHeaderSkeleton() {
     return (
         <div className="mb-4 flex gap-x-5 md:mb-8 md:gap-x-10">
             <div className="h-8 w-48 animate-pulse rounded bg-gray-200 xl:h-10 xl:w-64" />
@@ -13,6 +13,4 @@ const ProductsSectionHeaderSkeleton = () => {
             </div>
         </div>
     );
-};
-
-export default ProductsSectionHeaderSkeleton;
+}

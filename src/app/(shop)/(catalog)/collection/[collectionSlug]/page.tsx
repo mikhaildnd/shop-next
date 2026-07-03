@@ -1,20 +1,20 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProducts } from '@/services/product/product.service';
+
+import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
+import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
+import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
+import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { PageIssues } from '@/components/page-issues/ui/PageIssues';
+import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import ProductListingLayout from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
-import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
-import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
+import { getProducts } from '@/services/product/product.service';
 
 interface CollectionPageProps {
     params: Promise<{

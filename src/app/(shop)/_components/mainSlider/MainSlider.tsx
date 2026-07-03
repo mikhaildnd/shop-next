@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { Swiper, SwiperSlide, type SwiperProps } from 'swiper/react';
-import { Autoplay, EffectFade } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+
+import { useState } from 'react';
+import type { Swiper as SwiperType } from 'swiper';
+import { Autoplay, EffectFade } from 'swiper/modules';
+import { Swiper, type SwiperProps,SwiperSlide } from 'swiper/react';
+
+import { Slide } from '@/app/(shop)/_components/mainSlider/Slide';
+import { SliderNavigationButton } from '@/components/shared/slider/SliderNavigationButton';
+import { SliderPagination } from '@/components/shared/slider/SliderPagination';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import type { MainSlideData } from '@/types/mainSlideData';
-import SliderNavigationButton from '@/components/shared/slider/SliderNavigationButton';
-import SliderPagination from '@/components/shared/slider/SliderPagination';
-import Slide from '@/app/(shop)/_components/mainSlider/Slide';
-import clsx from 'clsx';
+import { cn } from '@/utils/cn';
 
 interface MainSliderProps {
     slides: MainSlideData[];
@@ -19,14 +21,14 @@ interface MainSliderProps {
     className?: string;
 }
 
-const MainSlider = ({ slides, className, autoplay }: MainSliderProps) => {
+export function MainSlider({ slides, className, autoplay }: MainSliderProps) {
     const [swiper, setSwiper] = useState<SwiperType | null>(null);
     const { prevSlide, nextSlide } = useSliderNavigation(swiper);
 
     return (
         <Swiper
             onSwiper={setSwiper}
-            className={clsx(className, 'relative')}
+            className={cn(className, 'relative')}
             modules={[Autoplay, EffectFade]}
             autoplay={autoplay}
             effect="fade"
@@ -67,6 +69,4 @@ const MainSlider = ({ slides, className, autoplay }: MainSliderProps) => {
             })}
         </Swiper>
     );
-};
-
-export default MainSlider;
+}

@@ -1,4 +1,4 @@
-const ProductCardSkeleton = () => {
+export function ProductCardSkeleton() {
     return (
         <div className="flex flex-col overflow-hidden rounded bg-white">
             {/* Image */}
@@ -39,6 +39,4 @@ const ProductCardSkeleton = () => {
             </div>
         </div>
     );
-};
-
-export default ProductCardSkeleton;
+}

@@ -7,7 +7,12 @@ interface FilterCheckboxProps {
     onChange: () => void;
 }
 
-function FilterCheckbox({ id, checked, label, onChange }: FilterCheckboxProps) {
+export function FilterCheckbox({
+    id,
+    checked,
+    label,
+    onChange,
+}: FilterCheckboxProps) {
     return (
         <label
             htmlFor={id}
@@ -33,5 +38,3 @@ function FilterCheckbox({ id, checked, label, onChange }: FilterCheckboxProps) {
         </label>
     );
 }
-
-export default FilterCheckbox;

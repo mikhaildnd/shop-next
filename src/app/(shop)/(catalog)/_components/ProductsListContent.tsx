@@ -1,7 +1,7 @@
-import Pagination from '@/components/shared/Pagination';
-import LoadMoreButton from '@/components/shared/LoadMoreButton';
-import type { ProductDto } from '@/services/product/product.types';
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
+import { LoadMoreButton } from '@/components/shared/LoadMoreButton';
+import { Pagination } from '@/components/shared/Pagination';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductsListContentProps {
     products: ProductDto[];
@@ -10,7 +10,7 @@ interface ProductsListContentProps {
     startPage: number;
 }
 
-export default function ProductsListContent({
+export function ProductsListContent({
     products,
     currentPage,
     totalPages,

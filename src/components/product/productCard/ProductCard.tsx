@@ -1,16 +1,17 @@
-import Image from 'next/image';
-import { formatPrice } from '@/utils/formatPrice';
-import StarRating from '@/components/shared/StarRating';
-import Link from 'next/link';
 import { Heart } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { StarRating } from '@/components/shared/StarRating';
 import type { ProductDto } from '@/services/product/product.types';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface ProductCardProps {
     product: ProductDto;
     href: string;
 }
 
-const ProductCard = ({ product, href }: ProductCardProps) => {
+export function ProductCard({ product, href }: ProductCardProps) {
     const hasDiscount = product.discountPercent > 0;
 
     //TODO сделать фолбек изображения
@@ -91,6 +92,4 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
             </div>
         </article>
     );
-};
-
-export default ProductCard;
+}

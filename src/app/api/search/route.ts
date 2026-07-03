@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
 import {
     MIN_SEARCH_QUERY_LENGTH,
     SEARCH_QUERY_PARAM,
 } from '@/lib/search/consts';
-import { getProducts } from '@/services/product/product.service';
 import { findCategories } from '@/services/category/category.service';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import { getProducts } from '@/services/product/product.service';
 
 const SEARCH_PRODUCTS_LIMIT = 5;
 const SEARCH_CATEGORIES_LIMIT = 5;

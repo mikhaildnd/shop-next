@@ -1,6 +1,6 @@
-import type { ProductListingIssue } from '@/lib/product-listing/types';
-import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
 import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import { PRODUCT_SORT_LISTING_ISSUES } from '@/lib/product-listing/sort/consts';
+import type { ProductListingIssue } from '@/lib/product-listing/types';
 
 type IssueMessage = {
     title: string;

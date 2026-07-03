@@ -1,7 +1,8 @@
-import { buildSearchParams } from '../url/build-search-params';
-import type { SearchParams } from '@/lib/url/types';
-import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
 import { appendPaginationSearchParams } from '@/lib/pagination/append-pagination-search-params';
+import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import type { SearchParams } from '@/lib/url/types';
+
+import { buildSearchParams } from '../url/build-search-params';
 
 type CreatePaginationUrlParams = {
     pathname: string;

@@ -1,7 +1,7 @@
-import type { ProductListingIssue } from '@/lib/product-listing/types';
-import type { PaginationIssue } from '@/lib/pagination/types';
 import { PaginationIssues } from '@/components/page-issues/ui/PaginationIssues';
 import { ProductListingIssues } from '@/components/page-issues/ui/ProductListingIssues';
+import type { PaginationIssue } from '@/lib/pagination/types';
+import type { ProductListingIssue } from '@/lib/product-listing/types';
 
 interface PageIssuesProps {
     listingIssues: ProductListingIssue[];

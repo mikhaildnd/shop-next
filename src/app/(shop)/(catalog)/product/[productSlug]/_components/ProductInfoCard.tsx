@@ -1,14 +1,14 @@
-import StarRating from '@/components/shared/StarRating';
+import { StarRating } from '@/components/shared/StarRating';
+import type { ProductDto } from '@/services/product/product.types';
 import { cn } from '@/utils/cn';
 import { formatPrice } from '@/utils/formatPrice';
-import { ProductDto } from '@/services/product/product.types';
 
 interface ProductInfoCardProps {
     product: ProductDto;
     className?: string;
 }
 
-const ProductInfoCard = ({ product, className }: ProductInfoCardProps) => {
+export function ProductInfoCard({ product, className }: ProductInfoCardProps) {
     const hasDiscount = product.discountPercent > 0;
 
     return (
@@ -53,6 +53,4 @@ const ProductInfoCard = ({ product, className }: ProductInfoCardProps) => {
             </button>
         </section>
     );
-};
-
-export default ProductInfoCard;
+}

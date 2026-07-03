@@ -1,4 +1,5 @@
 import type { SVGProps } from 'react';
+
 import { cn } from '@/utils/cn';
 
 interface SliderNavigationButtonProps {
@@ -20,13 +21,13 @@ const ArrowIcon = (props: SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const SliderNavigationButton = ({
+export function SliderNavigationButton({
     direction,
     className,
     iconClassName,
     isDisabled = false,
     onClick,
-}: SliderNavigationButtonProps) => {
+}: SliderNavigationButtonProps) {
     return (
         <button
             type="button"
@@ -54,6 +55,4 @@ const SliderNavigationButton = ({
             </span>
         </button>
     );
-};
-
-export default SliderNavigationButton;
+}

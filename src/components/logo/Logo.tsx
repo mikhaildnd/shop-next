@@ -1,15 +1,17 @@
-import Link from 'next/link';
 import Image from 'next/image';
-import LogoImage from '../../../public/icons/logo.png';
-import clsx from 'clsx';
-import { routes } from '@/lib/routes';
+import Link from 'next/link';
 
-const Logo = ({ className }: { className?: string }) => {
+import { routes } from '@/lib/routes';
+import { cn } from '@/utils/cn';
+
+import LogoImage from '../../../public/icons/logo.png';
+
+export function Logo({ className }: { className?: string }) {
     return (
         <Link
             href={routes.homePage()}
             aria-label="На главную"
-            className={clsx('flex items-center', className)}
+            className={cn('flex items-center', className)}
         >
             <Image
                 className="h-auto w-auto shrink-0"
@@ -21,6 +23,4 @@ const Logo = ({ className }: { className?: string }) => {
             />
         </Link>
     );
-};
-
-export default Logo;
+}

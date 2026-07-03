@@ -1,7 +1,7 @@
-import type { ProductListingIssue } from '@/lib/product-listing/types';
-import IssueMessage from '@/components/page-issues/ui/IssueMessage';
 import { PRODUCT_LISTING_ISSUE_GROUPS } from '@/components/page-issues/product-listing-issue-groups';
+import { IssueMessage } from '@/components/page-issues/ui/IssueMessage';
 import { ResetProductListingButton } from '@/components/page-issues/ui/ResetProductListingButton';
+import type { ProductListingIssue } from '@/lib/product-listing/types';
 
 interface ProductListingIssuesProps {
     issues: ProductListingIssue[];

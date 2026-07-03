@@ -1,6 +1,6 @@
-import ProductCardSkeleton from '@/components/product/productCard/ProductCardSkeleton';
+import { ProductCardSkeleton } from '@/components/product/productCard/ProductCardSkeleton';
 
-const ProductsSliderSkeleton = () => {
+export function ProductsSliderSkeleton() {
     return (
         <div className="overflow-hidden">
             <div className="flex gap-2 sm:gap-3 lg:gap-4">
@@ -15,6 +15,4 @@ const ProductsSliderSkeleton = () => {
             </div>
         </div>
     );
-};
-
-export default ProductsSliderSkeleton;
+}

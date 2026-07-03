@@ -1,19 +1,19 @@
+import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
+import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
+import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
+import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
+import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { IssueMessage } from '@/components/page-issues/ui/IssueMessage';
+import { PageIssues } from '@/components/page-issues/ui/PageIssues';
+import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
 import { getProducts } from '@/services/product/product.service';
-import ProductListingLayout from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
-import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
-import IssueMessage from '@/components/page-issues/ui/IssueMessage';
-import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 
 interface SearchPageProps {
     searchParams: Promise<ProductListingSearchParams>;

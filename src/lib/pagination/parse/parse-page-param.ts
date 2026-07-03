@@ -1,5 +1,5 @@
-import type { PaginationIssue } from '@/lib/pagination/types';
 import { PAGINATION_ISSUES } from '@/lib/pagination/consts';
+import type { PaginationIssue } from '@/lib/pagination/types';
 
 type ParsePageParamResult = {
     value?: number;

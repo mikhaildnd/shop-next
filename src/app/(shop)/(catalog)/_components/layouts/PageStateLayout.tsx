@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
+import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
 
 interface PageStateLayoutProps {

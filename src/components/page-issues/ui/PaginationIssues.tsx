@@ -1,7 +1,7 @@
-import type { PaginationIssue } from '@/lib/pagination/types';
-import IssueMessage from '@/components/page-issues/ui/IssueMessage';
 import { PAGINATION_ISSUE_GROUPS } from '@/components/page-issues/pagination-issue-groups';
 import { GoToCatalogButton } from '@/components/page-issues/ui/GoToCatalogButton';
+import { IssueMessage } from '@/components/page-issues/ui/IssueMessage';
+import type { PaginationIssue } from '@/lib/pagination/types';
 
 interface PaginationIssuesProps {
     issues: PaginationIssue[];

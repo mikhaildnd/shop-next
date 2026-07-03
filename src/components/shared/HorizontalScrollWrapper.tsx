@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+
 import { cn } from '@/utils/cn';
 
 interface HorizontalScrollWrapperProps {
@@ -6,7 +7,7 @@ interface HorizontalScrollWrapperProps {
     children: ReactNode;
 }
 
-export default function HorizontalScrollWrapper({
+export function HorizontalScrollWrapper({
     children,
     className,
 }: HorizontalScrollWrapperProps) {

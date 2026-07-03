@@ -1,6 +1,7 @@
 import Image from 'next/image';
-import clsx from 'clsx';
 import Link from 'next/link';
+
+import { cn } from '@/utils/cn';
 
 interface FooterPhoneProps {
     phoneNumber: string;
@@ -8,13 +9,13 @@ interface FooterPhoneProps {
     withIcon?: boolean;
 }
 
-const FooterPhone = (props: FooterPhoneProps) => {
+export function FooterPhone(props: FooterPhoneProps) {
     const { phoneNumber, className, withIcon = false } = props;
 
     return (
         <Link
             href={`tel:${phoneNumber}`}
-            className={clsx(
+            className={cn(
                 'flex items-center transition-opacity hover:opacity-80',
                 withIcon && 'gap-1',
                 className,
@@ -35,6 +36,4 @@ const FooterPhone = (props: FooterPhoneProps) => {
             </span>
         </Link>
     );
-};
-
-export default FooterPhone;
+}

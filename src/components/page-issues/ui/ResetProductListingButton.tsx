@@ -1,8 +1,8 @@
 'use client';
 
-import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 import { DEFAULT_PRODUCT_FILTERS } from '@/lib/product-listing/filters/consts';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
 export function ResetProductListingButton() {
     const updateProductListing = useUpdateProductListing();

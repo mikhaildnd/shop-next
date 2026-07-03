@@ -1,9 +1,9 @@
 'use client';
 
-import FilterSection from '@/components/product/productFilters/FilterSection';
-import FilterChip from '@/components/product/productFilters/FilterChip';
-import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
+import { FilterChip } from '@/components/product/productFilters/FilterChip';
+import { FilterSection } from '@/components/product/productFilters/FilterSection';
 import { useProductListing } from '@/hooks/useProductListing';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 import { DISCOUNT_FILTER_VALUES } from '@/lib/product-listing/filters/consts';
 
 interface ProductDiscountFilterProps {
@@ -17,7 +17,9 @@ function getAvailableDiscounts(
     return discounts.filter((discount) => discount <= maxDiscount);
 }
 
-function ProductDiscountFilter({ maxDiscount }: ProductDiscountFilterProps) {
+export function ProductDiscountFilter({
+    maxDiscount,
+}: ProductDiscountFilterProps) {
     const updateProductListing = useUpdateProductListing();
 
     const {
@@ -58,5 +60,3 @@ function ProductDiscountFilter({ maxDiscount }: ProductDiscountFilterProps) {
         </FilterSection>
     );
 }
-
-export default ProductDiscountFilter;

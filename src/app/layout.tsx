@@ -1,10 +1,12 @@
+import './globals.css';
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
-import Header from '@/components/header/Header';
-import Footer from '@/components/footer/Footer';
 import type { ReactNode } from 'react';
-import clsx from 'clsx';
+
+import { Footer } from '@/components/footer/Footer';
+import { Header } from '@/components/header/Header';
+import { cn } from '@/utils/cn';
 
 const fontMain = Inter({
     variable: '--font-main',
@@ -25,7 +27,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="ru">
             <body
-                className={clsx(
+                className={cn(
                     'flex min-h-screen flex-col antialiased',
                     fontMain.variable,
                 )}

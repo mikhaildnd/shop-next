@@ -1,25 +1,26 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProducts } from '@/services/product/product.service';
-import {
-    getCategoryBySlug,
-    getCategories,
-} from '@/services/category/category.service';
-import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrumbs';
-import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
-import { getCategoryPath } from '@/lib/category/get-category-path';
-import CategoryTags from '@/components/shared/CategoryTags';
-import ProductListingLayout from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
+
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
+import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
+import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
+import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
+import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { PageIssues } from '@/components/page-issues/ui/PageIssues';
+import { CategoryTags } from '@/components/shared/CategoryTags';
+import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrumbs';
+import { getCategoryPath } from '@/lib/category/get-category-path';
+import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
+import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
+import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
+import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import type { ProductListingSearchParams } from '@/lib/product-listing/types';
+import {
+    getCategories,
+    getCategoryBySlug,
+} from '@/services/category/category.service';
+import { getProducts } from '@/services/product/product.service';
 
 interface CategoryPageProps {
     params: Promise<{

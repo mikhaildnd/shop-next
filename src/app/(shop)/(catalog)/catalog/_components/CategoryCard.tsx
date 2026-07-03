@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import { routes } from '@/lib/routes';
 import type { CategoryDto } from '@/services/category/category.types';
 
@@ -7,10 +8,7 @@ interface CategoryCardProps {
     childCategories?: CategoryDto[];
 }
 
-export default function CategoryCard({
-    category,
-    childCategories,
-}: CategoryCardProps) {
+export function CategoryCard({ category, childCategories }: CategoryCardProps) {
     return (
         <div className="flex flex-col rounded-2xl border border-gray-200 p-2">
             <h2 className="font-medium">

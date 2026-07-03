@@ -1,11 +1,12 @@
-import ProductFiltersPanel from '@/components/product/productFilters/ProductFiltersPanel';
-import type { ProductListingStats } from '@/services/product/product.types';
 import type { ReactNode } from 'react';
-import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
+
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
+import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
+import { ProductSortDropdown } from '@/components/product/productFilters/ProductSortDropdown';
+import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
-import ProductSortDropdown from '@/components/product/productFilters/ProductSortDropdown';
 import type { ProductSort } from '@/lib/product-listing/sort/types';
+import type { ProductListingStats } from '@/services/product/product.types';
 
 interface ProductListingLayoutProps {
     sort: ProductSort;
@@ -17,7 +18,7 @@ interface ProductListingLayoutProps {
     children: ReactNode;
 }
 
-function ProductListingLayout({
+export function ProductListingLayout({
     sort,
     listingStats,
     filteredProductsCount,
@@ -58,5 +59,3 @@ function ProductListingLayout({
         </div>
     );
 }
-
-export default ProductListingLayout;

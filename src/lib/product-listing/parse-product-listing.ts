@@ -1,11 +1,11 @@
+import { parseProductFilters } from '@/lib/product-listing/filters/parse-product-filters';
+import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
+import { parseSortParam } from '@/lib/product-listing/sort/parse/parse-sort-param';
 import type {
     ParsedProductListing,
     ProductSearchParams,
 } from '@/lib/product-listing/types';
-import { parseProductFilters } from '@/lib/product-listing/filters/parse-product-filters';
-import { parseSortParam } from '@/lib/product-listing/sort/parse/parse-sort-param';
 import { isDefined } from '@/utils/type-guards/is-defined';
-import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 
 export function parseProductListing(
     searchParams: ProductSearchParams = {},

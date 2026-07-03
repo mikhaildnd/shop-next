@@ -1,14 +1,15 @@
-import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getProductBySlug } from '@/services/product/product.service';
+import { notFound } from 'next/navigation';
+
+import { ProductInfoCard } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductInfoCard';
+import { ProductPageSlider } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductPageSlider';
+import { ProductProperty } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductProperty';
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
+import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
 import { buildProductBreadcrumbs } from '@/lib/breadcrumbs/buildProductBreadcrumbs';
-import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
-import ProductPageSlider from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductPageSlider';
-import ProductInfoCard from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductInfoCard';
-import ProductProperty from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductProperty';
 import { getCategoryPath } from '@/lib/category/get-category-path';
 import { getCategories } from '@/services/category/category.service';
-import HorizontalScrollWrapper from '@/components/shared/HorizontalScrollWrapper';
+import { getProductBySlug } from '@/services/product/product.service';
 
 interface ProductPageProps {
     params: Promise<{

@@ -1,5 +1,6 @@
-import { cn } from '@/utils/cn';
 import type { ReactNode } from 'react';
+
+import { cn } from '@/utils/cn';
 
 interface FilterChipProps {
     active: boolean;
@@ -7,7 +8,7 @@ interface FilterChipProps {
     onClick: () => void;
 }
 
-function FilterChip({ active, children, onClick }: FilterChipProps) {
+export function FilterChip({ active, children, onClick }: FilterChipProps) {
     return (
         <button
             type="button"
@@ -23,5 +24,3 @@ function FilterChip({ active, children, onClick }: FilterChipProps) {
         </button>
     );
 }
-
-export default FilterChip;

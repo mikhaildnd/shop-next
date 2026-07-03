@@ -1,4 +1,4 @@
-import {
+import type {
     DISCOUNT_FILTER_VALUES,
     PRODUCT_FILTER_LISTING_ISSUES,
 } from '@/lib/product-listing/filters/consts';

@@ -1,8 +1,10 @@
-import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
-import UserActionItem from '@/components/header/UserActionItem';
-import { Heart, ShoppingCart, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag,ShoppingCart } from 'lucide-react';
 
-const UserActions = () => {
+import { UserActionItem } from '@/components/header/UserActionItem';
+
+import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
+
+export function UserActions() {
     return (
         <ul className="flex grow items-end justify-between">
             <UserActionItem
@@ -24,6 +26,4 @@ const UserActions = () => {
             />
         </ul>
     );
-};
-
-export default UserActions;
+}

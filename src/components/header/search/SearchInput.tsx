@@ -1,25 +1,22 @@
 'use client';
 
-import SearchDropdown from '@/components/header/search/SearchDropdown';
-import { X as IconClose, Search as IconSearch } from 'lucide-react';
-import {
-    type ChangeEvent,
-    type SubmitEventHandler,
-    useRef,
-    useState,
-} from 'react';
+import { Search as IconSearch, X as IconClose } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { ChangeEvent, SubmitEventHandler } from 'react';
+import { useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
+
+import { SearchDropdown } from '@/components/header/search/SearchDropdown';
+import { useDismiss } from '@/hooks/useDismiss';
+import { fetchSearch } from '@/lib/api/search';
+import type { SearchResponse } from '@/lib/api/search.types';
+import { routes } from '@/lib/routes';
 import {
     MIN_SEARCH_QUERY_LENGTH,
     SEARCH_QUERY_PARAM,
 } from '@/lib/search/consts';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useDismiss } from '@/hooks/useDismiss';
-import { routes } from '@/lib/routes';
-import type { SearchResponse } from '@/lib/api/search.types';
-import { fetchSearch } from '@/lib/api/search';
-import { useDebouncedCallback } from 'use-debounce';
 
-const SearchInput = () => {
+export function SearchInput() {
     const iconButtonClass =
         'rounded p-1.5 text-gray-500 transition-colors hover:bg-gray-100 cursor-pointer';
 
@@ -208,6 +205,4 @@ const SearchInput = () => {
             )}
         </div>
     );
-};
-
-export default SearchInput;
+}

@@ -4,61 +4,34 @@
 
 Маршруты Next.js.
 
-Page-specific компоненты располагаются рядом с page.tsx.
-
-Общие компоненты нескольких страниц могут располагаться выше.
-
-Например:
-
-```text
-app/
-└── (shop)
-    └── (catalog)
-        ├── category
-        ├── collection
-        ├── search
-        └── _components
-```
+* страницы;
+* layouts;
+* route handlers;
+* page-specific компоненты.
 
 ---
 
 ## components/
 
-Переиспользуемые UI-компоненты.
+Глобально переиспользуемые UI-компоненты.
 
-Структура строится по доменам:
-
-```text
-components/
-├── header
-├── footer
-├── product
-├── shared
-```
+Используются несколькими доменами приложения.
 
 ---
 
 ## hooks/
 
-Переиспользуемые хуки.
-
-Feature-хуки допускаются и со временем могут перемещаться ближе к своему домену.
+Переиспользуемые React-хуки.
 
 ---
 
 ## services/
 
-Доменная логика и работа с данными.
+Доменные сервисы.
 
-Структура домена может включать:
+Содержат бизнес-логику и работу с данными.
 
-```text
-product/
-├── product.service.ts
-├── product.types.ts
-├── product.mapper.ts
-└── use-cases
-```
+Структура зависит от потребностей конкретного домена.
 
 ---
 
@@ -66,24 +39,11 @@ product/
 
 Чистые функции и константы.
 
-Структура строится по доменам.
+---
 
-Например:
+## prisma/
 
-```text
-lib/
-├── breadcrumbs
-├── pagination
-├── product
-├── search
-├── url
-```
-
-Избегать глобальных папок:
-
-- helpers
-- common
-- utils
+Prisma schema, миграции и seed.
 
 ---
 
@@ -101,21 +61,19 @@ lib/
 
 ---
 
+## public/
+
+Статические файлы.
+
+---
+
 ## docs/
 
 Документация проекта.
 
-Основные документы:
-
-- current-state.md
-- progress.md
-- architecture.md
-- style-guide.md
-- principles.md
-- project-structure.md
-
----
-
-## public/
-
-Статические файлы.
+* `current-state.md`
+* `progress.md`
+* `architecture.md`
+* `project-structure.md`
+* `style-guide.md`
+* `principles.md`

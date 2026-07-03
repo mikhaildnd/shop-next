@@ -1,10 +1,11 @@
-import users from '@/data/seeds/users-mock';
-import products from '@/data/seeds/products-mock';
-import categories from '@/data/seeds/categories-mock';
-import collections from '@/data/seeds/collections-mock';
-import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+
+import { categories } from '@/data/seeds/categories-mock';
+import { collections } from '@/data/seeds/collections-mock';
+import { products } from '@/data/seeds/products-mock';
 import type { CategorySeed } from '@/data/seeds/types';
+import { users } from '@/data/seeds/users-mock';
+import { PrismaClient } from '@/generated/prisma/client';
 
 const prisma = new PrismaClient({
     adapter: new PrismaPg({

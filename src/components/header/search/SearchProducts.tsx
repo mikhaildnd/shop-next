@@ -1,5 +1,4 @@
-import SearchProductItem from '@/components/header/search/SearchProductItem';
-
+import { SearchProductItem } from '@/components/header/search/SearchProductItem';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface SearchProductsProps {
@@ -7,7 +6,7 @@ interface SearchProductsProps {
     onClose: () => void;
 }
 
-const SearchProducts = ({ products, onClose }: SearchProductsProps) => {
+export function SearchProducts({ products, onClose }: SearchProductsProps) {
     if (!products.length) {
         return null;
     }
@@ -29,6 +28,4 @@ const SearchProducts = ({ products, onClose }: SearchProductsProps) => {
             </ul>
         </section>
     );
-};
-
-export default SearchProducts;
+}

@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn } from '@/utils/cn';
 
 interface ProductsSliderNavButtonProps {
     direction: 'prev' | 'next';
@@ -6,24 +6,24 @@ interface ProductsSliderNavButtonProps {
     isDisabled?: boolean;
 }
 
-const ProductsSliderNavButton = ({
+export function ProductsSliderNavButton({
     direction,
     isDisabled = false,
     onClick,
-}: ProductsSliderNavButtonProps) => {
+}: ProductsSliderNavButtonProps) {
     return (
         <button
             type="button"
             disabled={isDisabled}
             onClick={onClick}
-            className={clsx(
+            className={cn(
                 'flex items-center justify-center',
                 'h-7 w-7 cursor-pointer rounded-full bg-gray-300 transition-colors',
                 'hover:bg-(--color-primary) focus-visible:bg-(--color-primary) active:bg-(--color-green)',
             )}
         >
             <span
-                className={clsx(
+                className={cn(
                     'inline-block h-2.5 w-2.5 border-t-2 border-r-2 border-white transition-transform',
                     direction === 'next'
                         ? '-ml-0.5 rotate-45'
@@ -35,6 +35,4 @@ const ProductsSliderNavButton = ({
             </span>
         </button>
     );
-};
-
-export default ProductsSliderNavButton;
+}

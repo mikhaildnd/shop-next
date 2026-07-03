@@ -1,6 +1,6 @@
+import { PAGINATION_PARAMS } from '@/lib/pagination/consts';
 import type { PaginationSearchParams } from '@/lib/pagination/types';
 import type { SearchParams } from '@/lib/url/types';
-import { PAGINATION_PARAMS } from '@/lib/pagination/consts';
 
 export function getPaginationSearchParams(
     searchParams: SearchParams,

@@ -1,4 +1,4 @@
-const MapsSkeleton = () => {
+export function MapsSkeleton() {
     return (
         <section>
             <div className="flex flex-col">
@@ -17,6 +17,4 @@ const MapsSkeleton = () => {
             </div>
         </section>
     );
-};
-
-export default MapsSkeleton;
+}

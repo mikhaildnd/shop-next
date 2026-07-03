@@ -2,7 +2,7 @@ import type { Prisma } from '@/generated/prisma/client';
 
 type CollectionSeed = Prisma.CollectionCreateInput;
 
-const collections: CollectionSeed[] = [
+export const collections: CollectionSeed[] = [
     {
         slug: 'promotion',
         title: 'Акции',
@@ -12,5 +12,3 @@ const collections: CollectionSeed[] = [
         title: 'Новинки',
     },
 ];
-
-export default collections;

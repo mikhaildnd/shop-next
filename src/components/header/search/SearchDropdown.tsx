@@ -1,7 +1,8 @@
-import SearchProducts from '@/components/header/search/SearchProducts';
-import SearchCategories from '@/components/header/search/SearchCategories';
 import Link from 'next/link';
-import SearchEmpty from '@/components/header/search/SearchEmpty';
+
+import { SearchCategories } from '@/components/header/search/SearchCategories';
+import { SearchEmpty } from '@/components/header/search/SearchEmpty';
+import { SearchProducts } from '@/components/header/search/SearchProducts';
 import type { SearchResponse } from '@/lib/api/search.types';
 
 interface SearchDropdownProps {
@@ -10,11 +11,11 @@ interface SearchDropdownProps {
     onClose: () => void;
 }
 
-const SearchDropdown = ({
+export function SearchDropdown({
     results,
     allResultsUrl,
     onClose,
-}: SearchDropdownProps) => {
+}: SearchDropdownProps) {
     if (!results) return null;
 
     const products = results.products;
@@ -56,6 +57,4 @@ const SearchDropdown = ({
             )}
         </div>
     );
-};
-
-export default SearchDropdown;
+}

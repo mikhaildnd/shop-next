@@ -1,14 +1,16 @@
-import AvatarImage from '../../../public/images/graphics/profile.png';
-import ArrowIcon from '../../../public/icons-header/icon-arrow.svg';
-import Image from 'next/image';
-import clsx from 'clsx';
 import { CircleUser } from 'lucide-react';
+import Image from 'next/image';
 
-const Profile = ({ className }: { className?: string }) => {
+import { cn } from '@/utils/cn';
+
+import ArrowIcon from '../../../public/icons-header/icon-arrow.svg';
+import AvatarImage from '../../../public/images/graphics/profile.png';
+
+export function Profile({ className }: { className?: string }) {
     const userImageIsAvailable = true;
 
     return (
-        <div className={clsx('flex items-center gap-2.5', className)}>
+        <div className={cn('flex items-center gap-2.5', className)}>
             {!userImageIsAvailable ? (
                 <CircleUser className="h-10 w-10 stroke-1" />
             ) : (
@@ -30,6 +32,4 @@ const Profile = ({ className }: { className?: string }) => {
             </button>
         </div>
     );
-};
-
-export default Profile;
+}
