@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { FilterSection } from '@/components/product/productFilters/FilterSection';
 import { useProductListing } from '@/hooks/useProductListing';
@@ -42,11 +42,6 @@ export function ProductPriceFilter({
         String(currentPriceFrom ?? minPrice),
     );
     const [priceTo, setPriceTo] = useState(String(currentPriceTo ?? maxPrice));
-
-    useEffect(() => {
-        setPriceFrom(String(currentPriceFrom ?? minPrice));
-        setPriceTo(String(currentPriceTo ?? maxPrice));
-    }, [currentPriceFrom, currentPriceTo, minPrice, maxPrice]);
 
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
         const normalizedFrom =
