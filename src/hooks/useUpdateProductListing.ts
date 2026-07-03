@@ -7,7 +7,7 @@ import { appendProductListingSearchParams } from '@/lib/product-listing/append-p
 import { appendPaginationSearchParams } from '@/lib/pagination/append-pagination-search-params';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { applyProductListingUpdates } from '@/lib/product-listing/apply-product-filters-updates';
+import { applyProductListingUpdates } from '@/lib/product-listing/apply-product-listing-updates';
 import type { PaginationParams } from '@/lib/pagination/types';
 import { getProductSearchParams } from '@/lib/product-listing/get-product-search-params';
 import { getPaginationSearchParams } from '@/lib/pagination/get-pagination-search-params';

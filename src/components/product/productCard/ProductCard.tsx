@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import type { ProductDto } from '@/services/product/product.types';
 
-type ProductCardProps = {
+interface ProductCardProps {
     product: ProductDto;
     href: string;
-};
+}
 
 const ProductCard = ({ product, href }: ProductCardProps) => {
     const hasDiscount = product.discountPercent > 0;

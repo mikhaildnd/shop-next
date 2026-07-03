@@ -2,16 +2,19 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getProducts } from '@/services/product/product.service';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import ProductsListEmpty from '@/app/(shop)/(catalog)/_components/ProductsListEmpty';
 import ProductsListContent from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import { routes } from '@/lib/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import ProductListingLayout from '@/app/(shop)/(catalog)/_components/ProductListingLayout';
+import ProductListingLayout from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
 import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
 import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
 import type { ProductListingSearchParams } from '@/lib/product-listing/types';
 import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
+import { PageIssues } from '@/components/page-issues/ui/PageIssues';
+import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
+import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
+import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -62,6 +65,26 @@ export default async function CollectionPage({
         notFound();
     }
 
+    const breadcrumbs = buildCollectionBreadcrumbs({
+        collection,
+    });
+
+    const hasIssues = listing.issues.length > 0 || pagination.issues.length > 0;
+
+    if (hasIssues) {
+        return (
+            <PageStateLayout
+                title={collection.title}
+                breadcrumbs={breadcrumbs}
+            >
+                <PageIssues
+                    listingIssues={listing.issues}
+                    paginationIssues={pagination.issues}
+                />
+            </PageStateLayout>
+        );
+    }
+
     const { products, filteredProductsCount, listingStats } = await getProducts(
         {
             take: pagination.take,
@@ -74,13 +97,27 @@ export default async function CollectionPage({
 
     const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
 
-    if (pagination.currentPage > totalPages) {
-        notFound();
+    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+        return (
+            <PageStateLayout
+                title={collection.title}
+                breadcrumbs={breadcrumbs}
+            >
+                <InvalidPageState />
+            </PageStateLayout>
+        );
     }
 
-    const breadcrumbs = buildCollectionBreadcrumbs({
-        collection,
-    });
+    if (filteredProductsCount === 0) {
+        return (
+            <PageStateLayout
+                title={collection.title}
+                breadcrumbs={breadcrumbs}
+            >
+                <EmptyProductState description="Попробуйте открыть другую коллекцию" />
+            </PageStateLayout>
+        );
+    }
 
     return (
         <ProductListingLayout
@@ -90,22 +127,12 @@ export default async function CollectionPage({
             title={collection.title}
             breadcrumbs={breadcrumbs}
         >
-            {filteredProductsCount === 0 ? (
-                <ProductsListEmpty
-                    title="Товары не найдены"
-                    description="Попробуйте открыть другую категорию"
-                />
-            ) : (
-                <ProductsListContent
-                    products={products}
-                    currentPage={pagination.currentPage}
-                    totalPages={totalPages}
-                    startPage={pagination.startPage}
-                    getProductHref={(product) =>
-                        routes.productInCategory(product.slug, slug)
-                    }
-                />
-            )}
+            <ProductsListContent
+                products={products}
+                currentPage={pagination.currentPage}
+                totalPages={totalPages}
+                startPage={pagination.startPage}
+            />
         </ProductListingLayout>
     );
 }
