@@ -1,5 +1,5 @@
-import clsx from 'clsx';
-import ProductsSliderNavButton from '@/components/product/productSlider/ProductsSliderNavButton';
+import { ProductsSliderNavButton } from '@/components/product/productSlider/ProductsSliderNavButton';
+import { cn } from '@/utils/cn';
 
 interface ProductsSectionControlsProps {
     disabled: boolean;
@@ -7,14 +7,14 @@ interface ProductsSectionControlsProps {
     onNext: () => void;
 }
 
-const ProductsSectionControls = ({
+export function ProductsSectionControls({
     disabled,
     onPrev,
     onNext,
-}: ProductsSectionControlsProps) => {
+}: ProductsSectionControlsProps) {
     return (
         <div
-            className={clsx(
+            className={cn(
                 'hidden items-center gap-2 transition-opacity duration-300 md:flex',
                 disabled && 'pointer-events-none opacity-50',
             )}
@@ -30,6 +30,4 @@ const ProductsSectionControls = ({
             />
         </div>
     );
-};
-
-export default ProductsSectionControls;
+}

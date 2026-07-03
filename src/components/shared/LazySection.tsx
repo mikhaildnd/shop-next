@@ -1,28 +1,26 @@
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 interface LazySectionProps {
     children: ReactNode;
     fallback?: ReactNode;
     rootMargin?: string | number;
-
-    /** если true — рендерим children только после появления */
     lazy?: boolean;
 }
 
-const normalizeRootMargin = (value: number | string): string => {
+function normalizeRootMargin(value: number | string): string {
     if (typeof value === 'number') return `${value}px`;
 
     return /^-?\d+(\.\d+)?(px|%|em|rem|vh|vw)$/.test(value) ? value : '0px';
-};
+}
 
-const LazySection = ({
+export function LazySection({
     children,
     fallback = null,
     rootMargin = '200px',
     lazy = true,
-}: LazySectionProps) => {
+}: LazySectionProps) {
     const ref = useRef<HTMLDivElement | null>(null);
 
     const [isVisible, setIsVisible] = useState(false);
@@ -51,6 +49,4 @@ const LazySection = ({
     }, [rootMargin, lazy]);
 
     return <div ref={ref}>{!lazy || isVisible ? children : fallback}</div>;
-};
-
-export default LazySection;
+}

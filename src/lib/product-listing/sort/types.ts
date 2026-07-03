@@ -1,4 +1,4 @@
-import {
+import type {
     PRODUCT_SORT_LISTING_ISSUES,
     PRODUCT_SORTS,
 } from '@/lib/product-listing/sort/consts';

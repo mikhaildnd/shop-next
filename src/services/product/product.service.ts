@@ -1,16 +1,17 @@
+import { cache } from 'react';
+
 import { prisma } from '@/lib/db';
 import { mapProductToDto } from '@/lib/mappers/product.mapper';
-import { cache } from 'react';
+import { productInclude } from '@/lib/prisma/product';
+import { buildProductQuery } from '@/lib/product-listing/build-product-query';
+import type { ProductFilters } from '@/lib/product-listing/filters/types';
+import { getProductOrderBy } from '@/lib/product-listing/sort/get-product-order-by';
+import type { ProductSort } from '@/lib/product-listing/sort/types';
 import type {
     ProductDto,
     ProductListingStats,
     ProductsResponse,
 } from '@/services/product/product.types';
-import { productInclude } from '@/lib/prisma/product';
-import { getProductOrderBy } from '@/lib/product-listing/sort/get-product-order-by';
-import type { ProductFilters } from '@/lib/product-listing/filters/types';
-import type { ProductSort } from '@/lib/product-listing/sort/types';
-import { buildProductQuery } from '@/lib/product-listing/build-product-query';
 
 type GetProductsParams = {
     filters?: ProductFilters;

@@ -1,4 +1,4 @@
-import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import type { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
 
 export type PaginationView =
     (typeof PAGINATION_VIEWS)[keyof typeof PAGINATION_VIEWS];

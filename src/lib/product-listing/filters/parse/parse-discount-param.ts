@@ -1,9 +1,9 @@
+import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
 import { isDiscountFilterValue } from '@/lib/product-listing/filters/guard';
 import type {
     ProductFilterParseResult,
     ProductFilters,
 } from '@/lib/product-listing/filters/types';
-import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
 
 export function parseDiscountParam(
     value: string | undefined,

@@ -1,13 +1,14 @@
 import Image from 'next/image';
-import clsx from 'clsx';
 import Link from 'next/link';
+
 import { socialLinks } from '@/consts/footerSocialLinks';
+import { cn } from '@/utils/cn';
 
 const hoverClass = 'transition-opacity duration-300 hover:opacity-80';
 
-const FooterSocials = ({ className }: { className?: string }) => {
+export function FooterSocials({ className }: { className?: string }) {
     return (
-        <div className={clsx('flex flex-wrap', className)}>
+        <div className={cn('flex flex-wrap', className)}>
             {socialLinks.map((item) => (
                 <Link
                     key={item.href}
@@ -27,6 +28,4 @@ const FooterSocials = ({ className }: { className?: string }) => {
             ))}
         </div>
     );
-};
-
-export default FooterSocials;
+}

@@ -1,6 +1,6 @@
 import MenuIcon from '../../../public/icons-header/icon-menu.svg';
 
-const CatalogButton = () => {
+export function CatalogButton() {
     return (
         <button className="hidden w-10 cursor-pointer gap-4 rounded bg-(--color-primary) p-2 duration-300 hover:shadow-(--shadow-button-default) active:shadow-(--shadow-button-active) md:flex lg:w-35">
             <MenuIcon
@@ -13,6 +13,4 @@ const CatalogButton = () => {
             </span>
         </button>
     );
-};
-
-export default CatalogButton;
+}

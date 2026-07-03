@@ -1,11 +1,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import MapsSkeleton from '@/components/maps/MapsSkeleton';
 
-const MapsLazy = dynamic(() => import('@/components/maps/Maps'), {
-    loading: () => <MapsSkeleton />,
-    ssr: false,
-});
+import { MapsSkeleton } from '@/components/maps/MapsSkeleton';
 
-export default MapsLazy;
+export const MapsLazy = dynamic(
+    () =>
+        import('@/components/maps/Maps').then((module) => ({
+            default: module.Maps,
+        })),
+    {
+        loading: () => <MapsSkeleton />,
+        ssr: false,
+    },
+);

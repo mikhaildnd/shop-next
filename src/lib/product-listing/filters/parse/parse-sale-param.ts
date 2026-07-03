@@ -1,8 +1,8 @@
+import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
 import type {
     ProductFilterParseResult,
     ProductFilters,
 } from '@/lib/product-listing/filters/types';
-import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
 
 export function parseSaleParam(
     value: string | undefined,

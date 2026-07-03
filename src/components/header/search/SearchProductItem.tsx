@@ -1,15 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatPrice } from '@/utils/formatPrice';
+
 import { routes } from '@/lib/routes';
 import type { ProductDto } from '@/services/product/product.types';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface SearchProductItemProps {
     product: ProductDto;
     onClose: () => void;
 }
 
-const SearchProductItem = ({ product, onClose }: SearchProductItemProps) => {
+export function SearchProductItem({
+    product,
+    onClose,
+}: SearchProductItemProps) {
     const hasDiscount = product.discountPercent > 0;
 
     const image = product.images[0];
@@ -56,6 +60,4 @@ const SearchProductItem = ({ product, onClose }: SearchProductItemProps) => {
             </Link>
         </li>
     );
-};
-
-export default SearchProductItem;
+}

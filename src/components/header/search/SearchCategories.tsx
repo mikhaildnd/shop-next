@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import { routes } from '@/lib/routes';
 import type { ProductCategoryDto } from '@/services/product/product.types';
 
@@ -7,7 +8,10 @@ interface SearchCategoriesProps {
     onClose: () => void;
 }
 
-const SearchCategories = ({ categories, onClose }: SearchCategoriesProps) => {
+export function SearchCategories({
+    categories,
+    onClose,
+}: SearchCategoriesProps) {
     if (!categories.length) {
         return null;
     }
@@ -33,6 +37,4 @@ const SearchCategories = ({ categories, onClose }: SearchCategoriesProps) => {
             </ul>
         </section>
     );
-};
-
-export default SearchCategories;
+}

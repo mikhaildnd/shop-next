@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 
-import ProductsSlider from '@/components/product/productSlider/ProductsSlider.lazy';
-import ProductsSectionHeader from '@/components/product/productsSection/ProductsSectionHeader';
+import { ProductsSliderLazy } from '@/components/product/productSlider/ProductsSlider.lazy';
+import { ProductsSectionControls } from '@/components/product/productsSection/ProductsSectionControls';
+import { ProductsSectionHeader } from '@/components/product/productsSection/ProductsSectionHeader';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
-import ProductsSectionControls from '@/components/product/productsSection/ProductsSectionControls';
-import { cn } from '@/utils/cn';
 import type { ProductDto } from '@/services/product/product.types';
+import { cn } from '@/utils/cn';
 
 interface ProductSectionProps {
     title: string;
@@ -18,7 +18,11 @@ interface ProductSectionProps {
 
 const CONTENT_HEIGHT = 'min-h-[260px] sm:min-h-[300px] lg:min-h-[400px]';
 
-const ProductsSection = ({ title, link, products }: ProductSectionProps) => {
+export function ProductsSection({
+    title,
+    link,
+    products,
+}: ProductSectionProps) {
     const [swiper, setSwiper] = useState<SwiperType | null>(null);
     const [isReady, setIsReady] = useState(false);
 
@@ -49,7 +53,7 @@ const ProductsSection = ({ title, link, products }: ProductSectionProps) => {
                         CONTENT_HEIGHT,
                     )}
                 >
-                    <ProductsSlider
+                    <ProductsSliderLazy
                         products={products}
                         onSwiper={setSwiper}
                         onReady={() => setIsReady(true)}
@@ -67,6 +71,4 @@ const ProductsSection = ({ title, link, products }: ProductSectionProps) => {
             )}
         </section>
     );
-};
-
-export default ProductsSection;
+}

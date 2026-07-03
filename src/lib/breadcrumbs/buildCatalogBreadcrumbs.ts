@@ -1,5 +1,5 @@
-import { routes } from '@/lib/routes';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
+import { routes } from '@/lib/routes';
 import type { CategoryDto } from '@/services/category/category.types';
 
 type BuildCatalogBreadcrumbsParams = {

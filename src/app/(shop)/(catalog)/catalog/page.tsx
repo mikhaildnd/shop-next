@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCategories } from '@/services/category/category.service';
-import Breadcrumbs from '@/components/breadcrumbs/Breadcrumbs';
+
+import { CategoryCard } from '@/app/(shop)/(catalog)/catalog/_components/CategoryCard';
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import { routes } from '@/lib/routes';
-import CategoryCard from '@/app/(shop)/(catalog)/catalog/_components/CategoryCard';
+import { getCategories } from '@/services/category/category.service';
 
 export const metadata: Metadata = {
     title: 'Каталог товаров',

@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import type { ProductSeed } from '@/services/product/product.types';
 
-const products: ProductSeed[] = [
+export const products: ProductSeed[] = [
     {
         slug: 'kapusta-casserole-fermentirovannaya-kimchi-400g',
         images: [
@@ -1021,5 +1021,3 @@ const products: ProductSeed[] = [
         collections: [],
     },
 ];
-
-export default products;

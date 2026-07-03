@@ -1,13 +1,15 @@
-import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
 
-type BreadcrumbsProps = {
+interface BreadcrumbsProps {
     items: BreadcrumbItem[];
     className?: string;
-};
+}
 
-export default function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+    // TODO мб вынести эту логику отображения в родителя
     if (items.length === 0) {
         return null;
     }

@@ -1,10 +1,11 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+
 import type { MainSlideData } from '@/types/mainSlideData';
 
 type SlideProps = Omit<MainSlideData, 'id'>;
 
-const Slide = ({ image, link, slideText }: SlideProps) => {
+export function Slide({ image, link, slideText }: SlideProps) {
     const SlideContent = (
         <div className="relative h-full bg-gray-300">
             <Image
@@ -40,6 +41,4 @@ const Slide = ({ image, link, slideText }: SlideProps) => {
     }
 
     return SlideContent;
-};
-
-export default Slide;
+}

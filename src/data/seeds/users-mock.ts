@@ -2,7 +2,7 @@ import { type Prisma, UserRole } from '@/generated/prisma/client';
 
 export type UserSeed = Prisma.UserCreateInput;
 
-const users: UserSeed[] = [
+export const users: UserSeed[] = [
     {
         name: 'Mikhail',
         email: 'dundukovmi@gmail.com',
@@ -18,5 +18,3 @@ const users: UserSeed[] = [
         role: UserRole.USER,
     },
 ];
-
-export default users;

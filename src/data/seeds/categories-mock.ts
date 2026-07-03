@@ -1,6 +1,6 @@
 import type { CategorySeed } from '@/data/seeds/types';
 
-const categories: CategorySeed[] = [
+export const categories: CategorySeed[] = [
     {
         slug: 'dairy',
         title: 'Молочные продукты',
@@ -148,5 +148,3 @@ const categories: CategorySeed[] = [
         ],
     },
 ];
-
-export default categories;

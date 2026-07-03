@@ -1,4 +1,4 @@
-const StarRating = ({ rating }: { rating: number }) => {
+export function StarRating({ rating }: { rating: number }) {
     const stars = [];
     const totalStars = 5;
 
@@ -49,6 +49,4 @@ const StarRating = ({ rating }: { rating: number }) => {
     }
 
     return <div className="flex flex-row gap-1">{stars}</div>;
-};
-
-export default StarRating;
+}

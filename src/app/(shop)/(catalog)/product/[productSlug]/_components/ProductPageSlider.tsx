@@ -1,22 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
-import { useSliderNavigation } from '@/hooks/useSliderNavigation';
-import SliderNavigationButton from '@/components/shared/slider/SliderNavigationButton';
+
 import Image from 'next/image';
-import clsx from 'clsx';
-import SliderPagination from '@/components/shared/slider/SliderPagination';
-import { ProductImageDto } from '@/services/product/product.types';
+import { useState } from 'react';
+import type { Swiper as SwiperType } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { SliderNavigationButton } from '@/components/shared/slider/SliderNavigationButton';
+import { SliderPagination } from '@/components/shared/slider/SliderPagination';
+import { useSliderNavigation } from '@/hooks/useSliderNavigation';
+import type { ProductImageDto } from '@/services/product/product.types';
+import { cn } from '@/utils/cn';
 
 interface ProductPageSliderProps {
     slides: ProductImageDto[];
     className?: string;
 }
 
-const ProductPageSlider = ({ slides, className }: ProductPageSliderProps) => {
+export function ProductPageSlider({
+    slides,
+    className,
+}: ProductPageSliderProps) {
     const [swiper, setSwiper] = useState<SwiperType | null>(null);
     const { prevSlide, nextSlide } = useSliderNavigation(swiper);
 
@@ -24,7 +29,7 @@ const ProductPageSlider = ({ slides, className }: ProductPageSliderProps) => {
         <div>
             <Swiper
                 onSwiper={setSwiper}
-                className={clsx(className, 'relative')}
+                className={cn(className, 'relative')}
                 loop
             >
                 {slides.length > 1 && (
@@ -71,6 +76,4 @@ const ProductPageSlider = ({ slides, className }: ProductPageSliderProps) => {
             </Swiper>
         </div>
     );
-};
-
-export default ProductPageSlider;
+}

@@ -1,7 +1,7 @@
+import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
+import { PRODUCT_SORT_PARAM } from '@/lib/product-listing/sort/consts';
 import type { ProductSearchParams } from '@/lib/product-listing/types';
 import type { SearchParams } from '@/lib/url/types';
-import { PRODUCT_SORT_PARAM } from '@/lib/product-listing/sort/consts';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 
 export function getProductSearchParams(
     searchParams: SearchParams,

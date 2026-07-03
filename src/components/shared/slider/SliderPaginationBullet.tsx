@@ -5,10 +5,10 @@ interface SliderPaginationBulletProps {
     onClick: () => void;
 }
 
-const SliderPaginationBullet = ({
+export function SliderPaginationBullet({
     isActive,
     onClick,
-}: SliderPaginationBulletProps) => {
+}: SliderPaginationBulletProps) {
     return (
         <button
             className={cn(
@@ -18,6 +18,4 @@ const SliderPaginationBullet = ({
             onClick={onClick}
         />
     );
-};
-
-export default SliderPaginationBullet;
+}

@@ -1,6 +1,7 @@
+import type { MainSlideData } from '@/types/mainSlideData';
+
 import OfferImage1 from '../../public/images/banners/akciya_1.webp';
 import OfferImage2 from '../../public/images/banners/akciya_2.webp';
-import { MainSlideData } from '@/types/mainSlideData';
 
 export const slides: MainSlideData[] = [
     {

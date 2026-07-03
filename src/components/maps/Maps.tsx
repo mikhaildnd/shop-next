@@ -1,17 +1,18 @@
 'use client';
 
-import { YMaps, Map, Placemark } from '@iminside/react-yandex-maps';
+import { Map, Placemark, YMaps } from '@iminside/react-yandex-maps';
 import { useState } from 'react';
-import clsx from 'clsx';
-import { locations } from '@/data/locations';
 
-const MapAreaSkeleton = () => {
+import { locations } from '@/data/locations';
+import { cn } from '@/utils/cn';
+
+function MapAreaSkeleton() {
     return (
         <div className="absolute inset-0 z-10 h-[354px] w-full animate-pulse rounded-2xl bg-gray-200" />
     );
-};
+}
 
-const Maps = () => {
+export function Maps() {
     const [currentLocation, setCurrentLocation] = useState('almaty');
     const [isMapLoaded, setIsMapLoaded] = useState(false);
 
@@ -39,7 +40,7 @@ const Maps = () => {
                                 <button
                                     key={key}
                                     onClick={() => setCurrentLocation(key)}
-                                    className={clsx(
+                                    className={cn(
                                         'cursor-pointer rounded p-2 text-xs transition-shadow duration-200 active:shadow-(--shadow-button-active)',
                                         isActive
                                             ? 'bg-(--color-primary) text-white hover:shadow-(--shadow-button-default)'
@@ -90,6 +91,4 @@ const Maps = () => {
             </section>
         </YMaps>
     );
-};
-
-export default Maps;
+}

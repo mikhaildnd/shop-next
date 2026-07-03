@@ -1,8 +1,9 @@
 'use client';
 
-import { useSwiper } from 'swiper/react';
 import { useEffect, useState } from 'react';
-import SliderPaginationBullet from '@/components/shared/slider/SliderPaginationBullet';
+import { useSwiper } from 'swiper/react';
+
+import { SliderPaginationBullet } from '@/components/shared/slider/SliderPaginationBullet';
 import { cn } from '@/utils/cn';
 
 interface SliderPaginationProps {
@@ -10,10 +11,10 @@ interface SliderPaginationProps {
     className?: string;
 }
 
-const SliderPagination = ({
+export function SliderPagination({
     totalSlides,
     className,
-}: SliderPaginationProps) => {
+}: SliderPaginationProps) {
     const swiper = useSwiper();
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -49,6 +50,4 @@ const SliderPagination = ({
             })}
         </div>
     );
-};
-
-export default SliderPagination;
+}

@@ -1,13 +1,15 @@
 'use client';
 
-import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+
 import type { Swiper as SwiperType } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { ProductCard } from '@/components/product/productCard/ProductCard';
 import { PRODUCTS_SLIDER_CONFIG } from '@/consts/productsSliderSettings';
-import ProductCard from '@/components/product/productCard/ProductCard';
 import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
 import type { ProductDto } from '@/services/product/product.types';
+import { cn } from '@/utils/cn';
 
 interface ProductsSliderProps {
     onSwiper?: (swiper: SwiperType) => void;
@@ -16,12 +18,12 @@ interface ProductsSliderProps {
     className?: string;
 }
 
-const ProductsSlider = ({
+export function ProductsSlider({
     className,
     products,
     onSwiper,
     onReady,
-}: ProductsSliderProps) => {
+}: ProductsSliderProps) {
     return (
         <Swiper
             onAfterInit={onReady}
@@ -42,6 +44,4 @@ const ProductsSlider = ({
             ))}
         </Swiper>
     );
-};
-
-export default ProductsSlider;
+}

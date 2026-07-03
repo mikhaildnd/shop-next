@@ -1,15 +1,15 @@
-import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
-import { PRODUCT_SORT_PARAM } from '@/lib/product-listing/sort/consts';
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import type { PaginationSearchParams } from '@/lib/pagination/types';
-import type {
-    ProductSort,
-    ProductSortListingIssue,
-} from '@/lib/product-listing/sort/types';
+import type { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
 import type {
     ProductFilterListingIssue,
     ProductFilters,
 } from '@/lib/product-listing/filters/types';
+import type { PRODUCT_SORT_PARAM } from '@/lib/product-listing/sort/consts';
+import type {
+    ProductSort,
+    ProductSortListingIssue,
+} from '@/lib/product-listing/sort/types';
+import type { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 
 export type ProductSearchParams = {
     [SEARCH_QUERY_PARAM]?: string;

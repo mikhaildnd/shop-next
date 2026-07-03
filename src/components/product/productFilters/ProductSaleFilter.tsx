@@ -1,11 +1,11 @@
 'use client';
 
-import FilterCheckbox from '@/components/product/productFilters/FilterCheckbox';
-import FilterSection from '@/components/product/productFilters/FilterSection';
-import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
+import { FilterCheckbox } from '@/components/product/productFilters/FilterCheckbox';
+import { FilterSection } from '@/components/product/productFilters/FilterSection';
 import { useProductListing } from '@/hooks/useProductListing';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
-function ProductSaleFilter() {
+export function ProductSaleFilter() {
     const updateProductListing = useUpdateProductListing();
 
     const { filters } = useProductListing();
@@ -29,5 +29,3 @@ function ProductSaleFilter() {
         </FilterSection>
     );
 }
-
-export default ProductSaleFilter;

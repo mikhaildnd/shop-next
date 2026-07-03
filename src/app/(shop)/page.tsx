@@ -1,11 +1,12 @@
-import MainSlider from '@/app/(shop)/_components/mainSlider/MainSlider';
-import ProductsOfferSection from '@/app/(shop)/_components/ProductsOfferSection';
-import ProductsNewSection from '@/app/(shop)/_components/ProductsNewSection';
-import BannerSpecialOffers from '@/components/banners/BannerSpecialOffers';
 import { Suspense } from 'react';
-import ProductsSectionSkeleton from '@/components/product/productsSection/ProductsSectionSkeleton';
-import LazySection from '@/components/shared/LazySection';
-import Maps from '@/components/maps/Maps.lazy';
+
+import { MainSlider } from '@/app/(shop)/_components/mainSlider/MainSlider';
+import { ProductsNewSection } from '@/app/(shop)/_components/ProductsNewSection';
+import { ProductsOfferSection } from '@/app/(shop)/_components/ProductsOfferSection';
+import { BannerSpecialOffers } from '@/components/banners/BannerSpecialOffers';
+import { MapsLazy } from '@/components/maps/Maps.lazy';
+import { ProductsSectionSkeleton } from '@/components/product/productsSection/ProductsSectionSkeleton';
+import { LazySection } from '@/components/shared/LazySection';
 import { slides } from '@/data/mainSlides';
 
 export default async function HomePage() {
@@ -30,7 +31,7 @@ export default async function HomePage() {
             </LazySection>
             <BannerSpecialOffers />
             <LazySection>
-                <Maps />
+                <MapsLazy />
             </LazySection>
         </div>
     );

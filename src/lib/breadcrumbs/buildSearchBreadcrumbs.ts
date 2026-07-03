@@ -1,5 +1,5 @@
-import { routes } from '@/lib/routes';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
+import { routes } from '@/lib/routes';
 
 export function buildSearchBreadcrumbs(): BreadcrumbItem[] {
     return [

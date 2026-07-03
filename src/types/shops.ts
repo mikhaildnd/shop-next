@@ -14,4 +14,4 @@ interface Locations {
     [key: string]: Location;
 }
 
-export type { Shop, Location, Locations };
+export type { Location, Locations,Shop };

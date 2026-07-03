@@ -1,18 +1,19 @@
 'use client';
 
+import { Check, ChevronDown } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { PRODUCT_SORT_ITEMS } from '@/lib/product-listing/sort/consts';
+
 import { useDismiss } from '@/hooks/useDismiss';
+import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
+import { PRODUCT_SORT_ITEMS } from '@/lib/product-listing/sort/consts';
 import type { ProductSort } from '@/lib/product-listing/sort/types';
 import { cn } from '@/utils/cn';
-import { Check, ChevronDown } from 'lucide-react';
-import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
 interface ProductSortDropdownProps {
     value: ProductSort;
 }
 
-function ProductSortDropdown({ value }: ProductSortDropdownProps) {
+export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const rootRef = useRef<HTMLDivElement>(null);
@@ -91,5 +92,3 @@ function ProductSortDropdown({ value }: ProductSortDropdownProps) {
         </div>
     );
 }
-
-export default ProductSortDropdown;

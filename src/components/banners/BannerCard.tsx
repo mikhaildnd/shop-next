@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import clsx from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import type { ReactNode } from 'react';
+
+import { cn } from '@/utils/cn';
 
 interface MainBannerCardText {
     title: string;
@@ -18,12 +18,12 @@ interface MainBannerCardProps {
     children?: ReactNode;
 }
 
-const BannerCard = ({
+export function BannerCard({
     bannerText,
     className,
     children,
     href,
-}: MainBannerCardProps) => {
+}: MainBannerCardProps) {
     const {
         title,
         description,
@@ -46,18 +46,16 @@ const BannerCard = ({
 
     return (
         <Link
-            className={twMerge(
-                clsx(
-                    'relative flex h-[170px] overflow-hidden rounded',
-                    'w-full duration-300 hover:shadow-(--shadow-default) xl:h-50',
-                    verticalClass,
-                    className,
-                ),
+            className={cn(
+                'relative flex h-[170px] overflow-hidden rounded',
+                'w-full duration-300 hover:shadow-(--shadow-default) xl:h-50',
+                verticalClass,
+                className,
             )}
             href={href}
         >
             <div
-                className={clsx(
+                className={cn(
                     'flex flex-col gap-1.5 p-5',
                     horizontalClass,
                     textColor === 'white' ? 'text-white' : 'text-black',
@@ -66,7 +64,7 @@ const BannerCard = ({
                 )}
             >
                 <h3
-                    className={clsx(
+                    className={cn(
                         'line-clamp-2 text-xl font-bold xl:text-2xl',
                         children && 'max-w-[174px] xl:max-w-[258px]',
                     )}
@@ -80,6 +78,4 @@ const BannerCard = ({
             {children}
         </Link>
     );
-};
-
-export default BannerCard;
+}

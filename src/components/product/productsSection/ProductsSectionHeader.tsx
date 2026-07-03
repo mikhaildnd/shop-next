@@ -8,12 +8,12 @@ interface ProductsSectionHeaderProps {
     children?: ReactNode;
 }
 
-const ProductsSectionHeader = ({
+export function ProductsSectionHeader({
     title,
     link,
     showLink = true,
     children,
-}: ProductsSectionHeaderProps) => {
+}: ProductsSectionHeaderProps) {
     return (
         <div className="mb-4 flex gap-x-5 md:mb-8 md:gap-x-10">
             <h3 className="line-clamp-2 grow text-2xl font-bold text-[#333] xl:text-4xl">
@@ -34,6 +34,4 @@ const ProductsSectionHeader = ({
             {children}
         </div>
     );
-};
-
-export default ProductsSectionHeader;
+}

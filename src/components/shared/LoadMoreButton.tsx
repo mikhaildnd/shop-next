@@ -1,18 +1,17 @@
 'use client';
 
-import { useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
+
 import { createLoadMoreUrl } from '@/lib/pagination/create-pagination-url';
+import { cn } from '@/utils/cn';
 
 interface LoadMoreButtonProps {
     nextPage: number;
     from: number;
 }
 
-export default function LoadMoreButton({
-    nextPage,
-    from,
-}: LoadMoreButtonProps) {
+export function LoadMoreButton({ nextPage, from }: LoadMoreButtonProps) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -42,11 +41,12 @@ export default function LoadMoreButton({
             type="button"
             disabled={isPending}
             onClick={handleClick}
-            className={`flex w-full items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity ${
+            className={cn(
+                'flex w-full items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity',
                 isPending
                     ? 'cursor-progress opacity-50'
-                    : 'cursor-pointer hover:opacity-90'
-            }`}
+                    : 'cursor-pointer hover:opacity-90',
+            )}
         >
             {isPending ? (
                 <>

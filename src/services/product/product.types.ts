@@ -1,5 +1,5 @@
-import type { CollectionDto } from '@/services/collection/collection.types';
 import type { CategoryDto } from '@/services/category/category.types';
+import type { CollectionDto } from '@/services/collection/collection.types';
 
 export type MeasureType = 'GRAM' | 'MILLILITER' | 'PIECE';
 

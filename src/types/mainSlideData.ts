@@ -1,6 +1,6 @@
+import type Image from 'next/image';
+import type Link from 'next/link';
 import type { ComponentProps } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 
 type ImageType = ComponentProps<typeof Image>;
 type LinkType = ComponentProps<typeof Link>;
