@@ -15,7 +15,7 @@ export function parsePriceFromParam(
 
     const price = Number(value);
 
-    if (!Number.isInteger(price) || price < 0) {
+    if (!Number.isFinite(price) || price < 0) {
         return {
             value: null,
             issue: PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_FROM,
