@@ -14,12 +14,12 @@ export function Logo({ className }: { className?: string }) {
             className={cn('flex items-center', className)}
         >
             <Image
-                className="h-auto w-auto shrink-0"
+                className="shrink-0"
                 src={LogoImage}
                 alt="Логотип магазина"
                 priority
-                width={40}
-                height={40}
+                width={42}
+                height={42}
             />
         </Link>
     );
