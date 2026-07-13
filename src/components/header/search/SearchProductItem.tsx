@@ -23,7 +23,7 @@ export function SearchProductItem({
             <Link
                 onClick={onClose}
                 href={routes.productPage(product.slug)}
-                className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-gray-50"
+                className="flex items-center gap-3 rounded-md py-1 transition-colors hover:bg-gray-50 md:p-2"
             >
                 <div className="relative size-14 shrink-0 overflow-hidden rounded border border-gray-100">
                     {image && (
