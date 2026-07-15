@@ -5,12 +5,12 @@ import type { ProductCategoryDto } from '@/services/product/product.types';
 
 interface SearchCategoriesProps {
     categories: ProductCategoryDto[];
-    onClose: () => void;
+    onSelect: (category: ProductCategoryDto) => void;
 }
 
 export function SearchCategories({
     categories,
-    onClose,
+    onSelect,
 }: SearchCategoriesProps) {
     if (!categories.length) {
         return null;
@@ -18,7 +18,7 @@ export function SearchCategories({
 
     return (
         <section className="border-b border-gray-100 p-3">
-            <h2 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+            <h2 className="mb-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 Категории
             </h2>
 
@@ -26,9 +26,9 @@ export function SearchCategories({
                 {categories.map((category) => (
                     <li key={category.id}>
                         <Link
-                            onClick={onClose}
+                            onClick={() => onSelect(category)}
                             href={routes.categoryPage(category.slug)}
-                            className="rounded-full bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200"
+                            className="rounded-full bg-gray-100 px-3 py-1 text-sm transition-colors hover:bg-gray-200 focus-visible:bg-gray-200 focus-visible:ring-1 focus-visible:ring-(--color-primary) focus-visible:outline-none"
                         >
                             {category.title}
                         </Link>

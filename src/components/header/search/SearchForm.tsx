@@ -5,7 +5,6 @@ import { cn } from '@/utils/cn';
 
 interface SearchFormProps {
     value: string;
-    isLoading: boolean;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     onFocus: () => void;
     onSubmit: SubmitEventHandler<HTMLFormElement>;
@@ -16,14 +15,13 @@ interface SearchFormProps {
 export function SearchForm({
     value,
     onSubmit,
-    isLoading,
     onChange,
     onFocus,
     onReset,
     className,
 }: SearchFormProps) {
     const iconButtonClass =
-        'rounded p-1 md:p-1.5 text-gray-500 transition-colors hover:bg-gray-100 cursor-pointer';
+        'rounded p-1 transition-colors hover:bg-gray-200 focus-visible:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-(--color-primary) cursor-pointer md:p-1.5';
 
     return (
         <form
@@ -32,7 +30,7 @@ export function SearchForm({
             autoComplete="off"
         >
             <input
-                className="h-10 w-full no-search-cancel rounded bg-gray-50 p-2 pr-16 text-base leading-[150%] text-black outline outline-(--color-primary) placeholder:text-(--placeholder-text-color) focus:bg-white focus:shadow-(--shadow-button-default)"
+                className="h-10 w-full no-search-cancel rounded border border-(--color-primary)/60 bg-gray-50 p-2 pr-16 text-base leading-[150%] text-black transition-colors placeholder:text-(--placeholder-text-color) focus:border-(--color-primary) focus:bg-white focus:ring-1 focus:ring-(--color-primary)/20 focus:outline-none"
                 autoComplete="off"
                 value={value}
                 onChange={onChange}
@@ -42,9 +40,6 @@ export function SearchForm({
             />
 
             <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center md:right-2 md:gap-2">
-                {isLoading && (
-                    <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-(--color-primary)" />
-                )}
                 {value && (
                     <button
                         type="button"
@@ -61,7 +56,7 @@ export function SearchForm({
                     aria-label="Поиск"
                     className={iconButtonClass}
                 >
-                    <IconSearch className="size-5 text-gray-500" />
+                    <IconSearch className="size-5 text-gray-500 transition-colors" />
                 </button>
             </div>
         </form>

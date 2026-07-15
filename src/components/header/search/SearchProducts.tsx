@@ -3,24 +3,24 @@ import type { ProductDto } from '@/services/product/product.types';
 
 interface SearchProductsProps {
     products: ProductDto[];
-    onClose: () => void;
+    onSelect: (product: ProductDto) => void;
 }
 
-export function SearchProducts({ products, onClose }: SearchProductsProps) {
+export function SearchProducts({ products, onSelect }: SearchProductsProps) {
     if (!products.length) {
         return null;
     }
 
     return (
         <section className="p-3">
-            <h2 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+            <h2 className="mb-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 Товары
             </h2>
 
             <ul className="space-y-1">
                 {products.map((product) => (
                     <SearchProductItem
-                        onClose={onClose}
+                        onSelect={onSelect}
                         key={product.id}
                         product={product}
                     />
