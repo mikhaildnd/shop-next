@@ -12,7 +12,6 @@ import type {
 } from '@/lib/search/search-history.types';
 
 export function useSearchHistory(): SearchHistoryState {
-    //lazy init
     const [history, setHistory] = useState<SearchHistoryItem[]>(() =>
         getSearchHistory(),
     );

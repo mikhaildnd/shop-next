@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { SubmitEventHandler} from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -13,7 +12,17 @@ import {
     SEARCH_QUERY_PARAM,
 } from '@/lib/search/consts';
 
-export function useSearch() {
+export type SearchState = {
+    query: string;
+    results: SearchResponse | null;
+    searchUrl: string;
+    updateQuery: (value: string) => void;
+    searchCurrentQuery: () => void;
+    submitSearch: () => boolean;
+    resetSearch: () => void;
+};
+
+export function useSearch(): SearchState {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -23,13 +32,14 @@ export function useSearch() {
     const urlQuery = searchParams.get(SEARCH_QUERY_PARAM) ?? '';
 
     const [query, setQuery] = useState(urlQuery);
-    const [results, setResults] = useState<SearchResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [searchResults, setSearchResults] = useState<SearchResponse | null>(
+        null,
+    );
 
     const trimmedQuery = query.trim();
     const searchUrl = routes.searchPage(trimmedQuery);
 
-    // Synchronize the input with URL changes
+    // Synchronize the local search state with URL changes.
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setQuery(urlQuery);
@@ -37,7 +47,7 @@ export function useSearch() {
 
     async function search(query: string) {
         if (query.length < MIN_SEARCH_QUERY_LENGTH) {
-            setResults(null);
+            setSearchResults(null);
 
             return;
         }
@@ -48,8 +58,6 @@ export function useSearch() {
 
         abortControllerRef.current = controller;
 
-        setIsLoading(true);
-
         try {
             const data = await fetchSearch(query, controller.signal);
 
@@ -57,15 +65,12 @@ export function useSearch() {
                 return;
             }
 
-            setResults(data);
+            setSearchResults(data);
+
             lastSearchQueryRef.current = query;
         } catch (error) {
             if ((error as Error).name !== 'AbortError') {
                 console.error(error);
-            }
-        } finally {
-            if (abortControllerRef.current === controller) {
-                setIsLoading(false);
             }
         }
     }
@@ -81,7 +86,7 @@ export function useSearch() {
             debouncedSearch.cancel();
             abortControllerRef.current?.abort();
 
-            setResults(null);
+            setSearchResults(null);
 
             return;
         }
@@ -103,15 +108,13 @@ export function useSearch() {
         void search(trimmedQuery);
     }
 
-    const submitSearch: SubmitEventHandler<HTMLFormElement> = (e) => {
-        e.preventDefault();
-
+    const submitSearch = () => {
         if (trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
-            return;
+            return false;
         }
 
         if (trimmedQuery === urlQuery) {
-            return;
+            return false;
         }
 
         debouncedSearch.cancel();
@@ -119,6 +122,8 @@ export function useSearch() {
         abortControllerRef.current?.abort();
 
         router.push(searchUrl);
+
+        return true;
     };
 
     function resetSearch() {
@@ -126,14 +131,13 @@ export function useSearch() {
         debouncedSearch.cancel();
 
         setQuery('');
-        setResults(null);
+        setSearchResults(null);
         lastSearchQueryRef.current = '';
     }
 
     return {
         query,
-        results,
-        isLoading,
+        results: searchResults,
         searchUrl,
 
         updateQuery,
