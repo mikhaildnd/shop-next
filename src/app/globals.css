@@ -52,6 +52,15 @@
   @apply line-clamp-2 grow text-[22px] font-bold text-[#333] xl:text-[32px]
 }
 
+@utility no-search-cancel {
+  &::-webkit-search-decoration,
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration {
+    appearance: none;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

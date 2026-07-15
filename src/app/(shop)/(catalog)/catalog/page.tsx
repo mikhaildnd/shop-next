@@ -46,7 +46,7 @@ export default async function CatalogPage() {
                 items={breadcrumbs}
                 className="py-4"
             />
-            <h1 className="mb-2 catalog-heading xl:mb-3">Каталог товаров</h1>
+            <h1 className="mb-3 catalog-heading xl:mb-5">Каталог товаров</h1>
 
             <div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

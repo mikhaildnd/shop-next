@@ -11,18 +11,22 @@ interface ProductPriceFilterProps {
     maxPrice: number;
 }
 
-function normalizePrice(
+function normalizePriceInput(
     value: string,
     fallback: number,
     minPrice: number,
     maxPrice: number,
 ): string {
-    const digits = value.replace(/\D/g, '');
+    const normalized = value.trim().replace(',', '.');
 
-    let number = digits ? Number(digits) : fallback;
+    const number = Number(normalized);
+
+    if (!Number.isFinite(number)) {
+        return String(fallback);
+    }
 
     if (number < minPrice || number > maxPrice) {
-        number = fallback;
+        return String(fallback);
     }
 
     return String(number);
@@ -44,11 +48,11 @@ export function ProductPriceFilter({
     const [priceTo, setPriceTo] = useState(String(currentPriceTo ?? maxPrice));
 
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
-        const normalizedFrom =
-            Number(nextPriceFrom) === minPrice ? null : Number(nextPriceFrom);
+        const from = Number(nextPriceFrom);
+        const to = Number(nextPriceTo);
 
-        const normalizedTo =
-            Number(nextPriceTo) === maxPrice ? null : Number(nextPriceTo);
+        const normalizedFrom = from === minPrice ? null : from;
+        const normalizedTo = to === maxPrice ? null : to;
 
         if (
             currentPriceFrom === normalizedFrom &&
@@ -66,14 +70,14 @@ export function ProductPriceFilter({
     };
 
     const handleBlur = () => {
-        const normalizedFrom = normalizePrice(
+        const normalizedFrom = normalizePriceInput(
             priceFrom,
             minPrice,
             minPrice,
             maxPrice,
         );
 
-        const normalizedTo = normalizePrice(
+        const normalizedTo = normalizePriceInput(
             priceTo,
             maxPrice,
             minPrice,
@@ -93,7 +97,7 @@ export function ProductPriceFilter({
                     autoComplete="off"
                     className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={priceFrom}
                     onChange={(e) => setPriceFrom(e.target.value)}
                     onBlur={handleBlur}

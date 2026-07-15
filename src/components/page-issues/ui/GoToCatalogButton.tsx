@@ -1,13 +1,14 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+import { routes } from '@/lib/routes';
 
 export function GoToCatalogButton() {
     const router = useRouter();
-    const pathname = usePathname();
 
     function handleClick() {
-        router.replace(pathname, {
+        router.replace(routes.catalogPage(), {
             scroll: false,
         });
     }

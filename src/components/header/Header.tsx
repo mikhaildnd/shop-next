@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
-import { SearchBar } from '@/components/header/search/SearchBar';
+import { CatalogButton } from '@/components/header/CatalogButton';
+import { Search } from '@/components/header/search/Search';
 import { UserMenu } from '@/components/header/UserMenu';
 import { Logo } from '@/components/logo/Logo';
 
@@ -8,10 +9,11 @@ export function Header() {
     return (
         <header className="relative z-10 flex wrapper items-center gap-x-4 bg-white py-3 md:gap-x-5 md:py-4 md:shadow-(--shadow-default) xl:gap-x-6">
             <Logo className="shrink-0" />
+            <CatalogButton />
             <Suspense fallback={null}>
-                <SearchBar className="shrink" />
+                <Search />
             </Suspense>
-            <UserMenu className="fixed right-0 bottom-0 left-0 z-50 ml-auto" />
+            <UserMenu className="ml-auto" />
         </header>
     );
 }

@@ -9,29 +9,33 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, childCategories }: CategoryCardProps) {
+    const linkStyles =
+        'block px-5 py-1 transition-colors duration-100 hover:text-(--color-primary) focus:text-(--color-primary)';
+
     return (
-        <div className="flex flex-col rounded-2xl border border-gray-200 p-2">
-            <h2 className="font-medium">
+        <div className="flex flex-col rounded-2xl border border-(--color-primary) bg-white py-3">
+            <h2 className="font-semibold">
                 <Link
                     href={routes.categoryPage(category.slug)}
-                    className=""
+                    className={linkStyles}
                 >
                     {category.title}
                 </Link>
             </h2>
 
             {childCategories && childCategories.length > 0 && (
-                <div className="">
+                <ul className="flex flex-col">
                     {childCategories.map((child: CategoryDto) => (
-                        <Link
-                            key={child.id}
-                            href={routes.categoryPage(child.slug)}
-                            className="block"
-                        >
-                            {child.title}
-                        </Link>
+                        <li key={child.id}>
+                            <Link
+                                href={routes.categoryPage(child.slug)}
+                                className={linkStyles}
+                            >
+                                {child.title}
+                            </Link>
+                        </li>
                     ))}
-                </div>
+                </ul>
             )}
         </div>
     );

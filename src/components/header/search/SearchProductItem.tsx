@@ -7,12 +7,12 @@ import { formatPrice } from '@/utils/formatPrice';
 
 interface SearchProductItemProps {
     product: ProductDto;
-    onClose: () => void;
+    onSelect: (product: ProductDto) => void;
 }
 
 export function SearchProductItem({
     product,
-    onClose,
+    onSelect,
 }: SearchProductItemProps) {
     const hasDiscount = product.discountPercent > 0;
 
@@ -21,9 +21,9 @@ export function SearchProductItem({
     return (
         <li>
             <Link
-                onClick={onClose}
+                onClick={() => onSelect(product)}
                 href={routes.productPage(product.slug)}
-                className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-gray-50"
+                className="flex items-center gap-3 rounded-md p-2 transition-colors outline-none hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:ring-1 focus-visible:ring-(--color-primary)"
             >
                 <div className="relative size-14 shrink-0 overflow-hidden rounded border border-gray-100">
                     {image && (
