@@ -123,7 +123,6 @@ export default async function CollectionPage({
         <ProductListingLayout
             sort={listing.sort}
             listingStats={listingStats}
-            filteredProductsCount={filteredProductsCount}
             title={collection.title}
             breadcrumbs={breadcrumbs}
         >

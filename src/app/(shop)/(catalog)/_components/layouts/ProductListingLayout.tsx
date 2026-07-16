@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
+import { DesktopFilters } from '@/components/product/productFilters/DesktopFilters';
+import { MobileFilters } from '@/components/product/productFilters/MobileFilters';
 import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
 import { ProductSortDropdown } from '@/components/product/productFilters/ProductSortDropdown';
 import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
@@ -11,7 +13,6 @@ import type { ProductListingStats } from '@/services/product/product.types';
 interface ProductListingLayoutProps {
     sort: ProductSort;
     listingStats: ProductListingStats;
-    filteredProductsCount: number;
     title: string;
     breadcrumbs: BreadcrumbItem[];
     tags?: ReactNode;
@@ -21,7 +22,6 @@ interface ProductListingLayoutProps {
 export function ProductListingLayout({
     sort,
     listingStats,
-    filteredProductsCount,
     title,
     breadcrumbs,
     tags,
@@ -44,14 +44,16 @@ export function ProductListingLayout({
                 </HorizontalScrollWrapper>
             )}
 
-            <div className="grid grid-cols-[280px_1fr] items-start gap-4">
-                <ProductFiltersPanel
-                    listingStats={listingStats}
-                    filteredProductsCount={filteredProductsCount}
-                />
+            <div className="grid items-start lg:grid-cols-[280px_1fr] lg:gap-4">
+                <DesktopFilters className="hidden lg:flex">
+                    <ProductFiltersPanel listingStats={listingStats} />
+                </DesktopFilters>
                 <div className="flex flex-col">
-                    <div className="mb-4 flex">
+                    <div className="mb-4 flex items-center justify-between">
                         <ProductSortDropdown value={sort} />
+                        <MobileFilters>
+                            <ProductFiltersPanel listingStats={listingStats} />
+                        </MobileFilters>
                     </div>
                     {children}
                 </div>

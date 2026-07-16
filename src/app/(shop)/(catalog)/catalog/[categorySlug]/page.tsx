@@ -147,7 +147,6 @@ export default async function CategoryPage({
         <ProductListingLayout
             sort={listing.sort}
             listingStats={listingStats}
-            filteredProductsCount={filteredProductsCount}
             breadcrumbs={breadcrumbs}
             title={category.title}
             tags={tags}

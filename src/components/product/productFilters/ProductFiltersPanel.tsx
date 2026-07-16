@@ -6,14 +6,13 @@ import type { ProductListingStats } from '@/services/product/product.types';
 
 interface ProductFiltersPanelProps {
     listingStats: ProductListingStats;
-    filteredProductsCount: number;
 }
 
 export function ProductFiltersPanel({
     listingStats,
 }: ProductFiltersPanelProps) {
     return (
-        <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-xl border border-gray-100 bg-white">
+        <div className="flex flex-col">
             <ProductPriceFilter
                 minPrice={listingStats.minPrice}
                 maxPrice={listingStats.maxPrice}
@@ -21,6 +20,6 @@ export function ProductFiltersPanel({
             <ProductInStockFilter />
             <ProductSaleFilter />
             <ProductDiscountFilter maxDiscount={listingStats.maxDiscount} />
-        </aside>
+        </div>
     );
 }
