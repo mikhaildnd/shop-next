@@ -126,7 +126,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <ProductListingLayout
             sort={listing.sort}
             listingStats={listingStats}
-            filteredProductsCount={filteredProductsCount}
             title="Результаты поиска"
             breadcrumbs={breadcrumbs}
         >
