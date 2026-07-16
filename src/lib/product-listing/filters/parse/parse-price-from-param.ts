@@ -1,4 +1,7 @@
-import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import {
+    DEFAULT_PRODUCT_FILTERS,
+    PRODUCT_FILTER_LISTING_ISSUES,
+} from '@/lib/product-listing/filters/consts';
 import type {
     ProductFilterParseResult,
     ProductFilters,
@@ -9,7 +12,7 @@ export function parsePriceFromParam(
 ): ProductFilterParseResult<ProductFilters['priceFrom']> {
     if (value === undefined) {
         return {
-            value: null,
+            value: DEFAULT_PRODUCT_FILTERS.priceFrom,
         };
     }
 
@@ -17,7 +20,7 @@ export function parsePriceFromParam(
 
     if (!Number.isFinite(price) || price < 0) {
         return {
-            value: null,
+            value: DEFAULT_PRODUCT_FILTERS.priceFrom,
             issue: PRODUCT_FILTER_LISTING_ISSUES.INVALID_PRICE_FROM,
         };
     }

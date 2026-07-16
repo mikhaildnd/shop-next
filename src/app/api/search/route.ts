@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
         products: productsResult.products,
-        productsCount: productsResult.filteredProductsCount,
+        productsCount: productsResult.totalProductsCount,
         categories,
     });
 }

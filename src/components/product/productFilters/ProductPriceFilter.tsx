@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { FilterSection } from '@/components/product/productFilters/FilterSection';
 import { useProductListing } from '@/hooks/useProductListing';
@@ -47,6 +47,12 @@ export function ProductPriceFilter({
     );
     const [priceTo, setPriceTo] = useState(String(currentPriceTo ?? maxPrice));
 
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setPriceFrom(String(currentPriceFrom ?? minPrice));
+        setPriceTo(String(currentPriceTo ?? maxPrice));
+    }, [currentPriceFrom, currentPriceTo, minPrice, maxPrice]);
+
     const applyFilters = (nextPriceFrom: string, nextPriceTo: string) => {
         const from = Number(nextPriceFrom);
         const to = Number(nextPriceTo);
@@ -83,9 +89,6 @@ export function ProductPriceFilter({
             minPrice,
             maxPrice,
         );
-
-        setPriceFrom(normalizedFrom);
-        setPriceTo(normalizedTo);
 
         applyFilters(normalizedFrom, normalizedTo);
     };

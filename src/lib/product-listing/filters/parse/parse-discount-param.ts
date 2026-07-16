@@ -1,4 +1,7 @@
-import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import {
+    DEFAULT_PRODUCT_FILTERS,
+    PRODUCT_FILTER_LISTING_ISSUES,
+} from '@/lib/product-listing/filters/consts';
 import { isDiscountFilterValue } from '@/lib/product-listing/filters/guard';
 import type {
     ProductFilterParseResult,
@@ -10,7 +13,7 @@ export function parseDiscountParam(
 ): ProductFilterParseResult<ProductFilters['discount']> {
     if (value === undefined) {
         return {
-            value: null,
+            value: DEFAULT_PRODUCT_FILTERS.discount,
         };
     }
 
@@ -18,7 +21,7 @@ export function parseDiscountParam(
 
     if (!isDiscountFilterValue(parsed)) {
         return {
-            value: null,
+            value: DEFAULT_PRODUCT_FILTERS.discount,
             issue: PRODUCT_FILTER_LISTING_ISSUES.INVALID_DISCOUNT,
         };
     }

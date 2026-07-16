@@ -1,3 +1,5 @@
+'use client';
+
 import { useSearchParams } from 'next/navigation';
 
 import { getProductSearchParams } from '@/lib/product-listing/get-product-search-params';

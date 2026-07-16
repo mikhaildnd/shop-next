@@ -8,42 +8,32 @@ type BuildProductQueryOptions = {
     collectionSlug?: string;
 };
 
-export function buildProductQuery({
+export function buildProductWhere({
     filters,
     categorySlugs,
     collectionSlug,
 }: BuildProductQueryOptions) {
-    const filtersWhere: Prisma.ProductWhereInput = filters
+    const where: Prisma.ProductWhereInput = filters
         ? getProductWhere(filters)
         : {};
-    const listingWhere: Prisma.ProductWhereInput = {};
 
     if (categorySlugs?.length) {
-        const categoryWhere = {
+        where.category = {
             slug: {
                 in: categorySlugs,
             },
         };
-
-        filtersWhere.category = categoryWhere;
-        listingWhere.category = categoryWhere;
     }
 
     if (collectionSlug) {
-        const collectionsWhere = {
+        where.collections = {
             some: {
                 collection: {
                     slug: collectionSlug,
                 },
             },
         };
-
-        filtersWhere.collections = collectionsWhere;
-        listingWhere.collections = collectionsWhere;
     }
 
-    return {
-        filtersWhere,
-        listingWhere,
-    };
+    return where;
 }

@@ -105,19 +105,17 @@ export default async function CategoryPage({
         );
     }
 
-    const { products, filteredProductsCount, listingStats } = await getProducts(
-        {
-            take: pagination.take,
-            skip: pagination.skip,
-            categorySlugs,
-            filters: listing.filters,
-            sort: listing.sort,
-        },
-    );
+    const { products, totalProductsCount, listingStats } = await getProducts({
+        take: pagination.take,
+        skip: pagination.skip,
+        categorySlugs,
+        filters: listing.filters,
+        sort: listing.sort,
+    });
 
-    const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
+    const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
-    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+    if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
             <PageStateLayout
                 title={category.title}
@@ -130,7 +128,7 @@ export default async function CategoryPage({
         );
     }
 
-    if (filteredProductsCount === 0) {
+    if (totalProductsCount === 0) {
         return (
             <PageStateLayout
                 title={category.title}

@@ -1,4 +1,7 @@
-import { PRODUCT_FILTER_LISTING_ISSUES } from '@/lib/product-listing/filters/consts';
+import {
+    DEFAULT_PRODUCT_FILTERS,
+    PRODUCT_FILTER_LISTING_ISSUES,
+} from '@/lib/product-listing/filters/consts';
 import type {
     ProductFilterParseResult,
     ProductFilters,
@@ -9,7 +12,7 @@ export function parseSaleParam(
 ): ProductFilterParseResult<ProductFilters['sale']> {
     if (value === undefined) {
         return {
-            value: false,
+            value: DEFAULT_PRODUCT_FILTERS.sale,
         };
     }
 
@@ -19,8 +22,14 @@ export function parseSaleParam(
         };
     }
 
+    if (value === 'false') {
+        return {
+            value: false,
+        };
+    }
+
     return {
-        value: false,
+        value: DEFAULT_PRODUCT_FILTERS.sale,
         issue: PRODUCT_FILTER_LISTING_ISSUES.INVALID_SALE,
     };
 }

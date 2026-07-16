@@ -3,7 +3,7 @@ import { cache } from 'react';
 import { prisma } from '@/lib/db';
 import { mapProductToDto } from '@/lib/mappers/product.mapper';
 import { productInclude } from '@/lib/prisma/product';
-import { buildProductQuery } from '@/lib/product-listing/build-product-query';
+import { buildProductWhere } from '@/lib/product-listing/build-product-where';
 import type { ProductFilters } from '@/lib/product-listing/filters/types';
 import { getProductOrderBy } from '@/lib/product-listing/sort/get-product-order-by';
 import type { ProductSort } from '@/lib/product-listing/sort/types';
@@ -30,57 +30,61 @@ export async function getProducts({
     sort,
     filters,
 }: GetProductsParams): Promise<ProductsResponse> {
-    const { listingWhere, filtersWhere } = buildProductQuery({
+    const where = buildProductWhere({
         filters,
         categorySlugs,
         collectionSlug,
     });
 
-    const [
-        products,
-        filteredProductsCount,
-        totalProductsCount,
-        listingAggregates,
-    ] = await Promise.all([
-        prisma.product.findMany({
-            where: filtersWhere,
-            include: productInclude,
-            skip,
-            take,
+    const [products, totalProductsCount, listingAggregates, saleProduct] =
+        await Promise.all([
+            prisma.product.findMany({
+                where,
+                include: productInclude,
+                skip,
+                take,
 
-            orderBy: getProductOrderBy(sort),
-        }),
+                orderBy: getProductOrderBy(sort),
+            }),
 
-        prisma.product.count({
-            where: filtersWhere,
-        }),
+            prisma.product.count({
+                where,
+            }),
 
-        prisma.product.count({
-            where: listingWhere,
-        }),
+            prisma.product.aggregate({
+                where,
+                _min: {
+                    effectivePrice: true,
+                },
+                _max: {
+                    effectivePrice: true,
+                    discountPercent: true,
+                },
+            }),
 
-        prisma.product.aggregate({
-            where: listingWhere,
-            _min: {
-                effectivePrice: true,
-            },
-            _max: {
-                effectivePrice: true,
-                discountPercent: true,
-            },
-        }),
-    ]);
+            prisma.product.findFirst({
+                where: {
+                    ...where,
+                    salePrice: {
+                        not: null,
+                    },
+                },
+                select: {
+                    id: true,
+                },
+            }),
+        ]);
 
     const listingStats: ProductListingStats = {
         minPrice: Number(listingAggregates._min.effectivePrice ?? 0),
         maxPrice: Number(listingAggregates._max.effectivePrice ?? 0),
         maxDiscount: Number(listingAggregates._max.discountPercent ?? 0),
-        totalProductsCount,
+        hasSaleProducts: saleProduct !== null,
     };
 
     return {
         products: products.map(mapProductToDto),
-        filteredProductsCount,
+        totalProductsCount,
         listingStats,
     };
 }

@@ -69,12 +69,12 @@ export type ProductSeed = {
 export type ProductListingStats = {
     minPrice: number;
     maxPrice: number;
-    totalProductsCount: number;
     maxDiscount: number;
+    hasSaleProducts: boolean;
 };
 
 export type ProductsResponse = {
     products: ProductDto[];
-    filteredProductsCount: number;
+    totalProductsCount: number;
     listingStats: ProductListingStats;
 };

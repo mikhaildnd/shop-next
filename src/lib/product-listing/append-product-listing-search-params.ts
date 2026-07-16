@@ -1,4 +1,7 @@
-import { PRODUCT_FILTER_PARAMS } from '@/lib/product-listing/filters/consts';
+import {
+    DEFAULT_PRODUCT_FILTERS,
+    PRODUCT_FILTER_PARAMS,
+} from '@/lib/product-listing/filters/consts';
 import {
     DEFAULT_PRODUCT_SORT,
     PRODUCT_SORT_PARAM,
@@ -28,23 +31,23 @@ export function appendProductListingSearchParams({
         params.set(PRODUCT_SORT_PARAM, sort);
     }
 
-    if (filters.sale) {
+    if (filters.sale !== DEFAULT_PRODUCT_FILTERS.sale) {
         params.set(PRODUCT_FILTER_PARAMS.SALE, String(filters.sale));
     }
 
-    if (filters.inStock) {
+    if (filters.inStock !== DEFAULT_PRODUCT_FILTERS.inStock) {
         params.set(PRODUCT_FILTER_PARAMS.IN_STOCK, String(filters.inStock));
     }
 
-    if (filters.discount !== null) {
+    if (filters.discount !== DEFAULT_PRODUCT_FILTERS.discount) {
         params.set(PRODUCT_FILTER_PARAMS.DISCOUNT, String(filters.discount));
     }
 
-    if (filters.priceFrom !== null) {
+    if (filters.priceFrom !== DEFAULT_PRODUCT_FILTERS.priceFrom) {
         params.set(PRODUCT_FILTER_PARAMS.PRICE_FROM, String(filters.priceFrom));
     }
 
-    if (filters.priceTo !== null) {
+    if (filters.priceTo !== DEFAULT_PRODUCT_FILTERS.priceTo) {
         params.set(PRODUCT_FILTER_PARAMS.PRICE_TO, String(filters.priceTo));
     }
 }
