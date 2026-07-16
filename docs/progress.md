@@ -33,6 +33,8 @@
 * Унифицированы фильтры и сортировка.
 * Product Listing отделён от Pagination.
 * Сервер формирует метаданные каталога.
+* Завершена архитектура мобильных фильтров.
+* DesktopFilters и MobileFilters используют общий ProductFiltersPanel.
 
 ---
 

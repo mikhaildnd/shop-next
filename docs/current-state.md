@@ -107,6 +107,15 @@ Prisma
 * Pagination
 * Load More
 
+Фильтры разделены на отдельные layout-компоненты:
+
+* `DesktopFilters`
+* `MobileFilters`
+
+Оба используют общий `ProductFiltersPanel`, который отвечает только за композицию набора фильтров.
+
+Для полноэкранных мобильных панелей используется `useLockBodyScroll`.
+
 `ProductGrid` отвечает только за отображение списка товаров.
 
 ---
