@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
-import { DesktopFilters } from '@/components/product/productFilters/DesktopFilters';
-import { MobileFilters } from '@/components/product/productFilters/MobileFilters';
-import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
+import { ProductDesktopFilters } from '@/components/product/productFilters/ProductDesktopFilters';
+import { ProductMobileFilters } from '@/components/product/productFilters/ProductMobileFilters';
 import { ProductSortDropdown } from '@/components/product/productFilters/ProductSortDropdown';
 import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
 import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
@@ -45,15 +44,14 @@ export function ProductListingLayout({
             )}
 
             <div className="grid items-start lg:grid-cols-[280px_1fr] lg:gap-4">
-                <DesktopFilters className="hidden lg:flex">
-                    <ProductFiltersPanel listingStats={listingStats} />
-                </DesktopFilters>
+                <ProductDesktopFilters
+                    listingStats={listingStats}
+                    className="hidden lg:flex"
+                />
                 <div className="flex flex-col">
                     <div className="mb-4 flex items-center justify-between">
                         <ProductSortDropdown value={sort} />
-                        <MobileFilters>
-                            <ProductFiltersPanel listingStats={listingStats} />
-                        </MobileFilters>
+                        <ProductMobileFilters listingStats={listingStats} />
                     </div>
                     {children}
                 </div>

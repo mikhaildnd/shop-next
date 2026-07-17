@@ -4,16 +4,20 @@ import {
     ChevronLeft as IconClose,
     SlidersHorizontal as IconFilter,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { ResetFiltersButton } from '@/components/product/productFilters/ResetFiltersButton';
+import type { ProductListingStats } from '@/services/product/product.types';
+import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
 
-interface MobileFiltersProps {
-    children: ReactNode;
+interface ProductMobileFiltersProps {
+    listingStats: ProductListingStats;
 }
 
-export function MobileFilters({ children }: MobileFiltersProps) {
+export function ProductMobileFilters({
+    listingStats,
+}: ProductMobileFiltersProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const openFilters = () => setIsOpen(true);
@@ -46,7 +50,13 @@ export function MobileFilters({ children }: MobileFiltersProps) {
                         <h2 className="text-lg font-semibold">Фильтры</h2>
                     </header>
 
-                    <main className="grow overflow-y-auto">{children}</main>
+                    <main className="flex grow flex-col overflow-y-auto">
+                        <ProductFiltersPanel listingStats={listingStats} />
+                    </main>
+
+                    <footer>
+                        <ResetFiltersButton className="w-full" />
+                    </footer>
                 </div>
             )}
         </>

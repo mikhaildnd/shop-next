@@ -45,7 +45,7 @@ export function LoadMoreButton({ nextPage, from }: LoadMoreButtonProps) {
                 'flex w-full items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity',
                 isPending
                     ? 'cursor-progress opacity-50'
-                    : 'cursor-pointer hover:opacity-90',
+                    : 'cursor-pointer hover:opacity-90 focus-visible:opacity-90',
             )}
         >
             {isPending ? (

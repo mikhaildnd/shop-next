@@ -30,16 +30,29 @@ export async function getProducts({
     sort,
     filters,
 }: GetProductsParams): Promise<ProductsResponse> {
-    const where = buildProductWhere({
+    const listingWhere = buildProductWhere({
         filters,
         categorySlugs,
         collectionSlug,
     });
 
-    const [products, totalProductsCount, listingAggregates, saleProduct] =
+    const priceStatsWhere = buildProductWhere({
+        filters: filters
+            ? {
+                  // Price aggregates should ignore the current price filter.
+                  ...filters,
+                  priceFrom: null,
+                  priceTo: null,
+              }
+            : undefined,
+        categorySlugs,
+        collectionSlug,
+    });
+
+    const [products, totalProductsCount, priceAggregates, saleProduct] =
         await Promise.all([
             prisma.product.findMany({
-                where,
+                where: listingWhere,
                 include: productInclude,
                 skip,
                 take,
@@ -48,11 +61,11 @@ export async function getProducts({
             }),
 
             prisma.product.count({
-                where,
+                where: listingWhere,
             }),
 
             prisma.product.aggregate({
-                where,
+                where: priceStatsWhere,
                 _min: {
                     effectivePrice: true,
                 },
@@ -64,7 +77,7 @@ export async function getProducts({
 
             prisma.product.findFirst({
                 where: {
-                    ...where,
+                    ...listingWhere,
                     salePrice: {
                         not: null,
                     },
@@ -76,9 +89,9 @@ export async function getProducts({
         ]);
 
     const listingStats: ProductListingStats = {
-        minPrice: Number(listingAggregates._min.effectivePrice ?? 0),
-        maxPrice: Number(listingAggregates._max.effectivePrice ?? 0),
-        maxDiscount: Number(listingAggregates._max.discountPercent ?? 0),
+        minPrice: Number(priceAggregates._min.effectivePrice ?? 0),
+        maxPrice: Number(priceAggregates._max.effectivePrice ?? 0),
+        maxDiscount: Number(priceAggregates._max.discountPercent ?? 0),
         hasSaleProducts: saleProduct !== null,
     };
 

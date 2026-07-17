@@ -11,25 +11,16 @@ interface ProductPriceFilterProps {
     maxPrice: number;
 }
 
-function normalizePriceInput(
-    value: string,
-    fallback: number,
-    minPrice: number,
-    maxPrice: number,
-): string {
+function parsePrice(value: string): number | null {
     const normalized = value.trim().replace(',', '.');
 
     const number = Number(normalized);
 
     if (!Number.isFinite(number)) {
-        return String(fallback);
+        return null;
     }
 
-    if (number < minPrice || number > maxPrice) {
-        return String(fallback);
-    }
-
-    return String(number);
+    return number;
 }
 
 export function ProductPriceFilter({
@@ -57,40 +48,48 @@ export function ProductPriceFilter({
         const from = Number(nextPriceFrom);
         const to = Number(nextPriceTo);
 
-        const normalizedFrom = from === minPrice ? null : from;
-        const normalizedTo = to === maxPrice ? null : to;
+        const priceFromFilter = from === minPrice ? null : from;
+        const priceToFilter = to === maxPrice ? null : to;
 
         if (
-            currentPriceFrom === normalizedFrom &&
-            currentPriceTo === normalizedTo
+            currentPriceFrom === priceFromFilter &&
+            currentPriceTo === priceToFilter
         ) {
             return;
         }
 
         updateProductListing({
             filters: {
-                priceFrom: normalizedFrom,
-                priceTo: normalizedTo,
+                priceFrom: priceFromFilter,
+                priceTo: priceToFilter,
             },
         });
     };
 
-    const handleBlur = () => {
-        const normalizedFrom = normalizePriceInput(
-            priceFrom,
-            minPrice,
-            minPrice,
-            maxPrice,
-        );
+    const handlePriceFromBlur = () => {
+        const value = parsePrice(priceFrom);
 
-        const normalizedTo = normalizePriceInput(
-            priceTo,
-            maxPrice,
-            minPrice,
-            maxPrice,
-        );
+        const nextPriceFrom =
+            value === null || value < minPrice || value > maxPrice
+                ? String(minPrice)
+                : String(value);
 
-        applyFilters(normalizedFrom, normalizedTo);
+        setPriceFrom(nextPriceFrom);
+
+        applyFilters(nextPriceFrom, priceTo);
+    };
+
+    const handlePriceToBlur = () => {
+        const value = parsePrice(priceTo);
+
+        const nextPriceTo =
+            value === null || value < minPrice || value > maxPrice
+                ? String(maxPrice)
+                : String(value);
+
+        setPriceTo(nextPriceTo);
+
+        applyFilters(priceFrom, nextPriceTo);
     };
 
     return (
@@ -103,7 +102,7 @@ export function ProductPriceFilter({
                     inputMode="decimal"
                     value={priceFrom}
                     onChange={(e) => setPriceFrom(e.target.value)}
-                    onBlur={handleBlur}
+                    onBlur={handlePriceFromBlur}
                 />
 
                 <input
@@ -113,7 +112,7 @@ export function ProductPriceFilter({
                     inputMode="numeric"
                     value={priceTo}
                     onChange={(e) => setPriceTo(e.target.value)}
-                    onBlur={handleBlur}
+                    onBlur={handlePriceToBlur}
                 />
             </div>
         </FilterSection>
