@@ -11,7 +11,7 @@ export function Logo({ className }: { className?: string }) {
         <Link
             href={routes.homePage()}
             aria-label="На главную"
-            className={cn('flex items-center', className)}
+            className={cn('flex shrink-0 items-center', className)}
         >
             <Image
                 className="shrink-0"

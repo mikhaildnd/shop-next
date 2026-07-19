@@ -10,28 +10,20 @@ import { SearchResults } from '@/components/header/search/SearchResults';
 import { useDismiss } from '@/hooks/useDismiss';
 import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/consts';
 import { createQueryHistoryItem } from '@/lib/search/search-history-items';
+import { cn } from '@/utils/cn';
 
-export function DesktopSearch() {
-    const {
-        query,
-        results,
-        searchUrl,
-        updateQuery,
-        searchCurrentQuery,
-        submitSearch,
-        resetSearch,
-        history,
-    } = useSearchContext();
+export function DesktopSearch({ className }: { className?: string }) {
+    const { search, history } = useSearchContext();
 
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [isOpen, setIsOpen] = useState(false);
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = search.query.trim();
     const hasValidQuery = trimmedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
     const hasHistory = history.items.length > 0;
 
-    const hasResults = results !== null;
+    const hasResults = search.results !== null;
 
     const shouldShowHistory = trimmedQuery === '' && hasHistory;
 
@@ -49,12 +41,12 @@ export function DesktopSearch() {
     });
 
     const handleResultSelect = () => {
-        resetSearch();
+        search.resetSearch();
         closeSearchPanel();
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        updateQuery(e.target.value);
+        search.updateQuery(e.target.value);
 
         openSearchPanel();
     };
@@ -63,14 +55,14 @@ export function DesktopSearch() {
         openSearchPanel();
 
         if (hasValidQuery) {
-            searchCurrentQuery();
+            search.searchCurrentQuery();
         }
     };
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
 
-        if (!submitSearch()) {
+        if (!search.submitSearch()) {
             return;
         }
 
@@ -82,14 +74,14 @@ export function DesktopSearch() {
     return (
         <div
             ref={containerRef}
-            className="relative hidden grow md:block"
+            className={cn('relative', className)}
         >
             <SearchForm
-                value={query}
+                value={search.query}
                 onChange={handleChange}
                 onFocus={handleFocus}
                 onSubmit={handleSubmit}
-                onReset={resetSearch}
+                onReset={search.resetSearch}
             />
 
             {shouldShowPanel && (
@@ -101,11 +93,11 @@ export function DesktopSearch() {
                         />
                     )}
 
-                    {shouldShowResults && (
+                    {shouldShowResults && search.results && (
                         <SearchResults
                             className="max-h-[500px]"
-                            results={results}
-                            allResultsUrl={searchUrl}
+                            results={search.results}
+                            allResultsUrl={search.searchUrl}
                             onResultSelect={handleResultSelect}
                             onShowAll={closeSearchPanel}
                             history={history}

@@ -1,7 +1,7 @@
-import { cn } from '@/utils/cn';
+import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
 import { ResetFiltersButton } from '@/components/product/productFilters/ResetFiltersButton';
 import type { ProductListingStats } from '@/services/product/product.types';
-import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
+import { cn } from '@/utils/cn';
 
 interface ProductDesktopFiltersProps {
     listingStats: ProductListingStats;

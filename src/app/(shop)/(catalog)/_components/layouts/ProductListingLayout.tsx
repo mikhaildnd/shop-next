@@ -51,7 +51,10 @@ export function ProductListingLayout({
                 <div className="flex flex-col">
                     <div className="mb-4 flex items-center justify-between">
                         <ProductSortDropdown value={sort} />
-                        <ProductMobileFilters listingStats={listingStats} />
+                        <ProductMobileFilters
+                            className="lg:hidden"
+                            listingStats={listingStats}
+                        />
                     </div>
                     {children}
                 </div>

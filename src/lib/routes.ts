@@ -12,12 +12,9 @@ export const routes = {
 
     productPage: (slug: string) => `/product/${slug}`,
 
-    productInCategory: (productSlug: string, categorySlug: string) => {
-        return buildUrl({
-            pathname: routes.productPage(productSlug),
-            params: { category: categorySlug },
-        });
-    },
+    favoritesPage: () => '/favorites',
+
+    cartPage: () => '/cart',
 
     searchPage: (query?: string) => {
         return buildUrl({

@@ -1,22 +1,22 @@
 'use client';
 
-import {
-    ChevronLeft as IconClose,
-    SlidersHorizontal as IconFilter,
-} from 'lucide-react';
+import { ChevronLeft as IconClose } from 'lucide-react';
 import { useState } from 'react';
 
-import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { ResetFiltersButton } from '@/components/product/productFilters/ResetFiltersButton';
-import type { ProductListingStats } from '@/services/product/product.types';
+import { ProductFiltersButton } from '@/components/product/productFilters/ProductFiltersButton';
 import { ProductFiltersPanel } from '@/components/product/productFilters/ProductFiltersPanel';
+import { ResetFiltersButton } from '@/components/product/productFilters/ResetFiltersButton';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import type { ProductListingStats } from '@/services/product/product.types';
 
 interface ProductMobileFiltersProps {
     listingStats: ProductListingStats;
+    className?: string;
 }
 
 export function ProductMobileFilters({
     listingStats,
+    className,
 }: ProductMobileFiltersProps) {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -26,18 +26,11 @@ export function ProductMobileFilters({
     useLockBodyScroll(isOpen);
 
     return (
-        <>
-            <button
-                type="button"
-                aria-label="Открыть фильтры"
-                className="rounded-xl border border-gray-100 bg-white p-2 lg:hidden"
-                onClick={openFilters}
-            >
-                <IconFilter className="size-6" />
-            </button>
+        <div className={className}>
+            <ProductFiltersButton onClick={openFilters} />
 
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden">
+                <div className="fixed inset-0 z-50 flex flex-col bg-white">
                     <header className="flex items-center gap-x-4 border-b border-gray-100 px-4 py-4">
                         <button
                             type="button"
@@ -59,6 +52,6 @@ export function ProductMobileFilters({
                     </footer>
                 </div>
             )}
-        </>
+        </div>
     );
 }
