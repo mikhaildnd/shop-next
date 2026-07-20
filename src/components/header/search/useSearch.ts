@@ -108,7 +108,7 @@ export function useSearch(): SearchState {
         void search(trimmedQuery);
     }
 
-    const submitSearch = () => {
+    function submitSearch() {
         if (trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
             return false;
         }
@@ -124,7 +124,7 @@ export function useSearch(): SearchState {
         router.push(searchUrl);
 
         return true;
-    };
+    }
 
     function resetSearch() {
         abortControllerRef.current?.abort();

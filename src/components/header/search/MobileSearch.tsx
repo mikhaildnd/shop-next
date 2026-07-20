@@ -8,7 +8,7 @@ import { useSearchContext } from '@/components/header/search/SearchContext';
 import { SearchForm } from '@/components/header/search/SearchForm';
 import { SearchHistory } from '@/components/header/search/SearchHistory';
 import { SearchResults } from '@/components/header/search/SearchResults';
-import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import { useMobileSearchOverlay } from '@/components/header/search/useMobileSearchOverlay';
 import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/consts';
 import { createQueryHistoryItem } from '@/lib/search/search-history-items';
 
@@ -16,8 +16,6 @@ export function MobileSearch({ className }: { className?: string }) {
     const { search, history } = useSearchContext();
 
     const [isOpen, setIsOpen] = useState(false);
-
-    useLockBodyScroll(isOpen);
 
     const trimmedQuery = search.query.trim();
     const hasValidQuery = trimmedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
@@ -33,6 +31,8 @@ export function MobileSearch({ className }: { className?: string }) {
 
     const openSearchPanel = () => setIsOpen(true);
     const closeSearchPanel = () => setIsOpen(false);
+
+    useMobileSearchOverlay(isOpen, closeSearchPanel);
 
     const handleResultSelect = () => {
         search.resetSearch();
