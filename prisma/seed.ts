@@ -21,12 +21,14 @@ async function seedCategory(category: CategorySeed, parentId?: string) {
 
         update: {
             title: category.title,
+            image: category.image ?? null,
             parentId,
         },
 
         create: {
             slug: category.slug,
             title: category.title,
+            image: category.image ?? null,
             parentId,
         },
     });
