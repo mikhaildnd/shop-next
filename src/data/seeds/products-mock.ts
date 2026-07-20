@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import type { ProductSeed } from '@/services/product/product.types';
+import type { ProductSeed } from '@/data/seeds/types';
 
 export const products: ProductSeed[] = [
     {

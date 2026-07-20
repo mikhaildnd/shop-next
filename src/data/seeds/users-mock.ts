@@ -1,6 +1,5 @@
-import { type Prisma, UserRole } from '@/generated/prisma/client';
-
-export type UserSeed = Prisma.UserCreateInput;
+import type { UserSeed } from '@/data/seeds/types';
+import { UserRole } from '@/generated/prisma/client';
 
 export const users: UserSeed[] = [
     {

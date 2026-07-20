@@ -7,7 +7,11 @@
         "build": "next build",
         "start": "next start -p 3000",
         "lint": "eslint",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "seed": "prisma db seed"
+    },
+    "prisma": {
+        "seed": "tsx prisma/seed.ts"
     },
     "dependencies": {
         "@iminside/react-yandex-maps": "^1.2.7",
