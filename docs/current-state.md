@@ -62,7 +62,7 @@ URL
 getProducts()
     │
     ▼
-buildProductQuery()
+buildProductWhere()
     │
     ▼
 Prisma
@@ -166,3 +166,19 @@ URL формируются через:
 * getProducts();
 * ProductListingLayout;
 * PageStateLayout.
+
+Страница каталога категорий использует отдельную модель представления.
+
+Поток данных:
+
+```text
+CategoryDto[]
+        │
+        ▼
+mapCategoriesToCatalogSections()
+        │
+        ▼
+CatalogSection[]
+        │
+        ├── CatalogDesktop
+        └── CatalogMobile
