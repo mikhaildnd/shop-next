@@ -1,67 +1,35 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { CatalogCategoryCard } from '@/app/(shop)/(catalog)/catalog/_components/CatalogCategoryCard';
+import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/lib/catalog.types';
 import { routes } from '@/lib/routes';
-import type { CategoryDto } from '@/services/category/category.types';
 import { cn } from '@/utils/cn';
 
-interface CatalogLayoutProps {
-    categories: CategoryDto[];
+interface CatalogDesktopProps {
+    catalogSections: CatalogSection[];
+    className?: string;
 }
 
-type CategoryGroup = {
-    category: CategoryDto;
-    childCategories: CategoryDto[];
-};
+export function CatalogDesktop({
+    catalogSections,
+    className,
+}: CatalogDesktopProps) {
+    const initialGroup = catalogSections[0];
 
-function buildCategoryGroups(categories: CategoryDto[]): CategoryGroup[] {
-    const childCategoriesByParentId = new Map<string, CategoryDto[]>();
-
-    for (const category of categories) {
-        if (!category.parentId) {
-            continue;
-        }
-
-        const childCategories =
-            childCategoriesByParentId.get(category.parentId) ?? [];
-
-        childCategories.push(category);
-
-        childCategoriesByParentId.set(category.parentId, childCategories);
-    }
-
-    return categories
-        .filter((category) => category.parentId === null)
-        .map((category) => ({
-            category,
-            childCategories: childCategoriesByParentId.get(category.id) ?? [],
-        }));
-}
-
-export function CatalogLayout({ categories }: CatalogLayoutProps) {
-    const categoryGroups = useMemo(
-        () => buildCategoryGroups(categories),
-        [categories],
-    );
-
-    const [activeCategoryId, setActiveCategoryId] = useState(
-        categoryGroups[0]?.category.id ?? null,
-    );
-
+    const [activeGroup, setActiveGroup] = useState(initialGroup);
     const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(
         () => new Set(),
     );
 
-    const activeGroup =
-        categoryGroups.find(
-            ({ category }) => category.id === activeCategoryId,
-        ) ?? null;
+    if (!initialGroup) {
+        return null;
+    }
 
-    function toggleCategory(categoryId: string) {
+    const toggleCategory = (categoryId: string) => {
         setExpandedCategoryIds((current) => {
             const next = new Set(current);
 
@@ -73,35 +41,38 @@ export function CatalogLayout({ categories }: CatalogLayoutProps) {
 
             return next;
         });
-    }
+    };
 
     return (
-        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+        <div className={cn('grid grid-cols-[280px_1fr] gap-8', className)}>
             <aside>
                 <ul>
-                    {categoryGroups.map(({ category, childCategories }) => {
-                        const expanded = expandedCategoryIds.has(category.id);
+                    {catalogSections.map((group) => {
+                        const { parentCategory, childCategories } = group;
+
+                        const expanded = expandedCategoryIds.has(
+                            parentCategory.id,
+                        );
 
                         return (
-                            <li key={category.id}>
+                            <li key={parentCategory.id}>
                                 <button
                                     type="button"
-                                    onClick={() => toggleCategory(category.id)}
-                                    onMouseEnter={() =>
-                                        setActiveCategoryId(category.id)
+                                    onClick={() =>
+                                        toggleCategory(parentCategory.id)
                                     }
-                                    onFocus={() =>
-                                        setActiveCategoryId(category.id)
-                                    }
+                                    onMouseEnter={() => setActiveGroup(group)}
+                                    onFocus={() => setActiveGroup(group)}
                                     aria-expanded={expanded}
                                     className={cn(
                                         'flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 text-left transition-colors hover:bg-(--color-primary)/5 focus-visible:ring-1 focus-visible:ring-(--color-primary) focus-visible:outline-none',
-                                        activeCategoryId === category.id &&
+                                        activeGroup.parentCategory.id ===
+                                            parentCategory.id &&
                                             'bg-(--color-primary)/10 text-(--color-primary)',
                                     )}
                                 >
                                     <span className="font-medium">
-                                        {category.title}
+                                        {parentCategory.title}
                                     </span>
 
                                     <ChevronDown
@@ -131,13 +102,13 @@ export function CatalogLayout({ categories }: CatalogLayoutProps) {
                                                             'focus-visible:outline-none',
                                                         )}
                                                         onMouseEnter={() =>
-                                                            setActiveCategoryId(
-                                                                category.id,
+                                                            setActiveGroup(
+                                                                group,
                                                             )
                                                         }
                                                         onFocus={() =>
-                                                            setActiveCategoryId(
-                                                                category.id,
+                                                            setActiveGroup(
+                                                                group,
                                                             )
                                                         }
                                                     >
@@ -155,16 +126,28 @@ export function CatalogLayout({ categories }: CatalogLayoutProps) {
             </aside>
 
             <section>
-                <h3 className="mb-4 text-xl font-semibold">
-                    {activeGroup?.category.title}
-                </h3>
+                <Link
+                    className="mb-4 flex items-center gap-x-2"
+                    href={routes.categoryPage(activeGroup.parentCategory.slug)}
+                >
+                    <h3 className="text-xl font-semibold">
+                        {activeGroup.parentCategory.title}
+                    </h3>
 
-                <ul className="flex flex-wrap gap-2">
-                    {activeGroup?.childCategories.map((category) => (
-                        <CatalogCategoryCard
+                    <ChevronRight
+                        aria-hidden="true"
+                        className="text-primary size-4 stroke-2"
+                    />
+                </Link>
+
+                <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,160px))] gap-6">
+                    {activeGroup.childCategories.map((category) => (
+                        <li
+                            // className="w-44"
                             key={category.id}
-                            category={category}
-                        />
+                        >
+                            <CatalogCategoryCard category={category} />
+                        </li>
                     ))}
                 </ul>
             </section>

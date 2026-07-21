@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { CatalogLayout } from '@/app/(shop)/(catalog)/catalog/_components/CatalogLayout';
+import { CatalogDesktop } from '@/app/(shop)/(catalog)/catalog/_components/CatalogDesktop';
+import { CatalogMobile } from '@/app/(shop)/(catalog)/catalog/_components/CatalogMobile';
+import { mapCategoriesToCatalogSections } from '@/app/(shop)/(catalog)/catalog/lib/map-categories-to-catalog-sections';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import { routes } from '@/lib/routes';
 import { getCategories } from '@/services/category/category.service';
@@ -17,6 +19,8 @@ export default async function CatalogPage() {
     if (!categories.length) {
         notFound();
     }
+
+    const categoryGroups = mapCategoriesToCatalogSections(categories);
 
     const breadcrumbs = [
         {
@@ -37,7 +41,15 @@ export default async function CatalogPage() {
             />
             <h1 className="mb-3 catalog-heading xl:mb-5">Каталог товаров</h1>
 
-            <CatalogLayout categories={categories} />
+            <CatalogMobile
+                catalogSections={categoryGroups}
+                className="lg:hidden"
+            />
+
+            <CatalogDesktop
+                catalogSections={categoryGroups}
+                className="hidden lg:grid"
+            />
         </div>
     );
 }

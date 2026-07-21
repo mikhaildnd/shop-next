@@ -12,7 +12,7 @@ export function Header() {
     return (
         <header className="relative z-10 flex wrapper items-center gap-x-4 bg-white py-3 md:gap-x-5 md:py-4 md:shadow-(--shadow-default) xl:gap-x-6">
             <Logo />
-            <CatalogLink />
+            <CatalogLink className="hidden md:flex" />
             <Suspense fallback={null}>
                 <SearchProvider>
                     <DesktopSearch className="hidden grow md:block" />
