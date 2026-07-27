@@ -25,6 +25,14 @@ export const routes = {
         });
     },
 
+    profilePage: () => '/profile',
+
+    signInPage: () => '/auth/sign-in',
+
+    signUpPage: () => '/auth/sign-up',
+
+    verifyEmailPage: () => '/auth/verify-email',
+
     api: {
         search: (query: string) => {
             return buildUrl({
