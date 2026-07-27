@@ -16,7 +16,7 @@ export function GoToCatalogButton() {
     return (
         <button
             onClick={handleClick}
-            className="flex cursor-pointer items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity hover:opacity-90"
+            className="flex cursor-pointer items-center justify-center bg-(--color-primary) px-4 py-3 text-white transition-opacity hover:opacity-90"
         >
             В каталог
         </button>
