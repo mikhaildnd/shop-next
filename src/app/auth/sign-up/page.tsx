@@ -9,7 +9,7 @@ import {
 } from '@/auth/cookies/verify-email-cookie';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
-import { getUserByEmail } from '@/services/user/user.service';
+import { getUserAuthDataByEmail } from '@/services/user/user.service';
 
 export default async function SignUpPage() {
     const session = await getSession();
@@ -21,7 +21,7 @@ export default async function SignUpPage() {
     const email = await getVerifyEmailCookie();
 
     if (email) {
-        const user = await getUserByEmail(email);
+        const user = await getUserAuthDataByEmail(email);
 
         if (user && !user.emailVerified) {
             redirect(routes.verifyEmailPage());

@@ -1,6 +1,6 @@
 import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
-import { validateEmail } from '@/auth/validation/fields/validate-email';
-import { validatePassword } from '@/auth/validation/fields/validate-password';
+import { validateEmail } from '@/services/user/validation/validate-email';
+import { validatePassword } from '@/services/user/validation/validate-password';
 
 export function validateEmailAuthForm(
     form: AuthSignInForm,

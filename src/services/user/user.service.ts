@@ -2,14 +2,7 @@ import { prisma } from '@/lib/db';
 import { mapUserToDto } from '@/lib/mappers/user.mapper';
 import type { UserDto } from '@/services/user/user.types';
 
-//TODO вынести маппинг и в других сервисах тоже
-export async function getUsers(): Promise<UserDto[]> {
-    const users = await prisma.user.findMany({});
-
-    return users.map(mapUserToDto);
-}
-
-export async function getUserByEmail(email: string) {
+export async function getUserAuthDataByEmail(email: string) {
     return prisma.user.findUnique({
         where: { email },
         select: {
@@ -17,4 +10,32 @@ export async function getUserByEmail(email: string) {
             emailVerified: true,
         },
     });
+}
+
+export async function getUserById(id: string): Promise<UserDto | null> {
+    const user = await prisma.user.findUnique({
+        where: { id },
+    });
+
+    if (!user) {
+        return null;
+    }
+
+    return mapUserToDto(user);
+}
+
+export async function updateUserName(
+    userId: string,
+    name: string,
+): Promise<UserDto> {
+    const user = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            name,
+        },
+    });
+
+    return mapUserToDto(user);
 }

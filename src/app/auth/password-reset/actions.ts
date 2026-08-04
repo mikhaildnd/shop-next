@@ -20,7 +20,7 @@ import { getOtpRetryAfter, setOtpCooldown } from '@/auth/services/otp.service';
 import { validatePasswordResetForm } from '@/auth/validation/password-reset';
 import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
-import { getUserByEmail } from '@/services/user/user.service';
+import { getUserAuthDataByEmail } from '@/services/user/user.service';
 
 export interface RequestPasswordResetState {
     values?: AuthPasswordResetForm;
@@ -47,7 +47,7 @@ export async function requestPasswordReset(
         };
     }
 
-    const user = await getUserByEmail(form.email);
+    const user = await getUserAuthDataByEmail(form.email);
 
     if (user && !user.emailVerified) {
         const retryAfter = await getOtpRetryAfter({

@@ -1,8 +1,8 @@
 import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
-import { validateConfirmPassword } from '@/auth/validation/fields/validate-confirm-password';
-import { validateEmail } from '@/auth/validation/fields/validate-email';
-import { validateName } from '@/auth/validation/fields/validate-name';
-import { validatePassword } from '@/auth/validation/fields/validate-password';
+import { validateConfirmPassword } from '@/services/user/validation/validate-confirm-password';
+import { validateEmail } from '@/services/user/validation/validate-email';
+import { validateName } from '@/services/user/validation/validate-name';
+import { validatePassword } from '@/services/user/validation/validate-password';
 
 export function validateEmailRegisterForm(
     form: AuthSignUpForm,

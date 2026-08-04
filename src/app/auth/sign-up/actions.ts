@@ -16,7 +16,7 @@ import { getOtpRetryAfter, setOtpCooldown } from '@/auth/services/otp.service';
 import { validateEmailRegisterForm } from '@/auth/validation/email-register';
 import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
-import { getUserByEmail } from '@/services/user/user.service';
+import { getUserAuthDataByEmail } from '@/services/user/user.service';
 
 export interface SignUpState {
     formError?: string;
@@ -52,7 +52,7 @@ export async function signUp(
         };
     }
 
-    const user = await getUserByEmail(form.email);
+    const user = await getUserAuthDataByEmail(form.email);
 
     if (user?.emailVerified) {
         return {

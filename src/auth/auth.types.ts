@@ -1,47 +1,28 @@
-// Auth fields
-
-export interface AuthFields {
-    email: string;
-    phone: string;
-    name: string;
-    password: string;
-    confirmPassword: string;
-    otp: string;
-}
-
-export type AuthFieldsErrors = {
-    [K in keyof AuthFields]?: string;
-};
+import type { FormErrors } from '@/lib/types/form-errors';
+import type { UserFormFields } from '@/services/user/user-form.types';
 
 // Password set form
 export type AuthPasswordSetForm = Pick<
-    AuthFields,
+    UserFormFields,
     'password' | 'confirmPassword'
 >;
-
-export type AuthPasswordSetFormErrors = Pick<
-    AuthFieldsErrors,
-    'password' | 'confirmPassword'
->;
+export type AuthPasswordSetFormErrors = FormErrors<AuthPasswordSetForm>;
 
 // Password reset form
-export type AuthPasswordResetForm = Pick<AuthFields, 'email'>;
-export type AuthPasswordResetFormErrors = Pick<AuthFieldsErrors, 'email'>;
+export type AuthPasswordResetForm = Pick<UserFormFields, 'email'>;
+export type AuthPasswordResetFormErrors = FormErrors<AuthPasswordResetForm>;
 
 // Sign in form
-export type AuthSignInForm = Pick<AuthFields, 'email' | 'password'>;
-export type AuthSignInFormErrors = Pick<AuthFieldsErrors, 'email' | 'password'>;
+export type AuthSignInForm = Pick<UserFormFields, 'email' | 'password'>;
+export type AuthSignInFormErrors = FormErrors<AuthSignInForm>;
 
 // Sign up form
 export type AuthSignUpForm = Pick<
-    AuthFields,
+    UserFormFields,
     'name' | 'email' | 'password' | 'confirmPassword'
 >;
-export type AuthSignUpFormErrors = Pick<
-    AuthFieldsErrors,
-    'name' | 'email' | 'password' | 'confirmPassword'
->;
+export type AuthSignUpFormErrors = FormErrors<AuthSignUpForm>;
 
 // Otp form
-export type AuthOtpForm = Pick<AuthFields, 'otp'>;
-export type AuthOtpFormErrors = Pick<AuthFieldsErrors, 'otp'>;
+export type AuthOtpForm = Pick<UserFormFields, 'otp'>;
+export type AuthOtpFormErrors = FormErrors<AuthOtpForm>;

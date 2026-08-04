@@ -29,8 +29,9 @@ export function DeleteUserButton() {
         <Button
             disabled={isPending}
             onClick={handleClick}
+            variant="destructive"
         >
-            Удалить тестовый аккаунт
+            Удалить аккаунт
         </Button>
     );
 }

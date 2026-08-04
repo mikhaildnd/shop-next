@@ -2,7 +2,7 @@ import type {
     AuthPasswordResetForm,
     AuthPasswordResetFormErrors,
 } from '@/auth/auth.types';
-import { validateEmail } from '@/auth/validation/fields/validate-email';
+import { validateEmail } from '@/services/user/validation/validate-email';
 
 export function validatePasswordResetForm(
     form: AuthPasswordResetForm,
