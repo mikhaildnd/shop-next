@@ -3,7 +3,6 @@
 import { useActionState, useTransition } from 'react';
 import { useState } from 'react';
 
-import { AuthCard } from '@/app/auth/_components/AuthCard';
 import { OtpInput } from '@/app/auth/_components/OtpInput';
 import {
     resendVerificationOtp,
@@ -14,14 +13,10 @@ import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface VerifyEmailFormProps {
-    email: string;
     initialSeconds: number;
 }
 
-export function VerifyEmailForm({
-    email,
-    initialSeconds,
-}: VerifyEmailFormProps) {
+export function VerifyEmailForm({ initialSeconds }: VerifyEmailFormProps) {
     const [state, formAction, isPending] = useActionState(verifyEmail, {});
 
     const [isResending, startTransition] = useTransition();
@@ -54,56 +49,52 @@ export function VerifyEmailForm({
     };
 
     return (
-        <AuthCard
-            title="Введите код"
-            description={`Мы отправили код подтверждения на ${email}`}
+        <form
+            className="flex flex-col gap-4"
+            action={submitAction}
+            noValidate
         >
-            <form
-                className="flex flex-col gap-4"
-                action={submitAction}
+            <OtpInput
+                name={AUTH_FORM_FIELDS.otp}
+                length={OTP_LENGTH}
+                error={state.fieldErrors?.otp}
+            />
+
+            {state.formError && (
+                <p className="text-sm text-red-500">{state.formError}</p>
+            )}
+
+            <LoadingButton
+                type="submit"
+                isLoading={isPending}
             >
-                <OtpInput
-                    name={AUTH_FORM_FIELDS.otp}
-                    length={OTP_LENGTH}
-                    error={state.fieldErrors?.otp}
-                />
+                Подтвердить код
+            </LoadingButton>
 
-                {state.formError && (
-                    <p className="text-sm text-red-500">{state.formError}</p>
-                )}
+            <LoadingButton
+                type="button"
+                variant="secondary"
+                pendingText="Отправка"
+                onClick={handleResend}
+                isLoading={isResending}
+                disabled={isResending || !canResend}
+            >
+                Отправить код повторно
+            </LoadingButton>
 
-                <LoadingButton
-                    type="submit"
-                    isLoading={isPending}
-                >
-                    Подтвердить код
-                </LoadingButton>
+            {!canResend && (
+                <p className="text-muted-foreground text-sm">
+                    Повторная отправка через {secondsLeft} сек.
+                </p>
+            )}
 
-                <LoadingButton
-                    type="button"
-                    variant="secondary"
-                    pendingText="Отправка"
-                    onClick={handleResend}
-                    isLoading={isResending}
-                    disabled={isResending || !canResend}
-                >
-                    Отправить код повторно
-                </LoadingButton>
+            {successMessage && (
+                <p className="text-sm text-green-600">{successMessage}</p>
+            )}
 
-                {!canResend && (
-                    <p className="text-muted-foreground text-sm">
-                        Повторная отправка через {secondsLeft} сек.
-                    </p>
-                )}
-
-                {successMessage && (
-                    <p className="text-sm text-green-600">{successMessage}</p>
-                )}
-
-                {resendError && (
-                    <p className="text-sm text-red-500">{resendError}</p>
-                )}
-            </form>
-        </AuthCard>
+            {resendError && (
+                <p className="text-sm text-red-500">{resendError}</p>
+            )}
+        </form>
     );
 }

@@ -21,10 +21,11 @@ export default async function VerifyEmailPage() {
 
     return (
         <AuthSurface>
-            <VerifyEmailForm
-                email={email}
-                initialSeconds={initialSeconds}
+            <AuthSurface.Header
+                title="Введите код"
+                description={`Мы отправили код подтверждения на ${email}`}
             />
+            <VerifyEmailForm initialSeconds={initialSeconds} />
         </AuthSurface>
     );
 }
