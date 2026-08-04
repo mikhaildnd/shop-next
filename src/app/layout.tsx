@@ -1,15 +1,15 @@
 import './globals.css';
 
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Rubik } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/utils/cn';
 
-const fontMain = Inter({
+const fontMain = Rubik({
     variable: '--font-main',
     subsets: ['latin', 'cyrillic'],
-    weight: ['400'],
+    weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
