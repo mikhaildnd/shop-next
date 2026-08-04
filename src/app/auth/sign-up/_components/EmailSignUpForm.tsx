@@ -1,148 +1,102 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import type { SubmitEventHandler} from 'react';
-import { useState } from 'react';
+import { useActionState, useEffect } from 'react';
 
-import { AuthCard } from '@/app/auth/_components/AuthCard';
+import { FormGroup } from '@/app/auth/_components/FormGroup';
 import { FormInput } from '@/app/auth/_components/FormInput';
-import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
-import { authClient } from '@/auth/client';
-import { validateEmailRegisterForm } from '@/auth/validation/email-register';
+import { signUp } from '@/app/auth/sign-up/actions';
+import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
+import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
-import { routes } from '@/lib/routes';
+import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 export function EmailSignUpForm() {
-    const router = useRouter();
+    const [state, formAction, isPending] = useActionState(signUp, {});
 
-    const [form, setForm] = useState<AuthSignUpForm>({
-        email: '',
-        name: '',
-        password: '',
-        confirmPassword: '',
-    });
+    const { restart, secondsLeft } = useCountdownTimer();
 
-    const [errors, setErrors] = useState<AuthSignUpFormErrors>({});
-    const [isPending, setIsPending] = useState(false);
+    const canResend = secondsLeft === 0;
 
-    function updateForm<K extends keyof AuthSignUpForm>(
-        key: K,
-        value: AuthSignUpForm[K],
-    ) {
-        setForm((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
+    const retryAfterSeconds = state.retryAfterSeconds;
 
-        setErrors((prev) => ({
-            ...prev,
-            [key]: undefined,
-            form: undefined,
-        }));
-    }
-
-    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
-        event.preventDefault();
-
-        setErrors({});
-
-        const errors = validateEmailRegisterForm(form);
-
-        if (Object.keys(errors).length > 0) {
-            setErrors(errors);
+    useEffect(() => {
+        if (retryAfterSeconds === undefined || retryAfterSeconds <= 0) {
             return;
         }
 
-        setIsPending(true);
-
-        try {
-            const { error } = await authClient.signUp.email({
-                name: form.name,
-                email: form.email,
-                password: form.password,
-            });
-
-            if (error) {
-                setErrors({
-                    form: error.message ?? 'Произошла ошибка',
-                });
-
-                return;
-            }
-
-            const { error: otpError } =
-                await authClient.emailOtp.sendVerificationOtp({
-                    email: form.email,
-                    type: 'email-verification',
-                });
-
-            if (otpError) {
-                setErrors({
-                    form: otpError.message ?? 'Не удалось отправить код',
-                });
-
-                return;
-            }
-
-            router.push(routes.verifyEmailPage());
-        } finally {
-            setIsPending(false);
-        }
-    };
+        restart(retryAfterSeconds);
+    }, [retryAfterSeconds, restart]);
 
     return (
-        <AuthCard
-            title="Регистрация"
-            description="Введите e-mail, чтобы зарегистрироваться"
+        <form
+            className="flex flex-col gap-4"
+            action={formAction}
+            noValidate
         >
-            <form
-                className="flex flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
+            <FormGroup error={state.fieldErrors?.email}>
+                <Label htmlFor={AUTH_FORM_FIELDS.email}>E-mail</Label>
                 <FormInput
-                    value={form.email}
-                    onChange={(event) =>
-                        updateForm('email', event.target.value)
-                    }
-                    placeholder="Введите e-mail"
+                    id={AUTH_FORM_FIELDS.email}
+                    name={AUTH_FORM_FIELDS.email}
                     type="email"
-                    error={errors.email}
+                    autoComplete="email"
+                    defaultValue={state.values?.email}
+                    error={state.fieldErrors?.email}
                 />
+            </FormGroup>
+
+            <FormGroup error={state.fieldErrors?.name}>
+                <Label htmlFor={AUTH_FORM_FIELDS.name}>Имя</Label>
                 <FormInput
-                    value={form.name}
-                    onChange={(event) => updateForm('name', event.target.value)}
-                    placeholder="Введите Имя"
+                    id={AUTH_FORM_FIELDS.name}
+                    name={AUTH_FORM_FIELDS.name}
                     type="text"
-                    error={errors.name}
+                    autoComplete="name"
+                    error={state.fieldErrors?.name}
                 />
-                <FormInput
-                    value={form.password}
-                    onChange={(event) =>
-                        updateForm('password', event.target.value)
-                    }
-                    placeholder="Введите пароль"
-                    type="password"
-                    error={errors.password}
-                />
-                <FormInput
-                    value={form.confirmPassword}
-                    onChange={(event) =>
-                        updateForm('confirmPassword', event.target.value)
-                    }
-                    placeholder="Подтвердите пароль"
-                    type="password"
-                    error={errors.confirmPassword}
-                />
+            </FormGroup>
 
-                {errors.form && <p className="text-red-500">{errors.form}</p>}
+            <FormGroup error={state.fieldErrors?.password}>
+                <Label htmlFor={AUTH_FORM_FIELDS.password}>Пароль</Label>
+                <FormInput
+                    id={AUTH_FORM_FIELDS.password}
+                    name={AUTH_FORM_FIELDS.password}
+                    type="password"
+                    autoComplete="current-password"
+                    error={state.fieldErrors?.password}
+                />
+            </FormGroup>
 
-                <LoadingButton
-                    type="submit"
-                    isLoading={isPending}
-                >
-                    Зарегистрироваться
-                </LoadingButton>
-            </form>
-        </AuthCard>
+            <FormGroup error={state.fieldErrors?.confirmPassword}>
+                <Label htmlFor={AUTH_FORM_FIELDS.confirmPassword}>
+                    Подтвердите пароль
+                </Label>
+                <FormInput
+                    id={AUTH_FORM_FIELDS.confirmPassword}
+                    name={AUTH_FORM_FIELDS.confirmPassword}
+                    type="password"
+                    autoComplete="new-password"
+                    error={state.fieldErrors?.confirmPassword}
+                />
+            </FormGroup>
+
+            {state.formError && (
+                <p className="text-red-500">{state.formError}</p>
+            )}
+
+            <LoadingButton
+                type="submit"
+                isLoading={isPending}
+                disabled={isPending || !canResend}
+            >
+                Зарегистрироваться
+            </LoadingButton>
+
+            {!canResend && (
+                <p className="text-muted-foreground text-sm">
+                    Повторная отправка через {secondsLeft} сек.
+                </p>
+            )}
+        </form>
     );
 }

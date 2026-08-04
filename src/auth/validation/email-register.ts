@@ -1,36 +1,36 @@
-import type { AuthForm, AuthFormErrors } from '@/auth/auth.types';
-import { EMAIL_REGEX } from '@/auth/validation/validation.consts';
-
-type EmailRegisterForm = Pick<
-    AuthForm,
-    'name' | 'email' | 'password' | 'confirmPassword'
->;
+import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
+import { validateConfirmPassword } from '@/auth/validation/fields/validate-confirm-password';
+import { validateEmail } from '@/auth/validation/fields/validate-email';
+import { validateName } from '@/auth/validation/fields/validate-name';
+import { validatePassword } from '@/auth/validation/fields/validate-password';
 
 export function validateEmailRegisterForm(
-    form: EmailRegisterForm,
-): AuthFormErrors {
-    const errors: AuthFormErrors = {};
+    form: AuthSignUpForm,
+): AuthSignUpFormErrors {
+    const errors: AuthSignUpFormErrors = {};
 
-    if (!form.email) {
-        errors.email = 'Введите e-mail';
-    } else if (!EMAIL_REGEX.test(form.email)) {
-        errors.email = 'Введите корректный e-mail';
+    const emailError = validateEmail(form.email);
+    const nameError = validateName(form.name);
+    const passwordError = validatePassword(form.password);
+    const confirmPasswordError = validateConfirmPassword(
+        form.password,
+        form.confirmPassword,
+    );
+
+    if (emailError) {
+        errors.email = emailError;
     }
 
-    if (!form.name.trim()) {
-        errors.name = 'Введите имя';
+    if (nameError) {
+        errors.name = nameError;
     }
 
-    if (!form.password) {
-        errors.password = 'Введите пароль';
+    if (passwordError) {
+        errors.password = passwordError;
     }
 
-    if (form.password.length < 8) {
-        errors.password = 'Пароль должен содержать минимум 8 символов';
-    }
-
-    if (form.password !== form.confirmPassword) {
-        errors.confirmPassword = 'Пароли не совпадают';
+    if (confirmPasswordError) {
+        errors.confirmPassword = confirmPasswordError;
     }
 
     return errors;

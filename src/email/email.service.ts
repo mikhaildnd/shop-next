@@ -1,39 +1,8 @@
+import type { EmailOtpType, SendEmailOtpParams } from '@/email/email.types';
+
 import { resend } from './resend';
 
-// type SendVerificationEmailParams = {
-//     email: string;
-//     url: string;
-// };
-//
-// export async function sendVerificationEmail({
-//     email,
-//     url,
-// }: SendVerificationEmailParams) {
-//     await resend.emails.send({
-//         from: process.env.EMAIL_FROM!,
-//         to: email,
-//         subject: 'Подтвердите адрес электронной почты',
-//         html: `
-//             <h2>Подтверждение регистрации</h2>
-//
-//             <p>Спасибо за регистрацию.</p>
-//
-//             <p>
-//                 <a href="${url}">
-//                     Подтвердить адрес электронной почты
-//                 </a>
-//             </p>
-//         `,
-//     });
-// }
-
-type SendEmailOtpParams = {
-    email: string;
-    otp: string;
-    type: 'email-verification' | 'sign-in' | 'forget-password' | 'change-email';
-};
-
-function getEmailOtpSubject(type: SendEmailOtpParams['type']) {
+function getEmailOtpSubject(type: EmailOtpType) {
     switch (type) {
         case 'email-verification':
             return 'Подтверждение электронной почты';
@@ -52,7 +21,22 @@ function getEmailOtpSubject(type: SendEmailOtpParams['type']) {
 export async function sendEmailOtp({ email, otp, type }: SendEmailOtpParams) {
     const subject = getEmailOtpSubject(type);
 
-    await resend.emails.send({
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`
+====================================
+🔐 ${subject}
+
+Email: ${email}
+Code:  ${otp}
+====================================
+`);
+
+        return;
+    }
+
+    // Better Auth recommends not awaiting email sending to reduce timing attacks.
+    // TODO: On Vercel/Cloudflare replace with waitUntil().
+    return void resend.emails.send({
         from: process.env.EMAIL_FROM!,
         to: email,
         subject,

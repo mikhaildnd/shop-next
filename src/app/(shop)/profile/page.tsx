@@ -1,5 +1,5 @@
-import { DeleteUserButton } from '@/app/(shop)/profile/DeleteUserButton';
-import { SignOutButton } from '@/app/(shop)/profile/SignOutButton';
+import { DeleteUserButton } from '@/app/(shop)/profile/_components/DeleteUserButton';
+import { SignOutButton } from '@/app/(shop)/profile/_components/SignOutButton';
 import { getSession } from '@/auth/session';
 
 export default async function ProfilePage() {

@@ -1,17 +1,13 @@
-import type { AuthForm, AuthFormErrors } from '@/auth/auth.types';
+import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
+import { validateOtp } from '@/auth/validation/fields/validate-otp';
 
-type EmailOtpForm = Pick<AuthForm, 'otp'>;
+export function validateEmailOtpForm(form: AuthOtpForm): AuthOtpFormErrors {
+    const errors: AuthOtpFormErrors = {};
 
-export function validateEmailOtpForm(form: EmailOtpForm): AuthFormErrors {
-    const errors: AuthFormErrors = {};
+    const otpError = validateOtp(form.otp);
 
-    if (!form.otp) {
-        errors.otp = 'Введите код';
-        return errors;
-    }
-
-    if (!/^\d{6}$/.test(form.otp)) {
-        errors.otp = 'Введите шестизначный код';
+    if (otpError) {
+        errors.otp = otpError;
     }
 
     return errors;

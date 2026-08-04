@@ -1,94 +1,56 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import type { SubmitEventHandler} from 'react';
+import { useActionState, useTransition } from 'react';
 import { useState } from 'react';
 
 import { AuthCard } from '@/app/auth/_components/AuthCard';
-import { FormInput } from '@/app/auth/_components/FormInput';
-import { type AuthVerifyEmailFormErrors } from '@/auth/auth.types';
-import { authClient } from '@/auth/client';
-import { validateEmailOtpForm } from '@/auth/validation/email-otp';
+import { OtpInput } from '@/app/auth/_components/OtpInput';
+import {
+    resendVerificationOtp,
+    verifyEmail,
+} from '@/app/auth/verify-email/actions';
+import { AUTH_FORM_FIELDS, OTP_LENGTH } from '@/auth/auth.consts';
 import { LoadingButton } from '@/components/shared/LoadingButton';
-import { routes } from '@/lib/routes';
+import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface VerifyEmailFormProps {
     email: string;
+    initialSeconds: number;
 }
 
-export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
-    const router = useRouter();
+export function VerifyEmailForm({
+    email,
+    initialSeconds,
+}: VerifyEmailFormProps) {
+    const [state, formAction, isPending] = useActionState(verifyEmail, {});
 
-    const [otp, setOtp] = useState('');
+    const [isResending, startTransition] = useTransition();
+    const [resendError, setResendError] = useState<string>();
+    const [successMessage, setSuccessMessage] = useState<string>();
 
-    const [errors, setErrors] = useState<AuthVerifyEmailFormErrors>({});
+    const { restart, secondsLeft } = useCountdownTimer(initialSeconds);
 
-    const [isPending, setIsPending] = useState(false);
-    const [isResending, setIsResending] = useState(false);
+    const canResend = secondsLeft === 0;
 
-    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
-        event.preventDefault();
-
-        setErrors({});
-
-        const errors = validateEmailOtpForm({
-            otp,
-        });
-
-        if (Object.keys(errors).length > 0) {
-            setErrors(errors);
-            return;
-        }
-
-        setIsPending(true);
-
-        try {
-            const { error } = await authClient.emailOtp.verifyEmail({
-                email,
-                otp,
-            });
-
-            if (error) {
-                setErrors({
-                    form:
-                        error.message ??
-                        'Не удалось подтвердить адрес электронной почты',
-                });
-
-                return;
-            }
-
-            router.replace(routes.homePage());
-            router.refresh();
-        } finally {
-            setIsPending(false);
-        }
+    const submitAction = (formData: FormData) => {
+        formAction(formData);
     };
 
-    const handleResend = async () => {
-        setErrors({});
-        setIsResending(true);
+    const handleResend = () => {
+        startTransition(async () => {
+            setResendError(undefined);
+            setSuccessMessage(undefined);
 
-        try {
-            const { error } = await authClient.emailOtp.sendVerificationOtp({
-                email,
-                type: 'email-verification',
-            });
+            const { formError, successMessage, retryAfterSeconds } =
+                await resendVerificationOtp();
 
-            if (error) {
-                setErrors({
-                    form: error.message ?? 'Не удалось отправить код',
-                });
-
-                return;
+            if (retryAfterSeconds) {
+                restart(retryAfterSeconds);
             }
 
-            // TODO:
-            // Показать сообщение об успешной отправке.
-            // Запустить таймер повторной отправки.
-        } finally {
-            setIsResending(false);
-        }
+            setResendError(formError);
+            setSuccessMessage(successMessage);
+        });
     };
 
     return (
@@ -98,25 +60,16 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
         >
             <form
                 className="flex flex-col gap-4"
-                onSubmit={handleSubmit}
+                action={submitAction}
             >
-                <FormInput
-                    type="email"
-                    value={email}
-                    disabled
-                    readOnly
+                <OtpInput
+                    name={AUTH_FORM_FIELDS.otp}
+                    length={OTP_LENGTH}
+                    error={state.fieldErrors?.otp}
                 />
 
-                <FormInput
-                    value={otp}
-                    onChange={(event) => setOtp(event.target.value)}
-                    placeholder="Введите код"
-                    type="number"
-                    error={errors.otp}
-                />
-
-                {errors.form && (
-                    <p className="text-sm text-red-500">{errors.form}</p>
+                {state.formError && (
+                    <p className="text-sm text-red-500">{state.formError}</p>
                 )}
 
                 <LoadingButton
@@ -132,9 +85,24 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
                     pendingText="Отправка"
                     onClick={handleResend}
                     isLoading={isResending}
+                    disabled={isResending || !canResend}
                 >
                     Отправить код повторно
                 </LoadingButton>
+
+                {!canResend && (
+                    <p className="text-muted-foreground text-sm">
+                        Повторная отправка через {secondsLeft} сек.
+                    </p>
+                )}
+
+                {successMessage && (
+                    <p className="text-sm text-green-600">{successMessage}</p>
+                )}
+
+                {resendError && (
+                    <p className="text-sm text-red-500">{resendError}</p>
+                )}
             </form>
         </AuthCard>
     );

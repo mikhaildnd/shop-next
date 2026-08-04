@@ -1,118 +1,71 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import type { SubmitEventHandler} from 'react';
-import { useState } from 'react';
+import Link from 'next/link';
+import { useActionState } from 'react';
 
-import { AuthCard } from '@/app/auth/_components/AuthCard';
+import { FormGroup } from '@/app/auth/_components/FormGroup';
 import { FormInput } from '@/app/auth/_components/FormInput';
-import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
-import { authClient } from '@/auth/client';
-import { validateEmailAuthForm } from '@/auth/validation/email-auth';
+import { signIn } from '@/app/auth/sign-in/actions';
+import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
+import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { routes } from '@/lib/routes';
 
 export function EmailSignInForm() {
-    const router = useRouter();
-
-    const [form, setForm] = useState<AuthSignInForm>({
-        email: '',
-        password: '',
-    });
-    const [errors, setErrors] = useState<AuthSignInFormErrors>({});
-    const [isPending, setIsPending] = useState(false);
-
-    function updateForm<K extends keyof AuthSignInForm>(
-        key: K,
-        value: AuthSignInForm[K],
-    ) {
-        setForm((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
-
-        setErrors((prev) => ({
-            ...prev,
-            [key]: undefined,
-            form: undefined,
-        }));
-    }
-
-    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (event) => {
-        event.preventDefault();
-
-        setErrors({});
-
-        const errors = validateEmailAuthForm(form);
-
-        if (Object.keys(errors).length > 0) {
-            setErrors(errors);
-            return;
-        }
-
-        setIsPending(true);
-
-        try {
-            const { error } = await authClient.signIn.email({
-                email: form.email,
-                password: form.password,
-            });
-
-            if (error) {
-                setErrors({
-                    form: error.message ?? 'Произошла ошибка',
-                });
-
-                return;
-            }
-
-            router.replace(routes.homePage());
-            router.refresh();
-        } finally {
-            setIsPending(false);
-        }
-    };
+    const [state, formAction, isPending] = useActionState(signIn, {});
 
     return (
-        <AuthCard
-            title="Войти"
-            description="Введите e-mail, чтобы войти"
+        <form
+            className="flex flex-col gap-4"
+            action={formAction}
+            noValidate
         >
-            <form
-                className="flex flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
+            <FormGroup error={state.fieldErrors?.email}>
+                <Label htmlFor={AUTH_FORM_FIELDS.email}>E-mail</Label>
                 <FormInput
-                    value={form.email}
-                    onChange={(event) =>
-                        updateForm('email', event.target.value)
-                    }
-                    placeholder="Введите e-mail"
+                    id={AUTH_FORM_FIELDS.email}
+                    name={AUTH_FORM_FIELDS.email}
                     type="email"
-                    error={errors.email}
+                    autoComplete="email"
+                    defaultValue={state.values?.email}
+                    error={state.fieldErrors?.email}
                 />
+            </FormGroup>
 
+            <FormGroup
+                error={state.fieldErrors?.password}
+                className="relative"
+            >
+                <Label htmlFor={AUTH_FORM_FIELDS.password}>Пароль</Label>
                 <FormInput
-                    value={form.password}
-                    onChange={(event) =>
-                        updateForm('password', event.target.value)
-                    }
-                    placeholder="Введите пароль"
+                    id={AUTH_FORM_FIELDS.password}
+                    name={AUTH_FORM_FIELDS.password}
                     type="password"
-                    error={errors.password}
+                    autoComplete="current-password"
+                    error={state.fieldErrors?.password}
                 />
+                <div className="absolute top-0 right-0 flex justify-center">
+                    <p className="text-sm">
+                        <Link
+                            href={routes.passwordResetPage()}
+                            className="focus-ring link-style"
+                        >
+                            Забыли пароль?
+                        </Link>
+                    </p>
+                </div>
+            </FormGroup>
 
-                {errors.form && (
-                    <p className="text-sm text-red-500">{errors.form}</p>
-                )}
+            {state.formError && (
+                <p className="text-sm text-red-500">{state.formError}</p>
+            )}
 
-                <LoadingButton
-                    type="submit"
-                    isLoading={isPending}
-                >
-                    Войти
-                </LoadingButton>
-            </form>
-        </AuthCard>
+            <LoadingButton
+                type="submit"
+                isLoading={isPending}
+            >
+                Войти
+            </LoadingButton>
+        </form>
     );
 }

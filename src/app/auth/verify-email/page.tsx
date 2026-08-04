@@ -1,19 +1,30 @@
 import { redirect } from 'next/navigation';
 
+import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { VerifyEmailForm } from '@/app/auth/verify-email/_components/VerifyEmailForm';
-import { getSession } from '@/auth/session';
+import { getVerifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
+import { getOtpRetryAfter } from '@/auth/services/otp.service';
+import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
 
 export default async function VerifyEmailPage() {
-    const session = await getSession();
+    const email = await getVerifyEmailCookie();
 
-    if (!session) {
+    if (!email) {
         redirect(routes.signInPage());
     }
 
-    if (session.user.emailVerified) {
-        redirect(routes.homePage());
-    }
+    const initialSeconds = await getOtpRetryAfter({
+        identifier: email,
+        purpose: OtpPurpose.EMAIL_VERIFICATION,
+    });
 
-    return <VerifyEmailForm email={session.user.email} />;
+    return (
+        <AuthSurface>
+            <VerifyEmailForm
+                email={email}
+                initialSeconds={initialSeconds}
+            />
+        </AuthSurface>
+    );
 }

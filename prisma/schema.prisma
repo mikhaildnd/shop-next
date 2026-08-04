@@ -150,6 +150,18 @@ model Verification {
   @@map("verifications")
 }
 
+model OtpCooldown {
+  identifier String
+  purpose    OtpPurpose
+  expiresAt  DateTime   @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([identifier, purpose])
+  @@map("otp_cooldowns")
+}
+
 enum MeasureType {
   GRAM
   MILLILITER
@@ -159,4 +171,11 @@ enum MeasureType {
 enum UserRole {
   ADMIN
   USER
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  PASSWORD_RESET
+  EMAIL_CHANGE
 }

@@ -33,6 +33,12 @@ export const routes = {
 
     verifyEmailPage: () => '/auth/verify-email',
 
+    passwordResetPage: () => '/auth/password-reset',
+
+    passwordResetVerifyPage: () => '/auth/password-reset/verify',
+
+    passwordSetPage: () => '/auth/password-reset/set-password',
+
     api: {
         search: (query: string) => {
             return buildUrl({

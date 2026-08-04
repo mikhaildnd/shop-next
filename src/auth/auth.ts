@@ -1,7 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { nextCookies } from 'better-auth/next-js';
 import { emailOTP } from 'better-auth/plugins';
 
+import { OTP_EXPIRES_IN } from '@/auth/auth.consts';
+import { deleteOtpCooldownsByIdentifier } from '@/auth/services/otp.service';
 import { sendEmailOtp } from '@/email/email.service';
 import { prisma } from '@/lib/db';
 
@@ -11,21 +14,29 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
+        requireEmailVerification: true,
+    },
+    emailVerification: {
+        autoSignInAfterVerification: true,
     },
     user: {
         deleteUser: {
             enabled: true,
+            beforeDelete: async (user) => {
+                await deleteOtpCooldownsByIdentifier(user.email);
+            },
         },
     },
     plugins: [
         emailOTP({
-            async sendVerificationOTP({ email, otp, type }) {
-                void sendEmailOtp({
-                    email,
-                    otp,
-                    type,
-                });
-            },
+            overrideDefaultEmailVerification: true,
+            sendVerificationOTP: sendEmailOtp,
+            sendVerificationOnSignUp: true,
+            otpLength: 6,
+            allowedAttempts: 3,
+            expiresIn: OTP_EXPIRES_IN,
+            resendStrategy: 'rotate',
         }),
+        nextCookies(), // must be last
     ],
 });

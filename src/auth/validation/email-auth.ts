@@ -1,23 +1,22 @@
-import type { AuthForm, AuthFormErrors } from '@/auth/auth.types';
-import { EMAIL_REGEX } from '@/auth/validation/validation.consts';
+import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
+import { validateEmail } from '@/auth/validation/fields/validate-email';
+import { validatePassword } from '@/auth/validation/fields/validate-password';
 
-type EmailAuthForm = Pick<AuthForm, 'email' | 'password'>;
+export function validateEmailAuthForm(
+    form: AuthSignInForm,
+): AuthSignInFormErrors {
+    const errors: AuthSignInFormErrors = {};
 
-export function validateEmailAuthForm(form: EmailAuthForm): AuthFormErrors {
-    const errors: AuthFormErrors = {};
+    const emailError = validateEmail(form.email);
 
-    if (!form.email) {
-        errors.email = 'Введите e-mail';
-    } else if (!EMAIL_REGEX.test(form.email)) {
-        errors.email = 'Введите корректный e-mail';
+    if (emailError) {
+        errors.email = emailError;
     }
 
-    if (!form.password) {
-        errors.password = 'Введите пароль';
-    }
+    const passwordError = validatePassword(form.password);
 
-    if (form.password.length < 8) {
-        errors.password = 'Пароль должен содержать минимум 8 символов';
+    if (passwordError) {
+        errors.password = passwordError;
     }
 
     return errors;
