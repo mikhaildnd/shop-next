@@ -4,7 +4,6 @@ import { nextCookies } from 'better-auth/next-js';
 import { emailOTP } from 'better-auth/plugins';
 
 import { OTP_EXPIRES_IN } from '@/auth/auth.consts';
-import { deleteOtpCooldownsByIdentifier } from '@/auth/services/otp.service';
 import { sendEmailOtp } from '@/email/email.service';
 import { prisma } from '@/lib/db';
 
@@ -22,14 +21,14 @@ export const auth = betterAuth({
     user: {
         deleteUser: {
             enabled: true,
-            beforeDelete: async (user) => {
-                await deleteOtpCooldownsByIdentifier(user.email);
-            },
         },
     },
     plugins: [
         emailOTP({
             overrideDefaultEmailVerification: true,
+            changeEmail: {
+                enabled: true,
+            },
             sendVerificationOTP: sendEmailOtp,
             sendVerificationOnSignUp: true,
             otpLength: 6,

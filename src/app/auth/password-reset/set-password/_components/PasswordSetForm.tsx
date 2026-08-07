@@ -51,6 +51,7 @@ export function PasswordSetForm() {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
+                disabled={isPending}
             >
                 Сохранить пароль
             </LoadingButton>

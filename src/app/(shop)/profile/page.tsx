@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { DeleteUserButton } from '@/app/(shop)/profile/_components/DeleteUserButton';
@@ -5,6 +6,7 @@ import { ProfileBadge } from '@/app/(shop)/profile/_components/ProfileBadge';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
+import { SignOutButton } from '@/app/(shop)/profile/_components/SignOutButton';
 import { getSession } from '@/auth/session';
 import { Button } from '@/components/shared/Button';
 import { routes } from '@/lib/routes';
@@ -39,7 +41,11 @@ export default async function ProfilePage() {
                                     variant="secondary"
                                     size="xs"
                                 >
-                                    Изменить
+                                    <Link
+                                        href={routes.profileChangeEmailPage()}
+                                    >
+                                        Изменить
+                                    </Link>
                                 </Button>
                             }
                         >
@@ -49,37 +55,10 @@ export default async function ProfilePage() {
                                 <ProfileBadge text="Подтвержден" />
                             </div>
                         </ProfileItem>
-
-                        <div className="flex items-center justify-between gap-6">
-                            <div className="flex flex-col gap-2">
-                                <p className="text-sm font-medium text-black">
-                                    Email
-                                </p>
-
-                                <div className="flex items-center gap-2">
-                                    <p className="text-base">{user.email}</p>
-
-                                    {user.emailVerified ? (
-                                        <ProfileBadge text="Подтвержден" />
-                                    ) : (
-                                        <ProfileBadge
-                                            text="Не подтвержден"
-                                            variant="warning"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            <Button
-                                variant="secondary"
-                                size="xs"
-                            >
-                                Изменить
-                            </Button>
-                        </div>
                     </div>
                 </ProfileSection>
 
+                {/*TODO использовать ProfileItem*/}
                 <ProfileSection title="Безопасность">
                     <div className="flex items-center justify-between gap-6">
                         <div>
@@ -103,6 +82,7 @@ export default async function ProfilePage() {
                 >
                     <div className="flex flex-col items-start gap-3">
                         <DeleteUserButton />
+                        <SignOutButton />
                     </div>
                 </ProfileSection>
             </div>

@@ -7,33 +7,31 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import {
     AUTH_FORM_FIELDS,
-    OTP_RESEND_TIMEOUT_SECONDS,
+    PASSWORD_RESET_ATTEMPTS,
+    PASSWORD_RESET_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type {
     AuthPasswordResetForm,
     AuthPasswordResetFormErrors,
 } from '@/auth/auth.types';
-import { setPasswordResetCookie } from '@/auth/cookies/password-reset-cookie';
-import { setVerifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
+import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { getOtpRetryAfter, setOtpCooldown } from '@/auth/services/otp.service';
 import { validatePasswordResetForm } from '@/auth/validation/password-reset';
-import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
-import { getUserAuthDataByEmail } from '@/services/user/user.service';
+import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
+import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
-export interface RequestPasswordResetState {
+interface RequestPasswordResetState {
     values?: AuthPasswordResetForm;
     fieldErrors?: AuthPasswordResetFormErrors;
     formError?: string;
+    rateLimit?: RateLimitState;
 }
 
 export async function requestPasswordReset(
     _: RequestPasswordResetState,
     formData: FormData,
 ): Promise<RequestPasswordResetState> {
-    const requestHeaders = await headers();
-
     const form: AuthPasswordResetForm = {
         email: String(formData.get(AUTH_FORM_FIELDS.email) ?? ''),
     };
@@ -47,34 +45,21 @@ export async function requestPasswordReset(
         };
     }
 
-    const user = await getUserAuthDataByEmail(form.email);
+    const rateLimit = await consumeRateLimit({
+        action: 'password-reset',
+        identifier: form.email,
+        windowSeconds: PASSWORD_RESET_TIMEOUT_SECONDS,
+        max: PASSWORD_RESET_ATTEMPTS,
+    });
 
-    if (user && !user.emailVerified) {
-        const retryAfter = await getOtpRetryAfter({
-            identifier: form.email,
-            purpose: OtpPurpose.EMAIL_VERIFICATION,
-        });
-
-        if (retryAfter === 0) {
-            await auth.api.sendVerificationOTP({
-                body: {
-                    email: form.email,
-                    type: 'email-verification',
-                },
-                headers: requestHeaders,
-            });
-
-            await setOtpCooldown({
-                identifier: form.email,
-                purpose: OtpPurpose.EMAIL_VERIFICATION,
-                duration: OTP_RESEND_TIMEOUT_SECONDS,
-            });
-        }
-
-        await setVerifyEmailCookie(form.email);
-
-        redirect(routes.verifyEmailPage());
+    if (!rateLimit.allowed) {
+        return {
+            values: form,
+            rateLimit,
+        };
     }
+
+    const requestHeaders = await headers();
 
     try {
         await auth.api.requestPasswordResetEmailOTP({
@@ -92,14 +77,8 @@ export async function requestPasswordReset(
         throw error;
     }
 
-    await setPasswordResetCookie({
+    await passwordResetCookie.set({
         email: form.email,
-    });
-
-    await setOtpCooldown({
-        identifier: form.email,
-        purpose: OtpPurpose.PASSWORD_RESET,
-        duration: OTP_RESEND_TIMEOUT_SECONDS,
     });
 
     redirect(routes.passwordResetVerifyPage());

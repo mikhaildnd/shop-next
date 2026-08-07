@@ -1,13 +1,13 @@
 import type {
-    UpdateNameForm,
-    UpdateNameFormErrors,
+    ChangeNameForm,
+    ChangeNameFormErrors,
 } from '@/app/(shop)/profile/profile.types';
 import { validateName } from '@/services/user/validation/validate-name';
 
-export function validateUpdateNameForm(
-    form: UpdateNameForm,
-): UpdateNameFormErrors {
-    const errors: UpdateNameFormErrors = {};
+export function validateChangeNameForm(
+    form: ChangeNameForm,
+): ChangeNameFormErrors {
+    const errors: ChangeNameFormErrors = {};
 
     const nameError = validateName(form.name);
 

@@ -27,6 +27,10 @@ export const routes = {
 
     profilePage: () => '/profile',
 
+    profileChangeEmailPage: () => '/profile/change-email',
+
+    profileChangeEmailVerifyPage: () => '/profile/change-email/verify',
+
     signInPage: () => '/auth/sign-in',
 
     signUpPage: () => '/auth/sign-up',

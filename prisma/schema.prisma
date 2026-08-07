@@ -150,16 +150,21 @@ model Verification {
   @@map("verifications")
 }
 
-model OtpCooldown {
+model RateLimit {
+  id String @id @default(uuid())
+
+  action     String
   identifier String
-  purpose    OtpPurpose
-  expiresAt  DateTime   @map("expires_at")
+
+  count Int
+
+  expiresAt DateTime? @map("expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([identifier, purpose])
-  @@map("otp_cooldowns")
+  @@unique([action, identifier])
+  @@map("rate_limits")
 }
 
 enum MeasureType {

@@ -2,30 +2,39 @@ import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { VerifyEmailForm } from '@/app/auth/verify-email/_components/VerifyEmailForm';
-import { getVerifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
-import { getOtpRetryAfter } from '@/auth/services/otp.service';
-import { OtpPurpose } from '@/generated/prisma/client';
+import { restartSignUp } from '@/app/auth/verify-email/actions';
+import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { routes } from '@/lib/routes';
 
 export default async function VerifyEmailPage() {
-    const email = await getVerifyEmailCookie();
+    const verifyEmail = await verifyEmailCookie.get();
 
-    if (!email) {
+    if (!verifyEmail) {
         redirect(routes.signInPage());
     }
 
-    const initialSeconds = await getOtpRetryAfter({
-        identifier: email,
-        purpose: OtpPurpose.EMAIL_VERIFICATION,
-    });
+    const { email } = verifyEmail;
 
     return (
         <AuthSurface>
             <AuthSurface.Header
                 title="Введите код"
-                description={`Мы отправили код подтверждения на ${email}`}
-            />
-            <VerifyEmailForm initialSeconds={initialSeconds} />
+                description="Код подтверждения отправлен."
+            >
+                <div className="flex items-center justify-between gap-2">
+                    <span>{email}</span>
+
+                    <form action={restartSignUp}>
+                        <button
+                            type="submit"
+                            className="link-style"
+                        >
+                            Изменить
+                        </button>
+                    </form>
+                </div>
+            </AuthSurface.Header>
+            <VerifyEmailForm />
         </AuthSurface>
     );
 }

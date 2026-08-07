@@ -1,6 +1,7 @@
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
 import { validateOtp } from '@/services/user/validation/validate-otp';
 
+//TODO Вынести, повтор validateChangeEmailOtpForm
 export function validateEmailOtpForm(form: AuthOtpForm): AuthOtpFormErrors {
     const errors: AuthOtpFormErrors = {};
 

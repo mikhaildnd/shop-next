@@ -2,16 +2,6 @@ import { prisma } from '@/lib/db';
 import { mapUserToDto } from '@/lib/mappers/user.mapper';
 import type { UserDto } from '@/services/user/user.types';
 
-export async function getUserAuthDataByEmail(email: string) {
-    return prisma.user.findUnique({
-        where: { email },
-        select: {
-            id: true,
-            emailVerified: true,
-        },
-    });
-}
-
 export async function getUserById(id: string): Promise<UserDto | null> {
     const user = await prisma.user.findUnique({
         where: { id },

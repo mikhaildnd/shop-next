@@ -10,14 +10,9 @@ import type {
     AuthPasswordSetForm,
     AuthPasswordSetFormErrors,
 } from '@/auth/auth.types';
-import {
-    clearPasswordResetCookie,
-    getPasswordResetCookie,
-} from '@/auth/cookies/password-reset-cookie';
+import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { deleteOtpCooldown } from '@/auth/services/otp.service';
 import { validateSetPasswordForm } from '@/auth/validation/set-password';
-import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
 
 export interface SetPasswordState {
@@ -29,9 +24,7 @@ export async function setPassword(
     _: SetPasswordState,
     formData: FormData,
 ): Promise<SetPasswordState> {
-    const requestHeaders = await headers();
-
-    const passwordReset = await getPasswordResetCookie();
+    const passwordReset = await passwordResetCookie.get();
 
     if (!passwordReset?.otp) {
         redirect(routes.passwordResetVerifyPage());
@@ -54,6 +47,8 @@ export async function setPassword(
         };
     }
 
+    const requestHeaders = await headers();
+
     try {
         await auth.api.resetPasswordEmailOTP({
             body: {
@@ -73,12 +68,7 @@ export async function setPassword(
         throw error;
     }
 
-    await clearPasswordResetCookie();
-
-    await deleteOtpCooldown({
-        identifier: email,
-        purpose: OtpPurpose.PASSWORD_RESET,
-    });
+    await passwordResetCookie.clear();
 
     redirect(routes.signInPage());
 }

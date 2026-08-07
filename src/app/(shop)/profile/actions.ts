@@ -5,25 +5,25 @@ import { redirect } from 'next/navigation';
 
 import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
 import type {
-    UpdateNameForm,
-    UpdateNameFormErrors,
+    ChangeNameForm,
+    ChangeNameFormErrors,
 } from '@/app/(shop)/profile/profile.types';
-import { validateUpdateNameForm } from '@/app/(shop)/profile/validation/user-name';
+import { validateChangeNameForm } from '@/app/(shop)/profile/validation/user-name';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
 import { updateUserName } from '@/services/user/user.service';
 
-export interface UpdateNameState {
+interface ChangeNameState {
     success?: boolean;
     formError?: string;
-    fieldErrors?: UpdateNameFormErrors;
-    values?: UpdateNameForm;
+    fieldErrors?: ChangeNameFormErrors;
+    values?: ChangeNameForm;
 }
 
-export async function updateName(
-    _: UpdateNameState,
+export async function changeName(
+    _: ChangeNameState,
     formData: FormData,
-): Promise<UpdateNameState> {
+): Promise<ChangeNameState> {
     const session = await getSession();
 
     if (!session) {
@@ -34,7 +34,7 @@ export async function updateName(
         name: String(formData.get(PROFILE_FORM_FIELDS.name) ?? ''),
     };
 
-    const fieldErrors = validateUpdateNameForm(form);
+    const fieldErrors = validateChangeNameForm(form);
 
     if (Object.keys(fieldErrors).length > 0) {
         return {

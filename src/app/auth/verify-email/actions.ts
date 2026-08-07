@@ -7,45 +7,33 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import {
     AUTH_FORM_FIELDS,
-    OTP_RESEND_TIMEOUT_SECONDS,
+    SIGN_UP_ATTEMPTS,
+    SIGN_UP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
-import {
-    clearVerifyEmailCookie,
-    getVerifyEmailCookie,
-} from '@/auth/cookies/verify-email-cookie';
+import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { mapAuthError } from '@/auth/errors/map-auth-error';
-import {
-    deleteOtpCooldown,
-    getOtpRetryAfter,
-    setOtpCooldown,
-} from '@/auth/services/otp.service';
 import { validateEmailOtpForm } from '@/auth/validation/email-otp';
-import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
+import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
+import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
 export interface VerifyEmailState {
     formError?: string;
     fieldErrors?: AuthOtpFormErrors;
 }
 
-export interface ResendVerificationOtpResult {
-    formError?: string;
-    successMessage?: string;
-    retryAfterSeconds?: number;
-}
-
 export async function verifyEmail(
     _: VerifyEmailState,
     formData: FormData,
 ): Promise<VerifyEmailState> {
-    const requestHeaders = await headers();
+    const verifyEmail = await verifyEmailCookie.get();
 
-    const email = await getVerifyEmailCookie();
-
-    if (!email) {
+    if (!verifyEmail) {
         redirect(routes.signInPage());
     }
+
+    const { email } = verifyEmail;
 
     const form: AuthOtpForm = {
         otp: String(formData.get(AUTH_FORM_FIELDS.otp) ?? ''),
@@ -58,6 +46,8 @@ export async function verifyEmail(
             fieldErrors,
         };
     }
+
+    const requestHeaders = await headers();
 
     try {
         await auth.api.verifyEmailOTP({
@@ -77,36 +67,41 @@ export async function verifyEmail(
         throw error;
     }
 
-    await clearVerifyEmailCookie();
-
-    await deleteOtpCooldown({
-        identifier: email,
-        purpose: OtpPurpose.EMAIL_VERIFICATION,
-    });
+    await verifyEmailCookie.clear();
 
     redirect(routes.profilePage());
 }
 
+export interface ResendVerificationOtpResult {
+    formError?: string;
+    rateLimit?: RateLimitState;
+    success: boolean;
+}
+
 export async function resendVerificationOtp(): Promise<ResendVerificationOtpResult> {
-    const requestHeaders = await headers();
+    const verifyEmail = await verifyEmailCookie.get();
 
-    const email = await getVerifyEmailCookie();
-
-    if (!email) {
+    if (!verifyEmail) {
         redirect(routes.signInPage());
     }
 
-    const retryAfter = await getOtpRetryAfter({
+    const { email } = verifyEmail;
+
+    const rateLimit = await consumeRateLimit({
+        action: 'sign-up',
         identifier: email,
-        purpose: OtpPurpose.EMAIL_VERIFICATION,
+        windowSeconds: SIGN_UP_TIMEOUT_SECONDS,
+        max: SIGN_UP_ATTEMPTS,
     });
 
-    if (retryAfter > 0) {
+    if (!rateLimit.allowed) {
         return {
-            formError: 'Код уже был отправлен.',
-            retryAfterSeconds: retryAfter,
+            rateLimit,
+            success: false,
         };
     }
+
+    const requestHeaders = await headers();
 
     try {
         await auth.api.sendVerificationOTP({
@@ -117,23 +112,22 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
             headers: requestHeaders,
         });
 
-        await setOtpCooldown({
-            identifier: email,
-            purpose: OtpPurpose.EMAIL_VERIFICATION,
-            duration: OTP_RESEND_TIMEOUT_SECONDS,
-        });
-
         return {
-            successMessage: 'Новый код отправлен.',
-            retryAfterSeconds: OTP_RESEND_TIMEOUT_SECONDS,
+            rateLimit,
+            success: true,
         };
     } catch (error) {
         if (isAPIError(error)) {
             return {
                 formError: mapAuthError(error),
+                success: false,
             };
         }
 
         throw error;
     }
+}
+
+export async function restartSignUp() {
+    redirect(routes.signUpPage());
 }

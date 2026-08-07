@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from 'react';
 
-import { updateName } from '@/app/(shop)/profile/actions';
+import { changeName } from '@/app/(shop)/profile/actions';
 import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
 import { FormGroup } from '@/app/auth/_components/FormGroup';
 import { FormInput } from '@/app/auth/_components/FormInput';
@@ -18,7 +18,7 @@ export function UpdateUserNameForm({
     onSuccess,
     defaultValue,
 }: UpdateUserNameFormProps) {
-    const [state, formAction, isPending] = useActionState(updateName, {});
+    const [state, formAction, isPending] = useActionState(changeName, {});
 
     useEffect(() => {
         if (!state.success) {

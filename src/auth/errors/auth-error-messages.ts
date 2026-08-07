@@ -22,6 +22,11 @@ export const AUTH_ERROR_MESSAGES = new Map<string, string>([
         AUTH_ERROR_CODES.TOO_MANY_ATTEMPTS.code,
         'Превышено количество попыток. Запросите новый код',
     ],
+    [
+        AUTH_ERROR_CODES.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL.code,
+        'Пользователь с таким e-mail существует. Используйте другой e-mail.',
+    ],
+    [AUTH_ERROR_CODES.USER_ALREADY_EXISTS.code, 'Пользователь уже существует.'],
 ]);
 
 export const DEFAULT_AUTH_ERROR_MESSAGE =

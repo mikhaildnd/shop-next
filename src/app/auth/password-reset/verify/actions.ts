@@ -7,37 +7,27 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import {
     AUTH_FORM_FIELDS,
-    OTP_RESEND_TIMEOUT_SECONDS,
+    PASSWORD_RESET_ATTEMPTS,
+    PASSWORD_RESET_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
-import {
-    getPasswordResetCookie,
-    setPasswordResetCookie,
-} from '@/auth/cookies/password-reset-cookie';
+import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { getOtpRetryAfter, setOtpCooldown } from '@/auth/services/otp.service';
 import { validateEmailOtpForm } from '@/auth/validation/email-otp';
-import { OtpPurpose } from '@/generated/prisma/client';
 import { routes } from '@/lib/routes';
+import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
+import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
 export interface VerifyPasswordResetState {
     formError?: string;
     fieldErrors?: AuthOtpFormErrors;
 }
 
-export interface ResendPasswordResetOtpResult {
-    formError?: string;
-    successMessage?: string;
-    retryAfterSeconds?: number;
-}
-
 export async function verifyPasswordResetOtp(
     _: VerifyPasswordResetState,
     formData: FormData,
 ): Promise<VerifyPasswordResetState> {
-    const requestHeaders = await headers();
-
-    const passwordReset = await getPasswordResetCookie();
+    const passwordReset = await passwordResetCookie.get();
 
     if (!passwordReset) {
         redirect(routes.passwordResetPage());
@@ -57,6 +47,8 @@ export async function verifyPasswordResetOtp(
         };
     }
 
+    const requestHeaders = await headers();
+
     try {
         await auth.api.checkVerificationOTP({
             body: {
@@ -67,7 +59,7 @@ export async function verifyPasswordResetOtp(
             headers: requestHeaders,
         });
 
-        await setPasswordResetCookie({
+        await passwordResetCookie.set({
             email,
             otp: form.otp,
         });
@@ -84,10 +76,14 @@ export async function verifyPasswordResetOtp(
     redirect(routes.passwordSetPage());
 }
 
-export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpResult> {
-    const requestHeaders = await headers();
+export interface ResendPasswordResetOtpResult {
+    formError?: string;
+    success: boolean;
+    rateLimit?: RateLimitState;
+}
 
-    const passwordReset = await getPasswordResetCookie();
+export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpResult> {
+    const passwordReset = await passwordResetCookie.get();
 
     if (!passwordReset) {
         redirect(routes.passwordResetPage());
@@ -95,17 +91,21 @@ export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpRe
 
     const { email } = passwordReset;
 
-    const retryAfter = await getOtpRetryAfter({
+    const rateLimit = await consumeRateLimit({
+        action: 'password-reset',
         identifier: email,
-        purpose: OtpPurpose.PASSWORD_RESET,
+        windowSeconds: PASSWORD_RESET_TIMEOUT_SECONDS,
+        max: PASSWORD_RESET_ATTEMPTS,
     });
 
-    if (retryAfter > 0) {
+    if (!rateLimit.allowed) {
         return {
-            formError: 'Код уже был отправлен.',
-            retryAfterSeconds: retryAfter,
+            rateLimit,
+            success: false,
         };
     }
+
+    const requestHeaders = await headers();
 
     try {
         await auth.api.sendVerificationOTP({
@@ -116,20 +116,15 @@ export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpRe
             headers: requestHeaders,
         });
 
-        await setOtpCooldown({
-            identifier: email,
-            purpose: OtpPurpose.PASSWORD_RESET,
-            duration: OTP_RESEND_TIMEOUT_SECONDS,
-        });
-
         return {
-            successMessage: 'Новый код отправлен.',
-            retryAfterSeconds: OTP_RESEND_TIMEOUT_SECONDS,
+            rateLimit,
+            success: true,
         };
     } catch (error) {
         if (isAPIError(error)) {
             return {
                 formError: mapAuthError(error),
+                success: false,
             };
         }
 

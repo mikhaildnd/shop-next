@@ -3,19 +3,19 @@
 import { useActionState, useTransition } from 'react';
 import { useState } from 'react';
 
-import { OtpInput } from '@/app/auth/_components/OtpInput';
 import {
-    resendPasswordResetOtp,
-    verifyPasswordResetOtp,
-} from '@/app/auth/password-reset/verify/actions';
+    resendChangeEmailOtp,
+    verifyEmailChangeOtp,
+} from '@/app/(shop)/profile/change-email/verify/actions';
+import { OtpInput } from '@/app/auth/_components/OtpInput';
 import { AUTH_FORM_FIELDS, OTP_LENGTH } from '@/auth/auth.consts';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
-export function VerifyPasswordResetForm() {
+export function VerifyEmailChangeForm() {
     const [state, formAction, isPending] = useActionState(
-        verifyPasswordResetOtp,
+        verifyEmailChangeOtp,
         {},
     );
 
@@ -37,7 +37,7 @@ export function VerifyPasswordResetForm() {
             setShowSuccessMessage(false);
 
             const { formError, success, rateLimit } =
-                await resendPasswordResetOtp();
+                await resendChangeEmailOtp();
 
             if (rateLimit) {
                 setRateLimit(rateLimit);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState } from 'react';
 
 import { FormGroup } from '@/app/auth/_components/FormGroup';
 import { FormInput } from '@/app/auth/_components/FormInput';
@@ -13,19 +13,11 @@ import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 export function EmailSignUpForm() {
     const [state, formAction, isPending] = useActionState(signUp, {});
 
-    const { restart, secondsLeft } = useCountdownTimer();
+    const retryAfterSeconds = state.rateLimit?.retryAfterSeconds ?? 0;
 
-    const canResend = secondsLeft === 0;
+    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
 
-    const retryAfterSeconds = state.retryAfterSeconds;
-
-    useEffect(() => {
-        if (retryAfterSeconds === undefined || retryAfterSeconds <= 0) {
-            return;
-        }
-
-        restart(retryAfterSeconds);
-    }, [retryAfterSeconds, restart]);
+    const hasRateLimit = secondsLeft > 0;
 
     return (
         <form
@@ -87,14 +79,14 @@ export function EmailSignUpForm() {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
-                disabled={isPending || !canResend}
+                disabled={isPending || hasRateLimit}
             >
                 Зарегистрироваться
             </LoadingButton>
 
-            {!canResend && (
-                <p className="text-muted-foreground text-sm">
-                    Повторная отправка через {secondsLeft} сек.
+            {hasRateLimit && (
+                <p className="text-sm text-red-500">
+                    Повторите попытку через {secondsLeft} сек.
                 </p>
             )}
         </form>

@@ -2,11 +2,11 @@ import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { PasswordSetForm } from '@/app/auth/password-reset/set-password/_components/PasswordSetForm';
-import { getPasswordResetCookie } from '@/auth/cookies/password-reset-cookie';
+import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { routes } from '@/lib/routes';
 
 export default async function PasswordSetPage() {
-    const passwordReset = await getPasswordResetCookie();
+    const passwordReset = await passwordResetCookie.get();
 
     if (!passwordReset) {
         redirect(routes.passwordResetPage());

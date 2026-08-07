@@ -25,7 +25,7 @@ export function LoadingButton({
     return (
         <Button
             {...buttonProps}
-            disabled={disabled || isLoading}
+            disabled={disabled}
             className={cn(isLoading && 'disabled:cursor-progress', className)}
         >
             {isLoading ? (

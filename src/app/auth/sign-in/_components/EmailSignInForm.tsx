@@ -9,10 +9,17 @@ import { signIn } from '@/app/auth/sign-in/actions';
 import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
 import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
+import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 import { routes } from '@/lib/routes';
 
 export function EmailSignInForm() {
     const [state, formAction, isPending] = useActionState(signIn, {});
+
+    const retryAfterSeconds = state.rateLimit?.retryAfterSeconds ?? 0;
+
+    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
+
+    const hasRateLimit = secondsLeft > 0;
 
     return (
         <form
@@ -63,9 +70,16 @@ export function EmailSignInForm() {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
+                disabled={hasRateLimit}
             >
                 Войти
             </LoadingButton>
+
+            {hasRateLimit && (
+                <p className="text-sm text-red-500">
+                    Повторите попытку через {secondsLeft} сек.
+                </p>
+            )}
         </form>
     );
 }

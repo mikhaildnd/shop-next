@@ -11,47 +11,44 @@ import {
 import { AUTH_FORM_FIELDS, OTP_LENGTH } from '@/auth/auth.consts';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
+import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
-interface VerifyEmailFormProps {
-    initialSeconds: number;
-}
-
-export function VerifyEmailForm({ initialSeconds }: VerifyEmailFormProps) {
+export function VerifyEmailForm() {
     const [state, formAction, isPending] = useActionState(verifyEmail, {});
+
+    const [rateLimit, setRateLimit] = useState<RateLimitState>();
 
     const [isResending, startTransition] = useTransition();
     const [resendError, setResendError] = useState<string>();
-    const [successMessage, setSuccessMessage] = useState<string>();
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-    const { restart, secondsLeft } = useCountdownTimer(initialSeconds);
+    const retryAfterSeconds = rateLimit?.retryAfterSeconds ?? 0;
 
-    const canResend = secondsLeft === 0;
+    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
 
-    const submitAction = (formData: FormData) => {
-        formAction(formData);
-    };
+    const hasRateLimit = secondsLeft > 0;
 
     const handleResend = () => {
         startTransition(async () => {
             setResendError(undefined);
-            setSuccessMessage(undefined);
+            setShowSuccessMessage(false);
 
-            const { formError, successMessage, retryAfterSeconds } =
+            const { formError, success, rateLimit } =
                 await resendVerificationOtp();
 
-            if (retryAfterSeconds) {
-                restart(retryAfterSeconds);
+            if (rateLimit) {
+                setRateLimit(rateLimit);
             }
 
             setResendError(formError);
-            setSuccessMessage(successMessage);
+            setShowSuccessMessage(success);
         });
     };
 
     return (
         <form
             className="flex flex-col gap-4"
-            action={submitAction}
+            action={formAction}
             noValidate
         >
             <OtpInput
@@ -67,6 +64,7 @@ export function VerifyEmailForm({ initialSeconds }: VerifyEmailFormProps) {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
+                disabled={isPending || isResending}
             >
                 Подтвердить код
             </LoadingButton>
@@ -77,19 +75,19 @@ export function VerifyEmailForm({ initialSeconds }: VerifyEmailFormProps) {
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}
-                disabled={isResending || !canResend}
+                disabled={isResending || hasRateLimit}
             >
                 Отправить код повторно
             </LoadingButton>
 
-            {!canResend && (
+            {hasRateLimit && (
                 <p className="text-muted-foreground text-sm">
                     Повторная отправка через {secondsLeft} сек.
                 </p>
             )}
 
-            {successMessage && (
-                <p className="text-sm text-green-600">{successMessage}</p>
+            {showSuccessMessage && (
+                <p className="text-sm text-green-600">Новый код отправлен.</p>
             )}
 
             {resendError && (
