@@ -5,8 +5,8 @@ import { useActionState, useEffect } from 'react';
 import { changeName } from '@/app/(shop)/profile/actions';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { Label } from '@/components/shared/Label';
-import { LoadingButton } from '@/components/shared/LoadingButton';
 
 interface ChangeUserNameFormProps {
     onSuccess: () => void;
@@ -43,7 +43,7 @@ export function ChangeUserNameForm({ onSuccess }: ChangeUserNameFormProps) {
 
             <LoadingButton
                 size="sm"
-                variant="secondary"
+                variant="outline"
                 className="min-w-20 self-start"
                 type="submit"
                 isLoading={isPending}

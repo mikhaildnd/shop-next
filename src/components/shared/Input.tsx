@@ -11,8 +11,8 @@ export function Input({ className, disabled, ref, ...props }: InputProps) {
         <input
             ref={ref}
             className={cn(
-                'rounded border border-(--color-primary)/60 px-3 py-1 text-base leading-[150%] text-black transition-colors placeholder:text-(--placeholder-text-color)',
-                'focus:border-(--color-primary) focus:bg-white focus:ring-1 focus:ring-(--color-primary)/20 focus:outline-none',
+                'rounded border border-(--color-primary) px-3 py-1 transition-colors placeholder:text-(--placeholder-text-color)',
+                'focus-ring',
                 'disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-500 disabled:opacity-100',
                 className,
             )}

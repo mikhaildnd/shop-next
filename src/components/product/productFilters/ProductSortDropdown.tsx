@@ -46,10 +46,9 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
             className="relative"
         >
             <button
-                className="flex w-54 cursor-pointer items-center justify-between overflow-x-hidden rounded-xl border border-gray-100 bg-white px-4 py-2 whitespace-nowrap hover:border-gray-200"
+                className="flex w-54 cursor-pointer items-center justify-between overflow-x-hidden rounded-xl border border-gray-100 bg-white px-4 py-2 whitespace-nowrap focus-ring hover:border-gray-200"
                 type="button"
                 onClick={() => setIsOpen((open) => !open)}
-                aria-haspopup="listbox"
                 aria-expanded={isOpen}
             >
                 <span>{selectedOption?.label}</span>
@@ -61,20 +60,15 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
                 />
             </button>
             {isOpen && (
-                <ul
-                    className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white whitespace-nowrap shadow-lg"
-                    role="listbox"
-                >
+                <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white whitespace-nowrap shadow-lg">
                     {PRODUCT_SORT_ITEMS.map((option) => (
                         <li key={option.value}>
                             <button
-                                role="option"
-                                aria-selected={option.value === value}
                                 className={cn(
-                                    'flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors duration-50',
-                                    option.value === value
-                                        ? 'bg-(--color-primary)/20 font-semibold'
-                                        : 'hover:bg-(--color-primary)/10',
+                                    'flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors outline-none',
+                                    'hover:bg-(--color-primary)/10 focus-visible:bg-(--color-primary)/10',
+                                    option.value === value &&
+                                        'bg-(--color-primary)/20 font-semibold',
                                 )}
                                 type="button"
                                 onClick={() => handleSelect(option.value)}

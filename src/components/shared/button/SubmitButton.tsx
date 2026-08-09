@@ -1,9 +1,9 @@
 'use client';
 
+import type { ComponentProps } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { Button } from '@/components/shared/Button';
-import type { ComponentProps } from 'react';
+import { Button } from '@/components/shared/button/Button';
 
 interface SubmitButtonProps extends ComponentProps<typeof Button> {
     pendingText?: string;

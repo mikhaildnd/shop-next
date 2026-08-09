@@ -29,7 +29,7 @@ export function FilterCheckbox({
 
             <span
                 aria-hidden
-                className="flex h-5 w-5 items-center justify-center rounded border border-(--color-primary) transition-colors peer-checked:bg-(--color-primary) peer-focus-visible:ring-2 peer-focus-visible:ring-(--color-primary)/30 peer-focus-visible:ring-offset-1 [&>svg]:opacity-0 [&>svg]:transition-opacity peer-checked:[&>svg]:opacity-100"
+                className="flex h-5 w-5 items-center justify-center rounded border border-(--color-primary) peer-focus-ring transition-colors peer-checked:bg-(--color-primary) [&>svg]:opacity-0 [&>svg]:transition-opacity peer-checked:[&>svg]:opacity-100"
             >
                 <Check className="h-3.5 w-3.5 text-white" />
             </span>

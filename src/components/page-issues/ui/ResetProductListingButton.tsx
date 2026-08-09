@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/shared/button/Button';
 import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 import { DEFAULT_PRODUCT_FILTERS } from '@/lib/product-listing/filters/consts';
 import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
@@ -14,12 +15,5 @@ export function ResetProductListingButton() {
         });
     }
 
-    return (
-        <button
-            onClick={handleClick}
-            className="flex cursor-pointer items-center justify-center gap-2 bg-(--color-primary) px-4 py-3 text-white transition-opacity hover:opacity-90"
-        >
-            Сбросить фильтры
-        </button>
-    );
+    return <Button onClick={handleClick}>Сбросить фильтры</Button>;
 }

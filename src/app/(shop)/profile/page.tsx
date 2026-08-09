@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { ProfileBadge } from '@/app/(shop)/profile/_components/ProfileBadge';
@@ -6,11 +5,12 @@ import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
 import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
-import { SubmitButton } from '@/components/shared/SubmitButton';
+import { deleteAccount, signOut } from '@/app/(shop)/profile/actions';
 import { getSession } from '@/auth/session';
+import { ButtonLink } from '@/components/shared/button/ButtonLink';
+import { SubmitButton } from '@/components/shared/button/SubmitButton';
 import { routes } from '@/lib/routes';
 import { getUserById } from '@/services/user/user.service';
-import { deleteAccount, signOut } from '@/app/(shop)/profile/actions';
 
 export default async function ProfilePage() {
     const session = await getSession();
@@ -37,12 +37,13 @@ export default async function ProfilePage() {
                         <ProfileItem
                             label="Email"
                             action={
-                                <Link
-                                    className="link-style"
+                                <ButtonLink
                                     href={routes.changeEmailPage()}
+                                    variant="outline"
+                                    size="sm"
                                 >
                                     Изменить
-                                </Link>
+                                </ButtonLink>
                             }
                         >
                             <div className="flex items-center gap-2">

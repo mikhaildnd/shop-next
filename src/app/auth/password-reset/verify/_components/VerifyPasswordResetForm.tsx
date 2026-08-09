@@ -9,7 +9,7 @@ import {
 } from '@/app/auth/password-reset/verify/actions';
 import { OTP_LENGTH } from '@/auth/auth.consts';
 import { OtpInput } from '@/components/form/OtpInput';
-import { LoadingButton } from '@/components/shared/LoadingButton';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface VerifyPasswordResetFormProps {
@@ -78,7 +78,7 @@ export function VerifyPasswordResetForm({
 
             <LoadingButton
                 type="button"
-                variant="secondary"
+                variant="outline"
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}

@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/shared/button/Button';
 import { cn } from '@/utils/cn';
 
 interface LoadingButtonProps extends ComponentProps<typeof Button> {

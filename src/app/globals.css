@@ -14,10 +14,11 @@
   --color-primary: #70c05b;
   --color-dark: #271746;
   --color-yellow: #fbc458;
-  --color-orange: #ff9941;
+  --color-orange: #ff6633;
   --color-green: #78d195;
   --color-purple: #765990;
   --color-red: #a15e5e;
+  --color-destructive: #D1242F;
   --color-light-gray: #e5e5e5;
   --color-star-rating: #ffbb30;
 
@@ -62,33 +63,91 @@
 }
 
 @utility focus-ring {
-  @apply focus-visible:ring-1 focus-visible:ring-(--color-primary) focus-visible:ring-offset-1 rounded-sm focus-visible:outline-none;
+  @apply focus-visible:ring-1
+  focus-visible:ring-(--color-primary)
+  focus-visible:ring-offset-1
+  focus-visible:outline-none;
 }
 
-@utility focus-primary {
-  @apply focus-visible:shadow-[0_0_0_2px_white,0_0_0_4px_var(--color-primary)] focus-visible:outline-none;
+@utility peer-focus-ring {
+  @apply peer-focus-visible:ring-1
+  peer-focus-visible:ring-(--color-primary)
+  peer-focus-visible:ring-offset-1;
+}
+
+@utility focus-ring-destructive {
+  @apply focus-visible:ring-1
+  focus-visible:ring-(--color-destructive)
+  focus-visible:ring-offset-1
+  focus-visible:outline-none;
 }
 
 @utility link-style {
-  @apply text-(--color-primary) underline-offset-1 transition-colors hover:underline;
+  @apply text-(--color-primary)
+  underline-offset-1
+  transition-colors
+  hover:underline;
 }
 
-@theme {
-  --caret-duration: 1s;
+@utility button-base {
+  @apply flex cursor-pointer items-center justify-center rounded
+  transition-colors
+  disabled:pointer-events-none
+  disabled:cursor-not-allowed
+  disabled:opacity-50;
+}
 
-  --animate-caret: caret-blink var(--caret-duration) step-end infinite;
 
-  @keyframes caret-blink {
-    0%,
-    49% {
-      opacity: 1;
-    }
+@utility button-primary {
+  @apply bg-(--color-primary)
+  text-white
+  hover:opacity-90
+  focus-ring
+  active:opacity-80;
+}
 
-    50%,
-    100% {
-      opacity: 0;
-    }
-  }
+@utility button-outline {
+  @apply border border-(--color-primary)
+  bg-white
+  text-(--color-primary)
+  active:opacity-90
+  hover:bg-(--color-primary) hover:text-white
+  focus-visible:bg-(--color-primary) focus-visible:text-white
+  focus-ring;
+}
+
+@utility button-destructive {
+  @apply border border-(--color-destructive)
+  bg-white
+  text-(--color-destructive)
+  active:opacity-90
+  hover:bg-(--color-destructive) hover:text-white
+  focus-visible:bg-(--color-destructive) focus-visible:text-white
+  focus-ring-destructive;
+}
+
+@utility button-accent {
+  @apply border border-(--color-primary)
+  bg-white
+  text-(--color-primary)
+  hover:border-transparent
+  hover:bg-(--color-orange)
+  hover:text-white
+  focus-ring
+  active:opacity-90
+  focus-visible:bg-(--color-orange) focus-visible:text-white;
+}
+
+@utility button-xs {
+  @apply h-6 px-1 text-xs;
+}
+
+@utility button-sm {
+  @apply h-8 px-2 text-sm;
+}
+
+@utility button-md {
+  @apply h-10 px-4;
 }
 
 body {

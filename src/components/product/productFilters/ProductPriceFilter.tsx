@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { FilterSection } from '@/components/product/productFilters/FilterSection';
+import { Input } from '@/components/shared/Input';
 import { useProductListing } from '@/hooks/useProductListing';
 import { useUpdateProductListing } from '@/hooks/useUpdateProductListing';
 
@@ -94,10 +95,10 @@ export function ProductPriceFilter({
 
     return (
         <FilterSection title="Цена">
-            <div className="flex gap-4 text-sm text-gray-700">
-                <input
+            <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <Input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
+                    className="w-full"
                     type="text"
                     inputMode="decimal"
                     value={priceFrom}
@@ -105,9 +106,9 @@ export function ProductPriceFilter({
                     onBlur={handlePriceFromBlur}
                 />
 
-                <input
+                <Input
                     autoComplete="off"
-                    className="w-full rounded-xl border border-(--color-primary) bg-white px-2 py-1 transition-colors focus-visible:border-(--color-primary) focus-visible:ring-2 focus-visible:ring-(--color-primary)/30 focus-visible:ring-offset-1 focus-visible:outline-none"
+                    className="w-full"
                     type="text"
                     inputMode="numeric"
                     value={priceTo}

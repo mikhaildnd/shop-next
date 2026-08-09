@@ -5,8 +5,8 @@ import { useActionState } from 'react';
 import { requestPasswordReset } from '@/app/auth/password-reset/actions';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { Label } from '@/components/shared/Label';
-import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 export function PasswordResetForm() {

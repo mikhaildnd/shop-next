@@ -22,7 +22,8 @@ export function ProfileSection({
                     className={cn(
                         'text-xl font-medium',
                         variant === 'default' && 'text-black',
-                        variant === 'destructive' && 'text-[rgb(209,36,47)]',
+                        variant === 'destructive' &&
+                            'text-(--color-destructive)',
                     )}
                 >
                     {title}

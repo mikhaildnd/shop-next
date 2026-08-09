@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ChangeUserNameForm } from '@/app/(shop)/profile/_components/ChangeUserNameForm';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/shared/button/Button';
 
 interface ProfileNameProps {
     name: string;
@@ -19,8 +19,8 @@ export function ProfileName({ name }: ProfileNameProps) {
                 label="Имя"
                 action={
                     <Button
-                        variant="secondary"
-                        size="xs"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setIsEditing(!isEditing)}
                     >
                         {isEditing ? 'Отмена' : 'Редактировать'}

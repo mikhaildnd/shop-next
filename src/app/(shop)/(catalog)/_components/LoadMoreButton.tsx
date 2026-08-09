@@ -1,10 +1,10 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { ComponentProps} from 'react';
+import type { ComponentProps } from 'react';
 import { useTransition } from 'react';
 
-import { LoadingButton } from '@/components/shared/LoadingButton';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { createLoadMoreUrl } from '@/lib/pagination/create-pagination-url';
 
 interface LoadMoreButtonProps extends Omit<

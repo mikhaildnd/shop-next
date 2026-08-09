@@ -5,8 +5,8 @@ import { useActionState } from 'react';
 import { setPassword } from '@/app/auth/password-reset/set-password/actions';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { Label } from '@/components/shared/Label';
-import { LoadingButton } from '@/components/shared/LoadingButton';
 
 export function PasswordSetForm() {
     const [state, formAction, isPending] = useActionState(setPassword, {});

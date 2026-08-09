@@ -9,7 +9,7 @@ import {
 } from '@/app/auth/change-email/verify/actions';
 import { OTP_LENGTH } from '@/auth/auth.consts';
 import { OtpInput } from '@/components/form/OtpInput';
-import { LoadingButton } from '@/components/shared/LoadingButton';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface VerifyEmailChangeFormProps {
@@ -79,7 +79,7 @@ export function VerifyEmailChangeForm({
 
             <LoadingButton
                 type="button"
-                variant="secondary"
+                variant="outline"
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}

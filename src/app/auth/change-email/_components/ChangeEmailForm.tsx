@@ -5,8 +5,8 @@ import { useActionState } from 'react';
 import { requestChangeEmail } from '@/app/auth/change-email/actions';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
+import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { Label } from '@/components/shared/Label';
-import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface ChangeEmailFormProps {

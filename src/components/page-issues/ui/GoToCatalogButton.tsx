@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
+import { Button } from '@/components/shared/button/Button';
 import { routes } from '@/lib/routes';
 
 export function GoToCatalogButton() {
@@ -13,12 +14,5 @@ export function GoToCatalogButton() {
         });
     }
 
-    return (
-        <button
-            onClick={handleClick}
-            className="flex cursor-pointer items-center justify-center bg-(--color-primary) px-4 py-3 text-white transition-opacity hover:opacity-90"
-        >
-            В каталог
-        </button>
-    );
+    return <Button onClick={handleClick}>В каталог</Button>;
 }

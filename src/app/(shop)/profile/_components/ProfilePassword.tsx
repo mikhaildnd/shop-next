@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ChangeUserPasswordForm } from '@/app/(shop)/profile/_components/ChangeUserPasswordForm';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/shared/button/Button';
 
 export function ProfilePassword() {
     const [isEditing, setIsEditing] = useState(false);
@@ -15,8 +15,8 @@ export function ProfilePassword() {
                 label="Пароль"
                 action={
                     <Button
-                        variant="secondary"
-                        size="xs"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setIsEditing(!isEditing)}
                     >
                         {isEditing ? 'Отмена' : 'Изменить'}

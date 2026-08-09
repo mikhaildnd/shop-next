@@ -1,3 +1,4 @@
+import { Button } from '@/components/shared/button/Button';
 import { StarRating } from '@/components/shared/StarRating';
 import type { ProductDto } from '@/services/product/product.types';
 import { cn } from '@/utils/cn';
@@ -48,9 +49,7 @@ export function ProductInfoCard({ product, className }: ProductInfoCardProps) {
                 )}
             </div>
 
-            <button className="flex h-10 w-full cursor-pointer items-center justify-center rounded border border-(--color-primary) p-2 text-(--color-primary) transition-all duration-300 select-none hover:border-transparent hover:bg-[#ff6633] hover:text-white active:shadow-(--shadow-button-active)">
-                В корзину
-            </button>
+            <Button variant="accent">В корзину</Button>
         </section>
     );
 }
