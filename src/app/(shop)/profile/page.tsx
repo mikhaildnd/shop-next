@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { DeleteUserButton } from '@/app/(shop)/profile/_components/DeleteUserButton';
 import { ProfileBadge } from '@/app/(shop)/profile/_components/ProfileBadge';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
 import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
-import { SignOutButton } from '@/app/(shop)/profile/_components/SignOutButton';
+import { SubmitButton } from '@/components/shared/SubmitButton';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
 import { getUserById } from '@/services/user/user.service';
+import { deleteAccount, signOut } from '@/app/(shop)/profile/actions';
 
 export default async function ProfilePage() {
     const session = await getSession();
@@ -61,8 +61,20 @@ export default async function ProfilePage() {
                     variant="destructive"
                 >
                     <div className="flex flex-col items-start gap-3">
-                        <DeleteUserButton />
-                        <SignOutButton />
+                        <form action={deleteAccount}>
+                            <SubmitButton
+                                variant="destructive"
+                                pendingText="Удаление аккаунта"
+                            >
+                                Удалить аккаунт
+                            </SubmitButton>
+                        </form>
+
+                        <form action={signOut}>
+                            <SubmitButton pendingText="Выход">
+                                Выйти
+                            </SubmitButton>
+                        </form>
                     </div>
                 </ProfileSection>
             </div>
