@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 interface ProfileItemProps {
     label: string;
-    children: ReactNode;
+    children?: ReactNode;
     action?: ReactNode;
 }
 

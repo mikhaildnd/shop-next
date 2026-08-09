@@ -2,10 +2,10 @@ import { prisma } from '@/lib/db';
 import { RATE_LIMIT_RETENTION_SECONDS } from '@/services/rate-limit/rate-limit.consts';
 
 import type {
-    CheckRateLimitParams,
-    CheckRateLimitResult,
+    ActiveRateLimit,
+    ConsumeRateLimitParams,
+    ConsumeRateLimitResult,
     RateLimitAction,
-    RateLimitState,
 } from './rate-limit.types';
 
 // TODO:
@@ -14,9 +14,9 @@ import type {
 export async function consumeRateLimit({
     action,
     identifier,
-    windowSeconds,
     max,
-}: CheckRateLimitParams): Promise<CheckRateLimitResult> {
+    attemptLifetimeSeconds,
+}: ConsumeRateLimitParams): Promise<ConsumeRateLimitResult> {
     const now = new Date();
 
     const record = await prisma.rateLimit.findUnique({
@@ -34,23 +34,14 @@ export async function consumeRateLimit({
             identifier,
         });
 
-        return createAllowedResult(1, max);
+        return createConsumeRateLimitResult(1, max);
     }
 
-    if (record.expiresAt) {
-        if (record.expiresAt > now) {
-            const retryAfterSeconds = Math.ceil(
-                (record.expiresAt.getTime() - now.getTime()) / 1000,
-            );
+    const attemptLifetimeDate = new Date(
+        now.getTime() - attemptLifetimeSeconds * 1000,
+    );
 
-            return {
-                allowed: false,
-                attempts: record.count,
-                remainingAttempts: 0,
-                retryAfterSeconds,
-            };
-        }
-
+    if (!record.expiresAt && record.updatedAt < attemptLifetimeDate) {
         await prisma.rateLimit.delete({
             where: {
                 action_identifier: {
@@ -65,32 +56,35 @@ export async function consumeRateLimit({
             identifier,
         });
 
-        return createAllowedResult(1, max);
+        return createConsumeRateLimitResult(1, max);
     }
 
-    if (record.count < max) {
-        const attempts = record.count + 1;
+    if (record.expiresAt && record.expiresAt > now) {
+        return {
+            attempts: record.count,
+            remainingAttempts: 0,
+        };
+    }
 
-        await prisma.rateLimit.update({
+    if (record.expiresAt) {
+        await prisma.rateLimit.delete({
             where: {
                 action_identifier: {
                     action,
                     identifier,
                 },
             },
-            data: {
-                count: attempts,
-            },
         });
 
-        return createAllowedResult(attempts, max);
+        await createRateLimit({
+            action,
+            identifier,
+        });
+
+        return createConsumeRateLimitResult(1, max);
     }
 
-    const expiresAt = new Date(now.getTime() + windowSeconds * 1000);
-
-    const retryAfterSeconds = Math.ceil(
-        (expiresAt.getTime() - now.getTime()) / 1000,
-    );
+    const attempts = Math.min(record.count + 1, max);
 
     await prisma.rateLimit.update({
         where: {
@@ -100,15 +94,61 @@ export async function consumeRateLimit({
             },
         },
         data: {
-            expiresAt,
+            count: attempts,
+        },
+    });
+
+    return createConsumeRateLimitResult(attempts, max);
+}
+
+interface ActivateRateLimitParams {
+    action: RateLimitAction;
+    identifier: string;
+    windowSeconds: number;
+}
+
+export async function activateRateLimit({
+    action,
+    identifier,
+    windowSeconds,
+}: ActivateRateLimitParams): Promise<ActiveRateLimit | null> {
+    const now = Date.now();
+
+    const record = await prisma.rateLimit.findUnique({
+        where: {
+            action_identifier: {
+                action,
+                identifier,
+            },
+        },
+    });
+
+    if (!record) {
+        return null;
+    }
+
+    if (record.expiresAt && record.expiresAt.getTime() > now) {
+        return {
+            expiresAt: record.expiresAt.getTime(),
+        };
+    }
+
+    const expiresAt = now + windowSeconds * 1000;
+
+    await prisma.rateLimit.update({
+        where: {
+            action_identifier: {
+                action,
+                identifier,
+            },
+        },
+        data: {
+            expiresAt: new Date(expiresAt),
         },
     });
 
     return {
-        allowed: false,
-        attempts: record.count,
-        remainingAttempts: 0,
-        retryAfterSeconds,
+        expiresAt,
     };
 }
 
@@ -129,15 +169,13 @@ async function createRateLimit({
     });
 }
 
-function createAllowedResult(
+function createConsumeRateLimitResult(
     attempts: number,
     max: number,
-): CheckRateLimitResult {
+): ConsumeRateLimitResult {
     return {
-        allowed: true,
         attempts,
-        remainingAttempts: max - attempts,
-        retryAfterSeconds: 0,
+        remainingAttempts: Math.max(max - attempts, 0),
     };
 }
 
@@ -159,14 +197,12 @@ export async function cleanupRateLimits() {
 interface GetRateLimitStateParams {
     action: RateLimitAction;
     identifier: string;
-    max: number;
 }
 
 export async function getRateLimitState({
     action,
     identifier,
-    max,
-}: GetRateLimitStateParams): Promise<RateLimitState | null> {
+}: GetRateLimitStateParams): Promise<ActiveRateLimit | null> {
     const now = new Date();
 
     const record = await prisma.rateLimit.findUnique({
@@ -195,19 +231,12 @@ export async function getRateLimitState({
         return null;
     }
 
-    const remainingAttempts = Math.max(max - record.count, 0);
-
-    const retryAfterSeconds = record.expiresAt
-        ? Math.max(
-              Math.ceil((record.expiresAt.getTime() - now.getTime()) / 1000),
-              0,
-          )
-        : 0;
+    if (!record.expiresAt) {
+        return null;
+    }
 
     return {
-        attempts: record.count,
-        remainingAttempts,
-        retryAfterSeconds,
+        expiresAt: record.expiresAt.getTime(),
     };
 }
 

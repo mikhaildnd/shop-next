@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation';
 
-import { VerifyEmailChangeForm } from '@/app/(shop)/profile/change-email/verify/_components/VerifyEmailChangeForm';
-import { restartEmailChange } from '@/app/(shop)/profile/change-email/verify/actions';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
+import { VerifyEmailChangeForm } from '@/app/auth/change-email/verify/_components/VerifyEmailChangeForm';
+import { restartEmailChange } from '@/app/auth/change-email/verify/actions';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
+import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
 
 export default async function VerifyChangeEmailPage() {
     const session = await getSession();
@@ -17,10 +18,15 @@ export default async function VerifyChangeEmailPage() {
     const emailChange = await changeEmailCookie.get();
 
     if (!emailChange) {
-        redirect(routes.profileChangeEmailPage());
+        redirect(routes.changeEmailPage());
     }
 
     const { email } = emailChange;
+
+    const activeRateLimit = await getRateLimitState({
+        action: 'change-email-otp',
+        identifier: session.user.id,
+    });
 
     return (
         <AuthSurface>
@@ -41,7 +47,7 @@ export default async function VerifyChangeEmailPage() {
                     </form>
                 </div>
             </AuthSurface.Header>
-            <VerifyEmailChangeForm />
+            <VerifyEmailChangeForm expiresAt={activeRateLimit?.expiresAt} />
         </AuthSurface>
     );
 }

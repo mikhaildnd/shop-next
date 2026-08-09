@@ -2,25 +2,28 @@
 
 import { useActionState } from 'react';
 
-import { requestChangeEmail } from '@/app/(shop)/profile/change-email/actions';
-import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
-import { FormGroup } from '@/app/auth/_components/FormGroup';
-import { FormInput } from '@/app/auth/_components/FormInput';
+import { requestChangeEmail } from '@/app/auth/change-email/actions';
+import { FormGroup } from '@/components/form/FormGroup';
+import { FormInput } from '@/components/form/FormInput';
 import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
-export function ChangeEmailForm() {
+interface ChangeEmailFormProps {
+    expiresAt?: number;
+}
+
+export function ChangeEmailForm({
+    expiresAt: initialExpiresAt,
+}: ChangeEmailFormProps) {
     const [state, formAction, isPending] = useActionState(
         requestChangeEmail,
         {},
     );
 
-    const retryAfterSeconds = state.rateLimit?.retryAfterSeconds ?? 0;
+    const expiresAt = state.activeRateLimit?.expiresAt ?? initialExpiresAt;
 
-    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
-
-    const hasRateLimit = secondsLeft > 0;
+    const { secondsLeft, isRunning } = useCountdownTimer(expiresAt);
 
     return (
         <form
@@ -29,22 +32,16 @@ export function ChangeEmailForm() {
             noValidate
         >
             <FormGroup error={state.fieldErrors?.email}>
-                <Label htmlFor={PROFILE_FORM_FIELDS.email}>E-mail</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <FormInput
-                    id={PROFILE_FORM_FIELDS.email}
-                    name={PROFILE_FORM_FIELDS.email}
+                    id="email"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     defaultValue={state.values?.email}
                     error={state.fieldErrors?.email}
                 />
             </FormGroup>
-
-            {hasRateLimit && (
-                <p className="text-sm text-red-500">
-                    Повторите попытку через {secondsLeft} сек.
-                </p>
-            )}
 
             {state.formError && (
                 <p className="text-sm text-red-500">{state.formError}</p>
@@ -53,10 +50,16 @@ export function ChangeEmailForm() {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
-                disabled={isPending || hasRateLimit}
+                disabled={isPending || isRunning}
             >
                 Сменить
             </LoadingButton>
+
+            {isRunning && (
+                <p className="text-sm text-red-500">
+                    Повторите попытку через {secondsLeft} сек.
+                </p>
+            )}
         </form>
     );
 }

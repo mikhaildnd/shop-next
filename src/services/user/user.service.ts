@@ -14,7 +14,7 @@ export async function getUserById(id: string): Promise<UserDto | null> {
     return mapUserToDto(user);
 }
 
-export async function updateUserName(
+export async function changeUserName(
     userId: string,
     name: string,
 ): Promise<UserDto> {

@@ -5,15 +5,15 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth/auth';
-import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
 import type {
     AuthPasswordSetForm,
     AuthPasswordSetFormErrors,
 } from '@/auth/auth.types';
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
-import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { validateSetPasswordForm } from '@/auth/validation/set-password';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { validateSetPasswordForm } from '@/auth/form-validators/set-password';
 import { routes } from '@/lib/routes';
+import { deleteRateLimit } from '@/services/rate-limit/rate-limit.service';
 
 export interface SetPasswordState {
     fieldErrors?: AuthPasswordSetFormErrors;
@@ -33,10 +33,8 @@ export async function setPassword(
     const { email, otp } = passwordReset;
 
     const form: AuthPasswordSetForm = {
-        password: String(formData.get(AUTH_FORM_FIELDS.password) ?? ''),
-        confirmPassword: String(
-            formData.get(AUTH_FORM_FIELDS.confirmPassword) ?? '',
-        ),
+        password: String(formData.get('password') ?? ''),
+        confirmPassword: String(formData.get('confirmPassword') ?? ''),
     };
 
     const fieldErrors = validateSetPasswordForm(form);
@@ -58,10 +56,15 @@ export async function setPassword(
             },
             headers: requestHeaders,
         });
+
+        await deleteRateLimit({
+            action: 'password-reset-otp',
+            identifier: email,
+        });
     } catch (error) {
         if (isAPIError(error)) {
             return {
-                formError: mapAuthError(error),
+                formError: translateAuthError(error),
             };
         }
 

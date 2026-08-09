@@ -6,22 +6,28 @@ import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth/auth';
 import {
-    AUTH_FORM_FIELDS,
+    SIGN_IN_ATTEMPT_LIFETIME_SECONDS,
     SIGN_IN_ATTEMPTS,
     SIGN_IN_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
-import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { validateEmailAuthForm } from '@/auth/validation/email-auth';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { validateSignInEmailForm } from '@/auth/form-validators/sign-in-email';
 import { routes } from '@/lib/routes';
-import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
+import {
+    activateRateLimit,
+    consumeRateLimit,
+    deleteRateLimit,
+    getRateLimitState,
+} from '@/services/rate-limit/rate-limit.service';
+import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
 export interface SignInState {
     formError?: string;
     fieldErrors?: AuthSignInFormErrors;
     values?: Pick<AuthSignInForm, 'email'>;
-    rateLimit?: RateLimitState;
+    activeRateLimit?: ActiveRateLimit;
+    remainingAttempts?: number;
 }
 
 export async function signIn(
@@ -29,11 +35,11 @@ export async function signIn(
     formData: FormData,
 ): Promise<SignInState> {
     const form: AuthSignInForm = {
-        email: String(formData.get(AUTH_FORM_FIELDS.email) ?? ''),
-        password: String(formData.get(AUTH_FORM_FIELDS.password) ?? ''),
+        email: String(formData.get('email') ?? ''),
+        password: String(formData.get('password') ?? ''),
     };
 
-    const fieldErrors = validateEmailAuthForm(form);
+    const fieldErrors = validateSignInEmailForm(form);
 
     if (Object.keys(fieldErrors).length > 0) {
         return {
@@ -44,21 +50,26 @@ export async function signIn(
         };
     }
 
-    const rateLimit = await consumeRateLimit({
+    const activeRateLimit = await getRateLimitState({
         action: 'sign-in',
         identifier: form.email,
-        windowSeconds: SIGN_IN_TIMEOUT_SECONDS,
-        max: SIGN_IN_ATTEMPTS,
     });
 
-    if (!rateLimit.allowed) {
+    if (activeRateLimit) {
         return {
             values: {
                 email: form.email,
             },
-            rateLimit,
+            activeRateLimit,
         };
     }
+
+    const consumeResult = await consumeRateLimit({
+        action: 'sign-in',
+        identifier: form.email,
+        max: SIGN_IN_ATTEMPTS,
+        attemptLifetimeSeconds: SIGN_IN_ATTEMPT_LIFETIME_SECONDS,
+    });
 
     const requestHeaders = await headers();
 
@@ -67,13 +78,34 @@ export async function signIn(
             body: form,
             headers: requestHeaders,
         });
+
+        await deleteRateLimit({
+            action: 'sign-in',
+            identifier: form.email,
+        });
     } catch (error) {
         if (isAPIError(error)) {
+            let activeRateLimit: ActiveRateLimit | undefined;
+
+            if (consumeResult.remainingAttempts === 0) {
+                activeRateLimit =
+                    (await activateRateLimit({
+                        action: 'sign-in',
+                        identifier: form.email,
+                        windowSeconds: SIGN_IN_TIMEOUT_SECONDS,
+                    })) ?? undefined;
+            }
+
             return {
                 values: {
                     email: form.email,
                 },
-                formError: mapAuthError(error),
+                formError: translateAuthError(error),
+                activeRateLimit,
+                remainingAttempts:
+                    activeRateLimit === undefined
+                        ? consumeResult.remainingAttempts
+                        : undefined,
             };
         }
 

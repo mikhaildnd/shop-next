@@ -2,26 +2,44 @@
 
 import { useEffect, useState } from 'react';
 
-export function useCountdownTimer(seconds: number) {
-    const [secondsLeft, setSecondsLeft] = useState(seconds);
+interface CountdownTimer {
+    secondsLeft: number;
+    isRunning: boolean;
+}
+
+export function useCountdownTimer(expiresAt?: number): CountdownTimer {
+    const [isReady, setIsReady] = useState(false);
+    const [secondsLeft, setSecondsLeft] = useState(0);
 
     useEffect(() => {
-        // Reset countdown when a new duration arrives.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSecondsLeft(seconds);
+        const update = () => {
+            const secondsLeft = getSecondsLeft(expiresAt);
 
-        if (seconds <= 0) {
+            setIsReady(true);
+            setSecondsLeft(secondsLeft);
+        };
+
+        update();
+
+        if (!expiresAt) {
             return;
         }
 
-        const interval = setInterval(() => {
-            setSecondsLeft((value) => Math.max(value - 1, 0));
-        }, 1000);
+        const interval = setInterval(update, 1000);
 
         return () => clearInterval(interval);
-    }, [seconds]);
+    }, [expiresAt]);
 
     return {
         secondsLeft,
+        isRunning: isReady && secondsLeft > 0,
     };
+}
+
+function getSecondsLeft(expiresAt?: number) {
+    if (!expiresAt) {
+        return 0;
+    }
+
+    return Math.max(Math.ceil((expiresAt - Date.now()) / 1000), 0);
 }

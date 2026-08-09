@@ -1,11 +1,11 @@
 import type { FormErrors } from '@/lib/types/form-errors';
-import type { UserFormFields } from '@/services/user/user-form.types';
 
-export type ChangeNameForm = Pick<UserFormFields, 'name'>;
+export type ChangeNameForm = { name: string };
 export type ChangeNameFormErrors = FormErrors<ChangeNameForm>;
 
-export type ChangeEmailForm = Pick<UserFormFields, 'email'>;
-export type ChangeEmailFormErrors = FormErrors<ChangeEmailForm>;
-
-export type ChangeEmailOtpForm = Pick<UserFormFields, 'otp'>;
-export type ChangeEmailOtpFormErrors = FormErrors<ChangeEmailOtpForm>;
+export type ChangePasswordForm = {
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+};
+export type ChangePasswordFormErrors = FormErrors<ChangePasswordForm>;

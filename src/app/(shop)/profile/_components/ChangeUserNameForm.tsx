@@ -3,21 +3,16 @@
 import { useActionState, useEffect } from 'react';
 
 import { changeName } from '@/app/(shop)/profile/actions';
-import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
-import { FormGroup } from '@/app/auth/_components/FormGroup';
-import { FormInput } from '@/app/auth/_components/FormInput';
+import { FormGroup } from '@/components/form/FormGroup';
+import { FormInput } from '@/components/form/FormInput';
 import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 
-interface UpdateUserNameFormProps {
-    defaultValue: string;
+interface ChangeUserNameFormProps {
     onSuccess: () => void;
 }
 
-export function UpdateUserNameForm({
-    onSuccess,
-    defaultValue,
-}: UpdateUserNameFormProps) {
+export function ChangeUserNameForm({ onSuccess }: ChangeUserNameFormProps) {
     const [state, formAction, isPending] = useActionState(changeName, {});
 
     useEffect(() => {
@@ -35,21 +30,16 @@ export function UpdateUserNameForm({
             noValidate
         >
             <FormGroup error={state.fieldErrors?.name}>
-                <Label htmlFor={PROFILE_FORM_FIELDS.name}>Новое имя</Label>
+                <Label htmlFor="name">Новое имя</Label>
                 <FormInput
                     className="max-w-100"
-                    id={PROFILE_FORM_FIELDS.name}
-                    name={PROFILE_FORM_FIELDS.name}
+                    id="name"
+                    name="name"
                     type="text"
                     autoComplete="name"
-                    defaultValue={state.values?.name ?? defaultValue}
                     error={state.fieldErrors?.name}
                 />
             </FormGroup>
-
-            {state.formError && (
-                <p className="text-red-500">{state.formError}</p>
-            )}
 
             <LoadingButton
                 size="sm"

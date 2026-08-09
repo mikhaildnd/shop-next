@@ -5,10 +5,10 @@ import { DeleteUserButton } from '@/app/(shop)/profile/_components/DeleteUserBut
 import { ProfileBadge } from '@/app/(shop)/profile/_components/ProfileBadge';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
+import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
 import { SignOutButton } from '@/app/(shop)/profile/_components/SignOutButton';
 import { getSession } from '@/auth/session';
-import { Button } from '@/components/shared/Button';
 import { routes } from '@/lib/routes';
 import { getUserById } from '@/services/user/user.service';
 
@@ -37,16 +37,12 @@ export default async function ProfilePage() {
                         <ProfileItem
                             label="Email"
                             action={
-                                <Button
-                                    variant="secondary"
-                                    size="xs"
+                                <Link
+                                    className="link-style"
+                                    href={routes.changeEmailPage()}
                                 >
-                                    <Link
-                                        href={routes.profileChangeEmailPage()}
-                                    >
-                                        Изменить
-                                    </Link>
-                                </Button>
+                                    Изменить
+                                </Link>
                             }
                         >
                             <div className="flex items-center gap-2">
@@ -58,23 +54,7 @@ export default async function ProfilePage() {
                     </div>
                 </ProfileSection>
 
-                {/*TODO использовать ProfileItem*/}
-                <ProfileSection title="Безопасность">
-                    <div className="flex items-center justify-between gap-6">
-                        <div>
-                            <p className="text-sm font-medium text-black">
-                                Пароль
-                            </p>
-                        </div>
-
-                        <Button
-                            variant="secondary"
-                            size="xs"
-                        >
-                            Изменить
-                        </Button>
-                    </div>
-                </ProfileSection>
+                <ProfilePassword />
 
                 <ProfileSection
                     title="Удаление аккаунта"

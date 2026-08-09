@@ -6,45 +6,51 @@ import { useState } from 'react';
 import {
     resendChangeEmailOtp,
     verifyEmailChangeOtp,
-} from '@/app/(shop)/profile/change-email/verify/actions';
-import { OtpInput } from '@/app/auth/_components/OtpInput';
-import { AUTH_FORM_FIELDS, OTP_LENGTH } from '@/auth/auth.consts';
+} from '@/app/auth/change-email/verify/actions';
+import { OTP_LENGTH } from '@/auth/auth.consts';
+import { OtpInput } from '@/components/form/OtpInput';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
-export function VerifyEmailChangeForm() {
+interface VerifyEmailChangeFormProps {
+    expiresAt?: number;
+}
+
+export function VerifyEmailChangeForm({
+    expiresAt: initialExpiresAt,
+}: VerifyEmailChangeFormProps) {
     const [state, formAction, isPending] = useActionState(
         verifyEmailChangeOtp,
         {},
     );
 
-    const [rateLimit, setRateLimit] = useState<RateLimitState>();
+    const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
 
     const [isResending, startTransition] = useTransition();
     const [resendError, setResendError] = useState<string>();
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [remainingAttempts, setRemainingAttempts] = useState<number>();
 
-    const retryAfterSeconds = rateLimit?.retryAfterSeconds ?? 0;
-
-    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
-
-    const hasRateLimit = secondsLeft > 0;
+    const { secondsLeft, isRunning } = useCountdownTimer(expiresAt);
 
     const handleResend = () => {
         startTransition(async () => {
             setResendError(undefined);
             setShowSuccessMessage(false);
 
-            const { formError, success, rateLimit } =
+            const { formError, success, activeRateLimit, remainingAttempts } =
                 await resendChangeEmailOtp();
 
-            if (rateLimit) {
-                setRateLimit(rateLimit);
+            setExpiresAt(activeRateLimit?.expiresAt);
+            setRemainingAttempts(remainingAttempts);
+
+            if (success) {
+                setShowSuccessMessage(true);
+                setResendError(undefined);
+                return;
             }
 
             setResendError(formError);
-            setShowSuccessMessage(success);
         });
     };
 
@@ -54,7 +60,7 @@ export function VerifyEmailChangeForm() {
             action={formAction}
         >
             <OtpInput
-                name={AUTH_FORM_FIELDS.otp}
+                name="otp"
                 length={OTP_LENGTH}
                 error={state.fieldErrors?.otp}
             />
@@ -77,12 +83,16 @@ export function VerifyEmailChangeForm() {
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}
-                disabled={isResending || hasRateLimit}
+                disabled={isResending || isRunning}
             >
                 Отправить код повторно
             </LoadingButton>
 
-            {hasRateLimit && (
+            {remainingAttempts !== undefined && remainingAttempts > 0 && (
+                <p className="text-sm">Осталось попыток: {remainingAttempts}</p>
+            )}
+
+            {isRunning && (
                 <p className="text-muted-foreground text-sm">
                     Повторная отправка через {secondsLeft} сек.
                 </p>

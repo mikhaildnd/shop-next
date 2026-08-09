@@ -6,17 +6,21 @@ import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth/auth';
 import {
-    AUTH_FORM_FIELDS,
-    PASSWORD_RESET_ATTEMPTS,
-    PASSWORD_RESET_TIMEOUT_SECONDS,
+    PASSWORD_RESET_OTP_ATTEMPT_LIFETIME_SECONDS,
+    PASSWORD_RESET_OTP_ATTEMPTS,
+    PASSWORD_RESET_OTP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
-import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { validateEmailOtpForm } from '@/auth/validation/email-otp';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { validateOtpForm } from '@/auth/form-validators/email-otp';
 import { routes } from '@/lib/routes';
-import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
+import {
+    activateRateLimit,
+    consumeRateLimit,
+    getRateLimitState,
+} from '@/services/rate-limit/rate-limit.service';
+import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
 export interface VerifyPasswordResetState {
     formError?: string;
@@ -36,10 +40,10 @@ export async function verifyPasswordResetOtp(
     const { email } = passwordReset;
 
     const form: AuthOtpForm = {
-        otp: String(formData.get(AUTH_FORM_FIELDS.otp) ?? ''),
+        otp: String(formData.get('otp') ?? ''),
     };
 
-    const fieldErrors: AuthOtpFormErrors = validateEmailOtpForm(form);
+    const fieldErrors: AuthOtpFormErrors = validateOtpForm(form);
 
     if (Object.keys(fieldErrors).length > 0) {
         return {
@@ -66,7 +70,7 @@ export async function verifyPasswordResetOtp(
     } catch (error) {
         if (isAPIError(error)) {
             return {
-                formError: mapAuthError(error),
+                formError: translateAuthError(error),
             };
         }
 
@@ -77,9 +81,10 @@ export async function verifyPasswordResetOtp(
 }
 
 export interface ResendPasswordResetOtpResult {
-    formError?: string;
     success: boolean;
-    rateLimit?: RateLimitState;
+    formError?: string;
+    activeRateLimit?: ActiveRateLimit;
+    remainingAttempts?: number;
 }
 
 export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpResult> {
@@ -91,19 +96,24 @@ export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpRe
 
     const { email } = passwordReset;
 
-    const rateLimit = await consumeRateLimit({
-        action: 'password-reset',
+    const activeRateLimit = await getRateLimitState({
+        action: 'password-reset-otp',
         identifier: email,
-        windowSeconds: PASSWORD_RESET_TIMEOUT_SECONDS,
-        max: PASSWORD_RESET_ATTEMPTS,
     });
 
-    if (!rateLimit.allowed) {
+    if (activeRateLimit) {
         return {
-            rateLimit,
             success: false,
+            activeRateLimit,
         };
     }
+
+    const consumeResult = await consumeRateLimit({
+        action: 'password-reset-otp',
+        identifier: email,
+        max: PASSWORD_RESET_OTP_ATTEMPTS,
+        attemptLifetimeSeconds: PASSWORD_RESET_OTP_ATTEMPT_LIFETIME_SECONDS,
+    });
 
     const requestHeaders = await headers();
 
@@ -116,14 +126,29 @@ export async function resendPasswordResetOtp(): Promise<ResendPasswordResetOtpRe
             headers: requestHeaders,
         });
 
+        let activeRateLimit: ActiveRateLimit | undefined;
+
+        if (consumeResult.remainingAttempts === 0) {
+            activeRateLimit =
+                (await activateRateLimit({
+                    action: 'password-reset-otp',
+                    identifier: email,
+                    windowSeconds: PASSWORD_RESET_OTP_TIMEOUT_SECONDS,
+                })) ?? undefined;
+        }
+
         return {
-            rateLimit,
             success: true,
+            activeRateLimit,
+            remainingAttempts:
+                activeRateLimit === undefined
+                    ? consumeResult.remainingAttempts
+                    : undefined,
         };
     } catch (error) {
         if (isAPIError(error)) {
             return {
-                formError: mapAuthError(error),
+                formError: translateAuthError(error),
                 success: false,
             };
         }

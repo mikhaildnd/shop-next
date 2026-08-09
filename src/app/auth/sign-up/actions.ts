@@ -6,23 +6,28 @@ import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth/auth';
 import {
-    AUTH_FORM_FIELDS,
+    SIGN_UP_ATTEMPT_LIFETIME_SECONDS,
     SIGN_UP_ATTEMPTS,
     SIGN_UP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
-import { mapAuthError } from '@/auth/errors/map-auth-error';
-import { validateEmailRegisterForm } from '@/auth/validation/email-register';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { validateSignUpEmailForm } from '@/auth/form-validators/sign-up-email';
 import { routes } from '@/lib/routes';
-import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
+import {
+    activateRateLimit,
+    consumeRateLimit,
+    getRateLimitState,
+} from '@/services/rate-limit/rate-limit.service';
+import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
 export interface SignUpState {
     formError?: string;
     fieldErrors?: AuthSignUpFormErrors;
     values?: Pick<AuthSignUpForm, 'email' | 'name'>;
-    rateLimit?: RateLimitState;
+    activeRateLimit?: ActiveRateLimit;
+    remainingAttempts?: number;
 }
 
 export async function signUp(
@@ -30,15 +35,13 @@ export async function signUp(
     formData: FormData,
 ): Promise<SignUpState> {
     const form: AuthSignUpForm = {
-        name: String(formData.get(AUTH_FORM_FIELDS.name) ?? ''),
-        email: String(formData.get(AUTH_FORM_FIELDS.email) ?? ''),
-        password: String(formData.get(AUTH_FORM_FIELDS.password) ?? ''),
-        confirmPassword: String(
-            formData.get(AUTH_FORM_FIELDS.confirmPassword) ?? '',
-        ),
+        name: String(formData.get('name') ?? ''),
+        email: String(formData.get('email') ?? ''),
+        password: String(formData.get('password') ?? ''),
+        confirmPassword: String(formData.get('confirmPassword') ?? ''),
     };
 
-    const fieldErrors: AuthSignUpFormErrors = validateEmailRegisterForm(form);
+    const fieldErrors: AuthSignUpFormErrors = validateSignUpEmailForm(form);
 
     if (Object.keys(fieldErrors).length > 0) {
         return {
@@ -50,24 +53,40 @@ export async function signUp(
         };
     }
 
-    const requestHeaders = await headers();
-
-    const rateLimit = await consumeRateLimit({
+    const activeRateLimit = await getRateLimitState({
         action: 'sign-up',
         identifier: form.email,
-        windowSeconds: SIGN_UP_TIMEOUT_SECONDS,
-        max: SIGN_UP_ATTEMPTS,
     });
 
-    if (!rateLimit.allowed) {
+    if (activeRateLimit) {
         return {
             values: {
-                email: form.email,
                 name: form.name,
+                email: form.email,
             },
-            rateLimit,
+            activeRateLimit,
         };
     }
+
+    const consumeResult = await consumeRateLimit({
+        action: 'sign-up',
+        identifier: form.email,
+        max: SIGN_UP_ATTEMPTS,
+        attemptLifetimeSeconds: SIGN_UP_ATTEMPT_LIFETIME_SECONDS,
+    });
+
+    let currentRateLimit: ActiveRateLimit | undefined;
+
+    if (consumeResult.remainingAttempts === 0) {
+        currentRateLimit =
+            (await activateRateLimit({
+                action: 'sign-up',
+                identifier: form.email,
+                windowSeconds: SIGN_UP_TIMEOUT_SECONDS,
+            })) ?? undefined;
+    }
+
+    const requestHeaders = await headers();
 
     try {
         await auth.api.signUpEmail({
@@ -77,7 +96,16 @@ export async function signUp(
     } catch (error) {
         if (isAPIError(error)) {
             return {
-                formError: mapAuthError(error),
+                values: {
+                    name: form.name,
+                    email: form.email,
+                },
+                formError: translateAuthError(error),
+                activeRateLimit: currentRateLimit,
+                remainingAttempts:
+                    currentRateLimit === undefined
+                        ? consumeResult.remainingAttempts
+                        : undefined,
             };
         }
 

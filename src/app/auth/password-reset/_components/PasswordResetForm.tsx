@@ -2,10 +2,9 @@
 
 import { useActionState } from 'react';
 
-import { FormGroup } from '@/app/auth/_components/FormGroup';
-import { FormInput } from '@/app/auth/_components/FormInput';
 import { requestPasswordReset } from '@/app/auth/password-reset/actions';
-import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
+import { FormGroup } from '@/components/form/FormGroup';
+import { FormInput } from '@/components/form/FormInput';
 import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
@@ -16,11 +15,9 @@ export function PasswordResetForm() {
         {},
     );
 
-    const retryAfterSeconds = state.rateLimit?.retryAfterSeconds ?? 0;
+    const expiresAt = state.activeRateLimit?.expiresAt;
 
-    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
-
-    const hasRateLimit = secondsLeft > 0;
+    const { secondsLeft, isRunning } = useCountdownTimer(expiresAt);
 
     return (
         <form
@@ -29,10 +26,10 @@ export function PasswordResetForm() {
             noValidate
         >
             <FormGroup error={state.fieldErrors?.email}>
-                <Label htmlFor={AUTH_FORM_FIELDS.email}>E-mail</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <FormInput
-                    id={AUTH_FORM_FIELDS.email}
-                    name={AUTH_FORM_FIELDS.email}
+                    id="email"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     defaultValue={state.values?.email}
@@ -47,12 +44,12 @@ export function PasswordResetForm() {
             <LoadingButton
                 type="submit"
                 isLoading={isPending}
-                disabled={hasRateLimit}
+                disabled={isRunning}
             >
                 Отправить код для сброса пароля
             </LoadingButton>
 
-            {hasRateLimit && (
+            {isRunning && (
                 <p className="text-muted-foreground text-sm">
                     Повторная отправка через {secondsLeft} сек.
                 </p>

@@ -5,6 +5,7 @@ import { VerifyEmailForm } from '@/app/auth/verify-email/_components/VerifyEmail
 import { restartSignUp } from '@/app/auth/verify-email/actions';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { routes } from '@/lib/routes';
+import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
 
 export default async function VerifyEmailPage() {
     const verifyEmail = await verifyEmailCookie.get();
@@ -14,6 +15,11 @@ export default async function VerifyEmailPage() {
     }
 
     const { email } = verifyEmail;
+
+    const activeRateLimit = await getRateLimitState({
+        action: 'sign-up-otp',
+        identifier: email,
+    });
 
     return (
         <AuthSurface>
@@ -34,7 +40,7 @@ export default async function VerifyEmailPage() {
                     </form>
                 </div>
             </AuthSurface.Header>
-            <VerifyEmailForm />
+            <VerifyEmailForm expiresAt={activeRateLimit?.expiresAt} />
         </AuthSurface>
     );
 }

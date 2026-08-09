@@ -1,18 +1,13 @@
-import { headers } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { auth } from '@/auth/auth';
+import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
 
 export async function proxy(request: NextRequest) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const session = await getSession();
 
-    const { pathname } = request.nextUrl;
-
-    if (!session && pathname === routes.profilePage()) {
+    if (!session) {
         return NextResponse.redirect(new URL(routes.signInPage(), request.url));
     }
 
@@ -20,5 +15,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/profile'],
+    matcher: ['/profile/:path*'],
 };

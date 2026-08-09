@@ -1,19 +1,21 @@
 'use server';
 
 import { isAPIError } from 'better-auth/api';
+import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/auth/auth';
 import {
-    SIGN_UP_OTP_ATTEMPT_LIFETIME_SECONDS,
-    SIGN_UP_OTP_ATTEMPTS,
-    SIGN_UP_OTP_TIMEOUT_SECONDS,
+    EMAIL_CHANGE_OTP_ATTEMPT_LIFETIME_SECONDS,
+    EMAIL_CHANGE_OTP_ATTEMPTS,
+    EMAIL_CHANGE_OTP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
-import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
+import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateOtpForm } from '@/auth/form-validators/email-otp';
+import { requireSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
 import {
     activateRateLimit,
@@ -23,22 +25,24 @@ import {
 } from '@/services/rate-limit/rate-limit.service';
 import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
-export interface VerifyEmailState {
+export interface VerifyEmailChangeState {
     formError?: string;
     fieldErrors?: AuthOtpFormErrors;
 }
 
-export async function verifyEmail(
-    _: VerifyEmailState,
+export async function verifyEmailChangeOtp(
+    _: VerifyEmailChangeState,
     formData: FormData,
-): Promise<VerifyEmailState> {
-    const verifyEmail = await verifyEmailCookie.get();
+): Promise<VerifyEmailChangeState> {
+    const session = await requireSession();
 
-    if (!verifyEmail) {
-        redirect(routes.signInPage());
+    const changeEmail = await changeEmailCookie.get();
+
+    if (!changeEmail) {
+        redirect(routes.changeEmailPage());
     }
 
-    const { email } = verifyEmail;
+    const { email } = changeEmail;
 
     const form: AuthOtpForm = {
         otp: String(formData.get('otp') ?? ''),
@@ -55,17 +59,17 @@ export async function verifyEmail(
     const requestHeaders = await headers();
 
     try {
-        await auth.api.verifyEmailOTP({
+        await auth.api.changeEmailEmailOTP({
             body: {
-                email,
+                newEmail: email,
                 otp: form.otp,
             },
             headers: requestHeaders,
         });
 
         await deleteRateLimit({
-            action: 'sign-up-otp',
-            identifier: email,
+            action: 'change-email-otp',
+            identifier: session.user.id,
         });
     } catch (error) {
         if (isAPIError(error)) {
@@ -77,30 +81,34 @@ export async function verifyEmail(
         throw error;
     }
 
-    await verifyEmailCookie.clear();
+    await changeEmailCookie.clear();
+
+    revalidatePath(routes.profilePage());
 
     redirect(routes.profilePage());
 }
 
-export interface ResendVerificationOtpResult {
+interface ResendEmailChangeOtpResult {
     success: boolean;
     formError?: string;
     activeRateLimit?: ActiveRateLimit;
     remainingAttempts?: number;
 }
 
-export async function resendVerificationOtp(): Promise<ResendVerificationOtpResult> {
-    const verifyEmail = await verifyEmailCookie.get();
+export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult> {
+    const session = await requireSession();
 
-    if (!verifyEmail) {
-        redirect(routes.signInPage());
+    const changeEmail = await changeEmailCookie.get();
+
+    if (!changeEmail) {
+        redirect(routes.changeEmailPage());
     }
 
-    const { email } = verifyEmail;
+    const { email } = changeEmail;
 
     const activeRateLimit = await getRateLimitState({
-        action: 'sign-up-otp',
-        identifier: email,
+        action: 'change-email-otp',
+        identifier: session.user.id,
     });
 
     if (activeRateLimit) {
@@ -111,19 +119,18 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
     }
 
     const consumeResult = await consumeRateLimit({
-        action: 'sign-up-otp',
-        identifier: email,
-        max: SIGN_UP_OTP_ATTEMPTS,
-        attemptLifetimeSeconds: SIGN_UP_OTP_ATTEMPT_LIFETIME_SECONDS,
+        action: 'change-email-otp',
+        identifier: session.user.id,
+        max: EMAIL_CHANGE_OTP_ATTEMPTS,
+        attemptLifetimeSeconds: EMAIL_CHANGE_OTP_ATTEMPT_LIFETIME_SECONDS,
     });
 
     const requestHeaders = await headers();
 
     try {
-        await auth.api.sendVerificationOTP({
+        await auth.api.requestEmailChangeEmailOTP({
             body: {
-                email,
-                type: 'email-verification',
+                newEmail: email,
             },
             headers: requestHeaders,
         });
@@ -133,9 +140,9 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
         if (consumeResult.remainingAttempts === 0) {
             activeRateLimit =
                 (await activateRateLimit({
-                    action: 'sign-up-otp',
-                    identifier: email,
-                    windowSeconds: SIGN_UP_OTP_TIMEOUT_SECONDS,
+                    action: 'change-email-otp',
+                    identifier: session.user.id,
+                    windowSeconds: EMAIL_CHANGE_OTP_TIMEOUT_SECONDS,
                 })) ?? undefined;
         }
 
@@ -150,9 +157,9 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
     } catch (error) {
         if (isAPIError(error)) {
             return {
+                success: false,
                 formError: translateAuthError(error),
                 remainingAttempts: consumeResult.remainingAttempts,
-                success: false,
             };
         }
 
@@ -160,6 +167,6 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
     }
 }
 
-export async function restartSignUp() {
-    redirect(routes.signUpPage());
+export async function restartEmailChange() {
+    redirect(routes.changeEmailPage());
 }

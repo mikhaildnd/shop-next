@@ -2,8 +2,8 @@ import type {
     AuthPasswordSetForm,
     AuthPasswordSetFormErrors,
 } from '@/auth/auth.types';
-import { validateConfirmPassword } from '@/services/user/validation/validate-confirm-password';
-import { validatePassword } from '@/services/user/validation/validate-password';
+import { validateConfirmPassword } from '@/services/user/validatiors/validate-confirm-password';
+import { validatePassword } from '@/services/user/validatiors/validate-password';
 
 export function validateSetPasswordForm(
     form: AuthPasswordSetForm,

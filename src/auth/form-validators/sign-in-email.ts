@@ -1,8 +1,8 @@
 import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
-import { validateEmail } from '@/services/user/validation/validate-email';
-import { validatePassword } from '@/services/user/validation/validate-password';
+import { validateEmail } from '@/services/user/validatiors/validate-email';
+import { validatePassword } from '@/services/user/validatiors/validate-password';
 
-export function validateEmailAuthForm(
+export function validateSignInEmailForm(
     form: AuthSignInForm,
 ): AuthSignInFormErrors {
     const errors: AuthSignInFormErrors = {};

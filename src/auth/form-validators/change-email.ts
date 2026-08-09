@@ -1,8 +1,5 @@
-import type {
-    ChangeEmailForm,
-    ChangeEmailFormErrors,
-} from '@/app/(shop)/profile/profile.types';
-import { validateEmail } from '@/services/user/validation/validate-email';
+import type { ChangeEmailForm, ChangeEmailFormErrors } from '@/auth/auth.types';
+import { validateEmail } from '@/services/user/validatiors/validate-email';
 
 export function validateChangeEmailForm(
     form: ChangeEmailForm,

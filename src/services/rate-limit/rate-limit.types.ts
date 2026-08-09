@@ -1,26 +1,24 @@
 export type RateLimitAction =
     | 'sign-up'
+    | 'sign-up-otp'
     | 'sign-in'
     | 'password-reset'
-    | 'change-email';
+    | 'password-reset-otp'
+    | 'change-email'
+    | 'change-email-otp';
 
-export type CheckRateLimitParams = {
+export type ConsumeRateLimitParams = {
     action: RateLimitAction;
     identifier: string;
-
-    windowSeconds: number;
     max: number;
+    attemptLifetimeSeconds: number;
 };
 
-export type CheckRateLimitResult = {
-    allowed: boolean;
+export type ConsumeRateLimitResult = {
     attempts: number;
     remainingAttempts: number;
-    retryAfterSeconds: number;
 };
 
-export interface RateLimitState {
-    retryAfterSeconds: number;
-    remainingAttempts: number;
-    attempts: number;
-}
+export type ActiveRateLimit = {
+    expiresAt: number;
+};

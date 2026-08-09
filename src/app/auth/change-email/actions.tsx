@@ -4,29 +4,31 @@ import { isAPIError } from 'better-auth/api';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
-import type {
-    ChangeEmailForm,
-    ChangeEmailFormErrors,
-} from '@/app/(shop)/profile/profile.types';
-import { validateChangeEmailForm } from '@/app/(shop)/profile/validation/user-email';
 import { auth } from '@/auth/auth';
 import {
+    EMAIL_CHANGE_ATTEMPT_LIFETIME_SECONDS,
     EMAIL_CHANGE_ATTEMPTS,
     EMAIL_CHANGE_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
+import type { ChangeEmailForm, ChangeEmailFormErrors } from '@/auth/auth.types';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
-import { mapAuthError } from '@/auth/errors/map-auth-error';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { validateChangeEmailForm } from '@/auth/form-validators/change-email';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
-import { consumeRateLimit } from '@/services/rate-limit/rate-limit.service';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
+import {
+    activateRateLimit,
+    consumeRateLimit,
+    getRateLimitState,
+} from '@/services/rate-limit/rate-limit.service';
+import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
 interface ChangeEmailState {
     values?: ChangeEmailForm;
     fieldErrors?: ChangeEmailFormErrors;
     formError?: string;
-    rateLimit?: RateLimitState;
+    activeRateLimit?: ActiveRateLimit;
+    remainingAttempts?: number;
 }
 
 export async function requestChangeEmail(
@@ -40,7 +42,7 @@ export async function requestChangeEmail(
     }
 
     const form: ChangeEmailForm = {
-        email: String(formData.get(PROFILE_FORM_FIELDS.email) ?? ''),
+        email: String(formData.get('email') ?? ''),
     };
 
     const fieldErrors: ChangeEmailFormErrors = validateChangeEmailForm(form);
@@ -48,23 +50,30 @@ export async function requestChangeEmail(
     if (Object.keys(fieldErrors).length > 0) {
         return {
             fieldErrors,
-            values: form,
+            values: {
+                email: form.email,
+            },
         };
     }
 
-    const rateLimit = await consumeRateLimit({
+    const activeRateLimit = await getRateLimitState({
         action: 'change-email',
         identifier: session.user.id,
-        windowSeconds: EMAIL_CHANGE_TIMEOUT_SECONDS,
-        max: EMAIL_CHANGE_ATTEMPTS,
     });
 
-    if (!rateLimit.allowed) {
+    if (activeRateLimit) {
         return {
-            values: form,
-            rateLimit,
+            values: { email: form.email },
+            activeRateLimit,
         };
     }
+
+    const consumeResult = await consumeRateLimit({
+        action: 'change-email',
+        identifier: session.user.id,
+        max: EMAIL_CHANGE_ATTEMPTS,
+        attemptLifetimeSeconds: EMAIL_CHANGE_ATTEMPT_LIFETIME_SECONDS,
+    });
 
     const requestHeaders = await headers();
 
@@ -75,11 +84,20 @@ export async function requestChangeEmail(
             },
             headers: requestHeaders,
         });
+
+        if (consumeResult.remainingAttempts === 0) {
+            await activateRateLimit({
+                action: 'change-email',
+                identifier: session.user.id,
+                windowSeconds: EMAIL_CHANGE_TIMEOUT_SECONDS,
+            });
+        }
     } catch (error) {
         if (isAPIError(error)) {
             return {
-                values: form,
-                formError: mapAuthError(error),
+                values: { email: form.email },
+                formError: translateAuthError(error),
+                remainingAttempts: consumeResult.remainingAttempts,
             };
         }
 
@@ -90,5 +108,5 @@ export async function requestChangeEmail(
         email: form.email,
     });
 
-    redirect(routes.profileChangeEmailVerifyPage());
+    redirect(routes.changeEmailVerifyPage());
 }

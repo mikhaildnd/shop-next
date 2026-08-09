@@ -3,7 +3,11 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
 import { emailOTP } from 'better-auth/plugins';
 
-import { OTP_EXPIRES_IN } from '@/auth/auth.consts';
+import {
+    OTP_ALLOWED_ATTEMPTS,
+    OTP_EXPIRES_IN,
+    OTP_LENGTH,
+} from '@/auth/auth.consts';
 import { sendEmailOtp } from '@/email/email.service';
 import { prisma } from '@/lib/db';
 
@@ -31,8 +35,8 @@ export const auth = betterAuth({
             },
             sendVerificationOTP: sendEmailOtp,
             sendVerificationOnSignUp: true,
-            otpLength: 6,
-            allowedAttempts: 3,
+            otpLength: OTP_LENGTH,
+            allowedAttempts: OTP_ALLOWED_ATTEMPTS,
             expiresIn: OTP_EXPIRES_IN,
             resendStrategy: 'rotate',
         }),

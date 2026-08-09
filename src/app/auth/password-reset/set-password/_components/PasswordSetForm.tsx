@@ -2,10 +2,9 @@
 
 import { useActionState } from 'react';
 
-import { FormGroup } from '@/app/auth/_components/FormGroup';
-import { FormInput } from '@/app/auth/_components/FormInput';
 import { setPassword } from '@/app/auth/password-reset/set-password/actions';
-import { AUTH_FORM_FIELDS } from '@/auth/auth.consts';
+import { FormGroup } from '@/components/form/FormGroup';
+import { FormInput } from '@/components/form/FormInput';
 import { Label } from '@/components/shared/Label';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 
@@ -19,12 +18,10 @@ export function PasswordSetForm() {
             noValidate
         >
             <FormGroup error={state.fieldErrors?.password}>
-                <Label htmlFor={AUTH_FORM_FIELDS.password}>
-                    Введите новый пароль
-                </Label>
+                <Label htmlFor="password">Введите новый пароль</Label>
                 <FormInput
-                    id={AUTH_FORM_FIELDS.password}
-                    name={AUTH_FORM_FIELDS.password}
+                    id="password"
+                    name="password"
                     type="password"
                     autoComplete="new-password"
                     error={state.fieldErrors?.password}
@@ -32,12 +29,10 @@ export function PasswordSetForm() {
             </FormGroup>
 
             <FormGroup error={state.fieldErrors?.confirmPassword}>
-                <Label htmlFor={AUTH_FORM_FIELDS.confirmPassword}>
-                    Подтвердите пароль
-                </Label>
+                <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
                 <FormInput
-                    id={AUTH_FORM_FIELDS.confirmPassword}
-                    name={AUTH_FORM_FIELDS.confirmPassword}
+                    id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
                     autoComplete="new-password"
                     error={state.fieldErrors?.confirmPassword}

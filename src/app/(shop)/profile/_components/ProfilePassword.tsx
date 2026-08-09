@@ -2,36 +2,30 @@
 
 import { useState } from 'react';
 
-import { ChangeUserNameForm } from '@/app/(shop)/profile/_components/ChangeUserNameForm';
+import { ChangeUserPasswordForm } from '@/app/(shop)/profile/_components/ChangeUserPasswordForm';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { Button } from '@/components/shared/Button';
 
-interface ProfileNameProps {
-    name: string;
-}
-
-export function ProfileName({ name }: ProfileNameProps) {
+export function ProfilePassword() {
     const [isEditing, setIsEditing] = useState(false);
 
     return (
         <div className="space-y-4">
             <ProfileItem
-                label="Имя"
+                label="Пароль"
                 action={
                     <Button
                         variant="secondary"
                         size="xs"
                         onClick={() => setIsEditing(!isEditing)}
                     >
-                        {isEditing ? 'Отмена' : 'Редактировать'}
+                        {isEditing ? 'Отмена' : 'Изменить'}
                     </Button>
                 }
-            >
-                <p>{name}</p>
-            </ProfileItem>
+            />
 
             {isEditing && (
-                <ChangeUserNameForm onSuccess={() => setIsEditing(false)} />
+                <ChangeUserPasswordForm onSuccess={() => setIsEditing(false)} />
             )}
         </div>
     );

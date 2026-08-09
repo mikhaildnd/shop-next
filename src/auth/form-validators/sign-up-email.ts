@@ -1,10 +1,10 @@
 import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
-import { validateConfirmPassword } from '@/services/user/validation/validate-confirm-password';
-import { validateEmail } from '@/services/user/validation/validate-email';
-import { validateName } from '@/services/user/validation/validate-name';
-import { validatePassword } from '@/services/user/validation/validate-password';
+import { validateConfirmPassword } from '@/services/user/validatiors/validate-confirm-password';
+import { validateEmail } from '@/services/user/validatiors/validate-email';
+import { validateName } from '@/services/user/validatiors/validate-name';
+import { validatePassword } from '@/services/user/validatiors/validate-password';
 
-export function validateEmailRegisterForm(
+export function validateSignUpEmailForm(
     form: AuthSignUpForm,
 ): AuthSignUpFormErrors {
     const errors: AuthSignUpFormErrors = {};

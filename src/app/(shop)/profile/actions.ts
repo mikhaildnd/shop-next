@@ -1,58 +1,99 @@
 'use server';
 
+import { isAPIError } from 'better-auth/api';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
-import { PROFILE_FORM_FIELDS } from '@/app/(shop)/profile/profile.consts';
+import { validateChangeNameForm } from '@/app/(shop)/profile/form-validators/change-name';
+import { validateChangePasswordForm } from '@/app/(shop)/profile/form-validators/change-password';
 import type {
     ChangeNameForm,
     ChangeNameFormErrors,
+    ChangePasswordForm,
+    ChangePasswordFormErrors,
 } from '@/app/(shop)/profile/profile.types';
-import { validateChangeNameForm } from '@/app/(shop)/profile/validation/user-name';
-import { getSession } from '@/auth/session';
+import { auth } from '@/auth/auth';
+import { translateAuthError } from '@/auth/errors/translate-auth-error';
+import { requireSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
-import { updateUserName } from '@/services/user/user.service';
+import { changeUserName } from '@/services/user/user.service';
 
 interface ChangeNameState {
     success?: boolean;
-    formError?: string;
     fieldErrors?: ChangeNameFormErrors;
-    values?: ChangeNameForm;
 }
 
 export async function changeName(
     _: ChangeNameState,
     formData: FormData,
 ): Promise<ChangeNameState> {
-    const session = await getSession();
+    const session = await requireSession();
 
-    if (!session) {
-        redirect(routes.signInPage());
-    }
-
-    const form = {
-        name: String(formData.get(PROFILE_FORM_FIELDS.name) ?? ''),
+    const form: ChangeNameForm = {
+        name: String(formData.get('name') ?? ''),
     };
 
-    const fieldErrors = validateChangeNameForm(form);
+    const fieldErrors: ChangeNameFormErrors = validateChangeNameForm(form);
 
     if (Object.keys(fieldErrors).length > 0) {
         return {
             fieldErrors,
-            values: form,
+        };
+    }
+
+    await changeUserName(session.user.id, form.name);
+
+    revalidatePath(routes.profilePage());
+
+    return { success: true };
+}
+
+interface ChangePasswordState {
+    success?: boolean;
+    formError?: string;
+    fieldErrors?: ChangePasswordFormErrors;
+}
+
+export async function changePassword(
+    _: ChangePasswordState,
+    formData: FormData,
+): Promise<ChangePasswordState> {
+    await requireSession();
+
+    const form: ChangePasswordForm = {
+        currentPassword: String(formData.get('currentPassword') ?? ''),
+        newPassword: String(formData.get('newPassword') ?? ''),
+        confirmNewPassword: String(formData.get('confirmNewPassword') ?? ''),
+    };
+
+    const fieldErrors: ChangePasswordFormErrors =
+        validateChangePasswordForm(form);
+
+    if (Object.keys(fieldErrors).length > 0) {
+        return {
+            fieldErrors,
         };
     }
 
     try {
-        await updateUserName(session.user.id, form.name);
+        await auth.api.changePassword({
+            body: {
+                currentPassword: form.currentPassword,
+                newPassword: form.newPassword,
+                revokeOtherSessions: false,
+            },
 
-        revalidatePath(routes.profilePage());
+            headers: await headers(),
+        });
 
         return { success: true };
-    } catch {
-        return {
-            formError: 'Не удалось обновить имя.',
-            values: form,
-        };
+    } catch (error) {
+        if (isAPIError(error)) {
+            return {
+                formError: translateAuthError(error),
+            };
+        }
+
+        throw error;
     }
 }

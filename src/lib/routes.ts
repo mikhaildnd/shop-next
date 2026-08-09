@@ -27,11 +27,11 @@ export const routes = {
 
     profilePage: () => '/profile',
 
-    profileChangeEmailPage: () => '/profile/change-email',
-
-    profileChangeEmailVerifyPage: () => '/profile/change-email/verify',
-
     signInPage: () => '/auth/sign-in',
+
+    changeEmailPage: () => '/auth/change-email',
+
+    changeEmailVerifyPage: () => '/auth/change-email/verify',
 
     signUpPage: () => '/auth/sign-up',
 

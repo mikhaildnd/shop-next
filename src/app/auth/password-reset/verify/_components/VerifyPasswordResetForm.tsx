@@ -3,48 +3,53 @@
 import { useActionState, useTransition } from 'react';
 import { useState } from 'react';
 
-import { OtpInput } from '@/app/auth/_components/OtpInput';
 import {
     resendPasswordResetOtp,
     verifyPasswordResetOtp,
 } from '@/app/auth/password-reset/verify/actions';
-import { AUTH_FORM_FIELDS, OTP_LENGTH } from '@/auth/auth.consts';
+import { OTP_LENGTH } from '@/auth/auth.consts';
+import { OtpInput } from '@/components/form/OtpInput';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
-import type { RateLimitState } from '@/services/rate-limit/rate-limit.types';
 
-export function VerifyPasswordResetForm() {
+interface VerifyPasswordResetFormProps {
+    expiresAt?: number;
+}
+
+export function VerifyPasswordResetForm({
+    expiresAt: initialExpiresAt,
+}: VerifyPasswordResetFormProps) {
     const [state, formAction, isPending] = useActionState(
         verifyPasswordResetOtp,
         {},
     );
 
-    const [rateLimit, setRateLimit] = useState<RateLimitState>();
+    const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
 
     const [isResending, startTransition] = useTransition();
     const [resendError, setResendError] = useState<string>();
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [remainingAttempts, setRemainingAttempts] = useState<number>();
 
-    const retryAfterSeconds = rateLimit?.retryAfterSeconds ?? 0;
-
-    const { secondsLeft } = useCountdownTimer(retryAfterSeconds);
-
-    const hasRateLimit = secondsLeft > 0;
+    const { secondsLeft, isRunning } = useCountdownTimer(expiresAt);
 
     const handleResend = () => {
         startTransition(async () => {
             setResendError(undefined);
             setShowSuccessMessage(false);
 
-            const { formError, success, rateLimit } =
+            const { formError, success, activeRateLimit, remainingAttempts } =
                 await resendPasswordResetOtp();
+            setExpiresAt(activeRateLimit?.expiresAt);
+            setRemainingAttempts(remainingAttempts);
 
-            if (rateLimit) {
-                setRateLimit(rateLimit);
+            if (success) {
+                setShowSuccessMessage(true);
+                setResendError(undefined);
+                return;
             }
 
             setResendError(formError);
-            setShowSuccessMessage(success);
         });
     };
 
@@ -54,7 +59,7 @@ export function VerifyPasswordResetForm() {
             action={formAction}
         >
             <OtpInput
-                name={AUTH_FORM_FIELDS.otp}
+                name="otp"
                 length={OTP_LENGTH}
                 error={state.fieldErrors?.otp}
             />
@@ -77,12 +82,16 @@ export function VerifyPasswordResetForm() {
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}
-                disabled={isResending || hasRateLimit}
+                disabled={isResending || isRunning}
             >
                 Отправить код повторно
             </LoadingButton>
 
-            {hasRateLimit && (
+            {remainingAttempts !== undefined && remainingAttempts > 0 && (
+                <p className="text-sm">Осталось попыток: {remainingAttempts}</p>
+            )}
+
+            {isRunning && (
                 <p className="text-muted-foreground text-sm">
                     Повторная отправка через {secondsLeft} сек.
                 </p>

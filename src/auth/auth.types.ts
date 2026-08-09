@@ -1,28 +1,36 @@
 import type { FormErrors } from '@/lib/types/form-errors';
-import type { UserFormFields } from '@/services/user/user-form.types';
 
-// Password set form
-export type AuthPasswordSetForm = Pick<
-    UserFormFields,
-    'password' | 'confirmPassword'
->;
+export type AuthPasswordSetForm = {
+    password: string;
+    confirmPassword: string;
+};
 export type AuthPasswordSetFormErrors = FormErrors<AuthPasswordSetForm>;
 
-// Password reset form
-export type AuthPasswordResetForm = Pick<UserFormFields, 'email'>;
+export type AuthPasswordResetForm = {
+    email: string;
+};
 export type AuthPasswordResetFormErrors = FormErrors<AuthPasswordResetForm>;
 
-// Sign in form
-export type AuthSignInForm = Pick<UserFormFields, 'email' | 'password'>;
+export type AuthSignInForm = {
+    email: string;
+    password: string;
+};
 export type AuthSignInFormErrors = FormErrors<AuthSignInForm>;
 
-// Sign up form
-export type AuthSignUpForm = Pick<
-    UserFormFields,
-    'name' | 'email' | 'password' | 'confirmPassword'
->;
+export type AuthSignUpForm = {
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+};
 export type AuthSignUpFormErrors = FormErrors<AuthSignUpForm>;
 
-// Otp form
-export type AuthOtpForm = Pick<UserFormFields, 'otp'>;
+export type AuthOtpForm = {
+    otp: string;
+};
 export type AuthOtpFormErrors = FormErrors<AuthOtpForm>;
+
+export type ChangeEmailForm = {
+    email: string;
+};
+export type ChangeEmailFormErrors = FormErrors<ChangeEmailForm>;
