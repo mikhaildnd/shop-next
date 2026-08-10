@@ -1,11 +1,14 @@
 import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
-import { VerifyEmailForm } from '@/app/auth/verify-email/_components/VerifyEmailForm';
-import { restartSignUp } from '@/app/auth/verify-email/actions';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { routes } from '@/lib/routes';
 import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
+import {
+    restartSignIn,
+    restartSignUp,
+} from '@/app/auth/email-verification/actions';
+import { EmailVerificationForm } from '@/app/auth/email-verification/_components/EmailVerificationForm';
 
 export default async function VerifyEmailPage() {
     const verifyEmail = await verifyEmailCookie.get();
@@ -14,7 +17,7 @@ export default async function VerifyEmailPage() {
         redirect(routes.signInPage());
     }
 
-    const { email } = verifyEmail;
+    const { email, source } = verifyEmail;
 
     const activeRateLimit = await getRateLimitState({
         action: 'sign-up-otp',
@@ -25,12 +28,16 @@ export default async function VerifyEmailPage() {
         <AuthSurface>
             <AuthSurface.Header
                 title="Введите код"
-                description="Код подтверждения отправлен."
+                description="Код подтверждения отправлен"
             >
                 <div className="flex items-center justify-between gap-2">
                     <span>{email}</span>
 
-                    <form action={restartSignUp}>
+                    <form
+                        action={
+                            source === 'sign-up' ? restartSignUp : restartSignIn
+                        }
+                    >
                         <button
                             type="submit"
                             className="link-style"
@@ -40,7 +47,8 @@ export default async function VerifyEmailPage() {
                     </form>
                 </div>
             </AuthSurface.Header>
-            <VerifyEmailForm expiresAt={activeRateLimit?.expiresAt} />
+
+            <EmailVerificationForm expiresAt={activeRateLimit?.expiresAt} />
         </AuthSurface>
     );
 }

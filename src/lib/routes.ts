@@ -35,7 +35,7 @@ export const routes = {
 
     signUpPage: () => '/auth/sign-up',
 
-    verifyEmailPage: () => '/auth/verify-email',
+    emailVerificationPage: () => '/auth/email-verification',
 
     passwordResetPage: () => '/auth/password-reset',
 

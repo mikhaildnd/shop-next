@@ -9,6 +9,9 @@ import {
     SIGN_IN_ATTEMPT_LIFETIME_SECONDS,
     SIGN_IN_ATTEMPTS,
     SIGN_IN_TIMEOUT_SECONDS,
+    SIGN_UP_OTP_ATTEMPT_LIFETIME_SECONDS,
+    SIGN_UP_OTP_ATTEMPTS,
+    SIGN_UP_OTP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
@@ -21,6 +24,7 @@ import {
     getRateLimitState,
 } from '@/services/rate-limit/rate-limit.service';
 import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
+import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 
 export interface SignInState {
     formError?: string;
@@ -28,6 +32,7 @@ export interface SignInState {
     values?: Pick<AuthSignInForm, 'email'>;
     activeRateLimit?: ActiveRateLimit;
     remainingAttempts?: number;
+    requiresEmailVerification?: boolean;
 }
 
 export async function signIn(
@@ -106,6 +111,8 @@ export async function signIn(
                     activeRateLimit === undefined
                         ? consumeResult.remainingAttempts
                         : undefined,
+                requiresEmailVerification:
+                    error.body?.code === 'EMAIL_NOT_VERIFIED',
             };
         }
 
@@ -113,4 +120,71 @@ export async function signIn(
     }
 
     redirect(routes.profilePage());
+}
+
+interface SendVerificationOtpState {
+    formError?: string;
+    activeRateLimit?: ActiveRateLimit;
+    remainingAttempts?: number;
+}
+
+export async function sendVerificationOtp(
+    _: SendVerificationOtpState,
+    formData: FormData,
+): Promise<SendVerificationOtpState> {
+    const email = String(formData.get('email') ?? '');
+
+    const activeRateLimit = await getRateLimitState({
+        action: 'sign-up-otp',
+        identifier: email,
+    });
+
+    if (activeRateLimit) {
+        return {
+            activeRateLimit,
+        };
+    }
+
+    const consumeResult = await consumeRateLimit({
+        action: 'sign-up-otp',
+        identifier: email,
+        max: SIGN_UP_OTP_ATTEMPTS,
+        attemptLifetimeSeconds: SIGN_UP_OTP_ATTEMPT_LIFETIME_SECONDS,
+    });
+
+    const requestHeaders = await headers();
+
+    try {
+        await auth.api.sendVerificationOTP({
+            body: {
+                email,
+                type: 'email-verification',
+            },
+            headers: requestHeaders,
+        });
+
+        await verifyEmailCookie.set({
+            email,
+            source: 'sign-in',
+        });
+    } catch (error) {
+        if (isAPIError(error)) {
+            return {
+                formError: translateAuthError(error),
+                remainingAttempts: consumeResult.remainingAttempts,
+            };
+        }
+
+        throw error;
+    }
+
+    if (consumeResult.remainingAttempts === 0) {
+        await activateRateLimit({
+            action: 'sign-up-otp',
+            identifier: email,
+            windowSeconds: SIGN_UP_OTP_TIMEOUT_SECONDS,
+        });
+    }
+
+    redirect(routes.emailVerificationPage());
 }

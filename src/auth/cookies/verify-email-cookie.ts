@@ -4,8 +4,11 @@ import {
     VERIFY_EMAIL_COOKIE_MAX_AGE,
 } from '@/auth/cookies/cookies.consts';
 
+type EmailVerificationSource = 'sign-up' | 'sign-in';
+
 type VerifyEmailCookie = {
     email: string;
+    source: EmailVerificationSource;
 };
 
 export const verifyEmailCookie = createCookieStorage<VerifyEmailCookie>({

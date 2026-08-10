@@ -5,21 +5,21 @@ import { useState } from 'react';
 
 import {
     resendVerificationOtp,
-    verifyEmail,
-} from '@/app/auth/verify-email/actions';
+    verifyEmailOtp,
+} from '@/app/auth/email-verification/actions';
 import { OTP_LENGTH } from '@/auth/auth.consts';
 import { OtpInput } from '@/components/form/OtpInput';
 import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
-interface VerifyEmailFormProps {
+interface EmailVerificationFormProps {
     expiresAt?: number;
 }
 
-export function VerifyEmailForm({
+export function EmailVerificationForm({
     expiresAt: initialExpiresAt,
-}: VerifyEmailFormProps) {
-    const [state, formAction, isPending] = useActionState(verifyEmail, {});
+}: EmailVerificationFormProps) {
+    const [state, formAction, isPending] = useActionState(verifyEmailOtp, {});
 
     const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
 
@@ -96,7 +96,7 @@ export function VerifyEmailForm({
             )}
 
             {showSuccessMessage && (
-                <p className="text-sm text-green-600">Новый код отправлен.</p>
+                <p className="text-sm text-green-600">Новый код отправлен</p>
             )}
 
             {resendError && (

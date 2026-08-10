@@ -23,15 +23,15 @@ import {
 } from '@/services/rate-limit/rate-limit.service';
 import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
 
-export interface VerifyEmailState {
+interface EmailVerificationState {
     formError?: string;
     fieldErrors?: AuthOtpFormErrors;
 }
 
-export async function verifyEmail(
-    _: VerifyEmailState,
+export async function verifyEmailOtp(
+    _: EmailVerificationState,
     formData: FormData,
-): Promise<VerifyEmailState> {
+): Promise<EmailVerificationState> {
     const verifyEmail = await verifyEmailCookie.get();
 
     if (!verifyEmail) {
@@ -65,6 +65,11 @@ export async function verifyEmail(
 
         await deleteRateLimit({
             action: 'sign-up-otp',
+            identifier: email,
+        });
+
+        await deleteRateLimit({
+            action: 'sign-in',
             identifier: email,
         });
     } catch (error) {
@@ -162,4 +167,8 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
 
 export async function restartSignUp() {
     redirect(routes.signUpPage());
+}
+
+export async function restartSignIn() {
+    redirect(routes.signInPage());
 }

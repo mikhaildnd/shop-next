@@ -112,7 +112,10 @@ export async function signUp(
         throw error;
     }
 
-    await verifyEmailCookie.set({ email: form.email });
+    await verifyEmailCookie.set({
+        email: form.email,
+        source: 'sign-up',
+    });
 
-    redirect(routes.verifyEmailPage());
+    redirect(routes.emailVerificationPage());
 }
