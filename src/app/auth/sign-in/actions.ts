@@ -14,6 +14,7 @@ import {
     SIGN_UP_OTP_TIMEOUT_SECONDS,
 } from '@/auth/auth.consts';
 import type { AuthSignInForm, AuthSignInFormErrors } from '@/auth/auth.types';
+import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateSignInEmailForm } from '@/auth/form-validators/sign-in-email';
 import { routes } from '@/lib/routes';
@@ -24,7 +25,6 @@ import {
     getRateLimitState,
 } from '@/services/rate-limit/rate-limit.service';
 import type { ActiveRateLimit } from '@/services/rate-limit/rate-limit.types';
-import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 
 export interface SignInState {
     formError?: string;

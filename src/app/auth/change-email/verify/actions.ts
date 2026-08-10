@@ -166,7 +166,3 @@ export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult
         throw error;
     }
 }
-
-export async function restartEmailChange() {
-    redirect(routes.changeEmailPage());
-}

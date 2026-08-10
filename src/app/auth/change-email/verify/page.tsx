@@ -1,8 +1,8 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { VerifyEmailChangeForm } from '@/app/auth/change-email/verify/_components/VerifyEmailChangeForm';
-import { restartEmailChange } from '@/app/auth/change-email/verify/actions';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { getSession } from '@/auth/session';
 import { routes } from '@/lib/routes';
@@ -37,14 +37,12 @@ export default async function VerifyChangeEmailPage() {
                 <div className="flex items-center justify-between gap-2">
                     <span>{email}</span>
 
-                    <form action={restartEmailChange}>
-                        <button
-                            type="submit"
-                            className="link-style"
-                        >
-                            Изменить
-                        </button>
-                    </form>
+                    <Link
+                        href={routes.changeEmailPage()}
+                        className="link-style"
+                    >
+                        Изменить
+                    </Link>
                 </div>
             </AuthSurface.Header>
             <VerifyEmailChangeForm expiresAt={activeRateLimit?.expiresAt} />

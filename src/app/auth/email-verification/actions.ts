@@ -164,11 +164,3 @@ export async function resendVerificationOtp(): Promise<ResendVerificationOtpResu
         throw error;
     }
 }
-
-export async function restartSignUp() {
-    redirect(routes.signUpPage());
-}
-
-export async function restartSignIn() {
-    redirect(routes.signInPage());
-}

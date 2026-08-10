@@ -1,14 +1,11 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
+import { EmailVerificationForm } from '@/app/auth/email-verification/_components/EmailVerificationForm';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { routes } from '@/lib/routes';
 import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
-import {
-    restartSignIn,
-    restartSignUp,
-} from '@/app/auth/email-verification/actions';
-import { EmailVerificationForm } from '@/app/auth/email-verification/_components/EmailVerificationForm';
 
 export default async function VerifyEmailPage() {
     const verifyEmail = await verifyEmailCookie.get();
@@ -32,19 +29,16 @@ export default async function VerifyEmailPage() {
             >
                 <div className="flex items-center justify-between gap-2">
                     <span>{email}</span>
-
-                    <form
-                        action={
-                            source === 'sign-up' ? restartSignUp : restartSignIn
+                    <Link
+                        href={
+                            source === 'sign-up'
+                                ? routes.signUpPage()
+                                : routes.signInPage()
                         }
+                        className="link-style"
                     >
-                        <button
-                            type="submit"
-                            className="link-style"
-                        >
-                            Изменить
-                        </button>
-                    </form>
+                        Изменить
+                    </Link>
                 </div>
             </AuthSurface.Header>
 
