@@ -85,19 +85,17 @@ export default async function CollectionPage({
         );
     }
 
-    const { products, filteredProductsCount, listingStats } = await getProducts(
-        {
-            take: pagination.take,
-            skip: pagination.skip,
-            collectionSlug: collection?.slug,
-            filters: listing.filters,
-            sort: listing.sort,
-        },
-    );
+    const { products, totalProductsCount, listingStats } = await getProducts({
+        take: pagination.take,
+        skip: pagination.skip,
+        collectionSlug: collection?.slug,
+        filters: listing.filters,
+        sort: listing.sort,
+    });
 
-    const totalPages = Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE);
+    const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
-    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+    if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
             <PageStateLayout
                 title={collection.title}
@@ -108,7 +106,7 @@ export default async function CollectionPage({
         );
     }
 
-    if (filteredProductsCount === 0) {
+    if (totalProductsCount === 0) {
         return (
             <PageStateLayout
                 title={collection.title}

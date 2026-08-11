@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { CategoryCard } from '@/app/(shop)/(catalog)/catalog/_components/CategoryCard';
+import { CatalogDesktop } from '@/app/(shop)/(catalog)/catalog/_components/CatalogDesktop';
+import { CatalogMobile } from '@/app/(shop)/(catalog)/catalog/_components/CatalogMobile';
+import { mapCategoriesToCatalogSections } from '@/app/(shop)/(catalog)/catalog/lib/map-categories-to-catalog-sections';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import { routes } from '@/lib/routes';
 import { getCategories } from '@/services/category/category.service';
@@ -18,16 +20,7 @@ export default async function CatalogPage() {
         notFound();
     }
 
-    const rootCategories = categories.filter(
-        (category) => category.parentId === null,
-    );
-
-    const categoryCards = rootCategories.map((category) => ({
-        category,
-        childCategories: categories.filter(
-            (childCategory) => childCategory.parentId === category.id,
-        ),
-    }));
+    const categoryGroups = mapCategoriesToCatalogSections(categories);
 
     const breadcrumbs = [
         {
@@ -48,17 +41,15 @@ export default async function CatalogPage() {
             />
             <h1 className="mb-3 catalog-heading xl:mb-5">Каталог товаров</h1>
 
-            <div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {categoryCards.map(({ category, childCategories }) => (
-                        <CategoryCard
-                            key={category.id}
-                            category={category}
-                            childCategories={childCategories}
-                        />
-                    ))}
-                </div>
-            </div>
+            <CatalogMobile
+                catalogSections={categoryGroups}
+                className="lg:hidden"
+            />
+
+            <CatalogDesktop
+                catalogSections={categoryGroups}
+                className="hidden lg:grid"
+            />
         </div>
     );
 }

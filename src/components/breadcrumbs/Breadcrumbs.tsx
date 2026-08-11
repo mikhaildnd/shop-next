@@ -47,7 +47,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
                             {!isLast && (
                                 <ChevronRight
                                     aria-hidden="true"
-                                    className="text-primary h-4 w-4 stroke-[2px]"
+                                    className="text-primary size-3 stroke-2"
                                 />
                             )}
                         </li>

@@ -1,0 +1,37 @@
+export const SIGN_UP_ATTEMPTS = 3;
+export const SIGN_UP_TIMEOUT_SECONDS = 40;
+export const SIGN_UP_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const SIGN_UP_OTP_ATTEMPTS = 3;
+export const SIGN_UP_OTP_TIMEOUT_SECONDS = 40;
+export const SIGN_UP_OTP_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const SIGN_IN_ATTEMPTS = 3;
+export const SIGN_IN_TIMEOUT_SECONDS = 30;
+export const SIGN_IN_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_CHANGE_TIMEOUT_SECONDS = 40;
+export const EMAIL_CHANGE_ATTEMPTS = 3;
+export const EMAIL_CHANGE_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const EMAIL_CHANGE_OTP_ATTEMPTS = 3;
+export const EMAIL_CHANGE_OTP_TIMEOUT_SECONDS = 40;
+export const EMAIL_CHANGE_OTP_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const OTP_LENGTH = 6;
+export const OTP_ALLOWED_ATTEMPTS = 3;
+export const OTP_EXPIRES_IN = 60 * 15;
+export const OTP_REGEXP = new RegExp(`^\\d{${OTP_LENGTH}}$`);
+
+export const PASSWORD_LENGTH = 8;
+export const NAME_MAX_LENGTH = 24;
+export const NAME_MIN_LENGTH = 2;
+
+export const PASSWORD_RESET_ATTEMPTS = 3;
+export const PASSWORD_RESET_TIMEOUT_SECONDS = 40;
+export const PASSWORD_RESET_ATTEMPT_LIFETIME_SECONDS = 60 * 2;
+
+export const PASSWORD_RESET_OTP_ATTEMPTS = 3;
+export const PASSWORD_RESET_OTP_TIMEOUT_SECONDS = 40;
+export const PASSWORD_RESET_OTP_ATTEMPT_LIFETIME_SECONDS = 60 * 2;

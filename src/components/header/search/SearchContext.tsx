@@ -3,12 +3,13 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
-import type { SearchState} from '@/components/header/search/useSearch';
+import type { SearchState } from '@/components/header/search/useSearch';
 import { useSearch } from '@/components/header/search/useSearch';
 import { useSearchHistory } from '@/components/header/search/useSearchHistory';
 import type { SearchHistoryState } from '@/lib/search/search-history.types';
 
-type SearchContextValue = SearchState & {
+type SearchContextValue = {
+    search: SearchState;
     history: SearchHistoryState;
 };
 const SearchContext = createContext<SearchContextValue | null>(null);
@@ -22,7 +23,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
     const history = useSearchHistory();
 
     return (
-        <SearchContext.Provider value={{ ...search, history }}>
+        <SearchContext.Provider value={{ search, history }}>
             {children}
         </SearchContext.Provider>
     );

@@ -42,39 +42,15 @@ export type ProductDto = {
     updatedAt: string;
 };
 
-export type ProductSeed = {
-    slug: string;
-    title: string;
-    description: string | null;
-
-    regularPrice: number;
-    salePrice?: number | null;
-
-    ratingRate: number;
-    ratingCount: number;
-
-    stock: number;
-
-    measureType: MeasureType;
-    measureValue: number;
-
-    ingredients?: string[];
-
-    images: string[];
-
-    category: string;
-    collections?: string[];
-};
-
 export type ProductListingStats = {
     minPrice: number;
     maxPrice: number;
-    totalProductsCount: number;
     maxDiscount: number;
+    hasSaleProducts: boolean;
 };
 
 export type ProductsResponse = {
     products: ProductDto[];
-    filteredProductsCount: number;
+    totalProductsCount: number;
     listingStats: ProductListingStats;
 };

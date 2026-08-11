@@ -1,0 +1,1 @@
+export const RATE_LIMIT_RETENTION_SECONDS = 24 * 60 * 60;

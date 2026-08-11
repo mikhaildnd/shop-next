@@ -1,17 +1,15 @@
 import './globals.css';
 
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Rubik } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { Footer } from '@/components/footer/Footer';
-import { Header } from '@/components/header/Header';
 import { cn } from '@/utils/cn';
 
-const fontMain = Inter({
+const fontMain = Rubik({
     variable: '--font-main',
     subsets: ['latin', 'cyrillic'],
-    weight: ['400'],
+    weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
@@ -32,9 +30,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                     fontMain.variable,
                 )}
             >
-                <Header />
-                <main className="wrapper grow">{children}</main>
-                <Footer className="pb-(--bottom-nav-height) md:pb-0" />
+                {children}
             </body>
         </html>
     );

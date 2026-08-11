@@ -80,21 +80,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    const { products, filteredProductsCount, listingStats } = await getProducts(
-        {
-            take: pagination.take,
-            skip: pagination.skip,
-            filters: listing.filters,
-            sort: listing.sort,
-        },
-    );
+    const { products, totalProductsCount, listingStats } = await getProducts({
+        take: pagination.take,
+        skip: pagination.skip,
+        filters: listing.filters,
+        sort: listing.sort,
+    });
 
     const totalPages = Math.max(
         1,
-        Math.ceil(filteredProductsCount / PRODUCTS_PER_PAGE),
+        Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE),
     );
 
-    if (pagination.currentPage > totalPages && filteredProductsCount > 0) {
+    if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
             <PageStateLayout
                 title="Результаты поиска"
@@ -107,7 +105,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    if (filteredProductsCount === 0) {
+    if (totalProductsCount === 0) {
         return (
             <PageStateLayout
                 title="Результаты поиска"

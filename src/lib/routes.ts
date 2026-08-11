@@ -12,12 +12,9 @@ export const routes = {
 
     productPage: (slug: string) => `/product/${slug}`,
 
-    productInCategory: (productSlug: string, categorySlug: string) => {
-        return buildUrl({
-            pathname: routes.productPage(productSlug),
-            params: { category: categorySlug },
-        });
-    },
+    favoritesPage: () => '/favorites',
+
+    cartPage: () => '/cart',
 
     searchPage: (query?: string) => {
         return buildUrl({
@@ -27,6 +24,24 @@ export const routes = {
             },
         });
     },
+
+    profilePage: () => '/profile',
+
+    signInPage: () => '/auth/sign-in',
+
+    changeEmailPage: () => '/auth/change-email',
+
+    changeEmailVerifyPage: () => '/auth/change-email/verify',
+
+    signUpPage: () => '/auth/sign-up',
+
+    emailVerificationPage: () => '/auth/email-verification',
+
+    passwordResetPage: () => '/auth/password-reset',
+
+    passwordResetVerifyPage: () => '/auth/password-reset/verify',
+
+    passwordSetPage: () => '/auth/password-reset/set-password',
 
     api: {
         search: (query: string) => {

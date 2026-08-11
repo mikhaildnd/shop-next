@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
     images: {
-        qualities: [70, 75, 80],
+        qualities: [70, 75, 80, 90, 100],
     },
     turbopack: {
         rules: {
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
             },
         },
     },
-    allowedDevOrigins: ['192.168.0.132'],
+    allowedDevOrigins: ['192.168.0.131', '192.168.0.132'],
 };
 
 export default nextConfig;

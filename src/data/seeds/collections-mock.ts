@@ -1,6 +1,4 @@
-import type { Prisma } from '@/generated/prisma/client';
-
-type CollectionSeed = Prisma.CollectionCreateInput;
+import type { CollectionSeed } from '@/data/seeds/types';
 
 export const collections: CollectionSeed[] = [
     {

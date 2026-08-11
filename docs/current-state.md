@@ -62,7 +62,7 @@ URL
 getProducts()
     │
     ▼
-buildProductQuery()
+buildProductWhere()
     │
     ▼
 Prisma
@@ -106,6 +106,15 @@ Prisma
 * ProductGrid
 * Pagination
 * Load More
+
+Фильтры разделены на отдельные layout-компоненты:
+
+* `DesktopFilters`
+* `MobileFilters`
+
+Оба используют общий `ProductFiltersPanel`, который отвечает только за композицию набора фильтров.
+
+Для полноэкранных мобильных панелей используется `useLockBodyScroll`.
 
 `ProductGrid` отвечает только за отображение списка товаров.
 
@@ -157,3 +166,19 @@ URL формируются через:
 * getProducts();
 * ProductListingLayout;
 * PageStateLayout.
+
+Страница каталога категорий использует отдельную модель представления.
+
+Поток данных:
+
+```text
+CategoryDto[]
+        │
+        ▼
+mapCategoriesToCatalogSections()
+        │
+        ▼
+CatalogSection[]
+        │
+        ├── CatalogDesktop
+        └── CatalogMobile

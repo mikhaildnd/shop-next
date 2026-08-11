@@ -2,6 +2,7 @@ import { Heart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { Button } from '@/components/shared/button/Button';
 import { StarRating } from '@/components/shared/StarRating';
 import type { ProductDto } from '@/services/product/product.types';
 import { formatPrice } from '@/utils/formatPrice';
@@ -39,7 +40,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 {/*FAVORITE BUTTON*/}
                 <button
                     aria-label="В избранное"
-                    className="group absolute top-2 right-2 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-80"
+                    className="group absolute top-2 right-2 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-80 focus-ring"
                 >
                     <Heart className="size-5.5 fill-transparent stroke-[1.5px] transition-[fill] duration-150 group-hover:fill-black" />
                 </button>
@@ -86,9 +87,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 </div>
 
                 {/*ACTIONS SEGMENT*/}
-                <button className="mt-auto flex h-10 w-full cursor-pointer items-center justify-center rounded border border-(--color-primary) p-2 text-(--color-primary) transition-all duration-300 select-none hover:border-transparent hover:bg-[#ff6633] hover:text-white active:shadow-(--shadow-button-active)">
-                    В корзину
-                </button>
+                <Button variant="accent">В корзину</Button>
             </div>
         </article>
     );

@@ -33,7 +33,6 @@ ALTER TABLE "products"
         GENERATED ALWAYS AS (
             CASE
                 WHEN "sale_price" IS NULL THEN 0
-                WHEN "regular_price" <= 0 THEN 0
                 ELSE ROUND(
                     (
                         ("regular_price" - "sale_price")

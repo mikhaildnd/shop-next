@@ -8,6 +8,7 @@ const categorySelect = {
     id: true,
     slug: true,
     title: true,
+    image: true,
     parentId: true,
 } satisfies Prisma.CategorySelect;
 
