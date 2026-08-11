@@ -5,7 +5,7 @@ import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
 import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
-import { deleteAccount, signOut } from '@/app/(shop)/profile/actions';
+import { deleteAccount } from '@/app/(shop)/profile/actions';
 import { getSession } from '@/auth/session';
 import { ButtonLink } from '@/components/shared/button/ButtonLink';
 import { SubmitButton } from '@/components/shared/button/SubmitButton';
@@ -26,8 +26,10 @@ export default async function ProfilePage() {
     }
 
     return (
-        <div className="mx-auto max-w-2xl">
-            <h1 className="mt-10 mb-4 text-3xl font-semibold">Профиль</h1>
+        <div className="mx-auto page-spacing max-w-2xl">
+            <h1 className="mt-6 mb-4 text-2xl font-semibold lg:mt-10 lg:text-3xl">
+                Профиль
+            </h1>
 
             <div className="flex flex-col gap-10">
                 <ProfileSection title="Личные данные">
@@ -39,14 +41,14 @@ export default async function ProfilePage() {
                             action={
                                 <ButtonLink
                                     href={routes.changeEmailPage()}
-                                    variant="outline"
+                                    variant="neutral"
                                     size="sm"
                                 >
                                     Изменить
                                 </ButtonLink>
                             }
                         >
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-2">
                                 <p>{user.email}</p>
 
                                 <ProfileBadge text="Подтвержден" />
@@ -64,16 +66,11 @@ export default async function ProfilePage() {
                     <div className="flex flex-col items-start gap-3">
                         <form action={deleteAccount}>
                             <SubmitButton
+                                size="sm"
                                 variant="destructive"
                                 pendingText="Удаление аккаунта"
                             >
                                 Удалить аккаунт
-                            </SubmitButton>
-                        </form>
-
-                        <form action={signOut}>
-                            <SubmitButton pendingText="Выход">
-                                Выйти
                             </SubmitButton>
                         </form>
                     </div>

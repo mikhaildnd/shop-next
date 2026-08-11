@@ -15,7 +15,7 @@ export function ProfilePassword() {
                 label="Пароль"
                 action={
                     <Button
-                        variant="outline"
+                        variant="neutral"
                         size="sm"
                         onClick={() => setIsEditing(!isEditing)}
                     >

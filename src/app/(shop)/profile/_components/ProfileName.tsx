@@ -19,7 +19,7 @@ export function ProfileName({ name }: ProfileNameProps) {
                 label="Имя"
                 action={
                     <Button
-                        variant="outline"
+                        variant="neutral"
                         size="sm"
                         onClick={() => setIsEditing(!isEditing)}
                     >

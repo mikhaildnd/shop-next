@@ -1,13 +1,19 @@
 import { Heart, ShoppingCart } from 'lucide-react';
 
 import { NavigationItem } from '@/components/header/NavigationItem';
-import { Profile } from '@/components/header/Profile';
+import { DesktopProfile } from '@/components/header/profile/DesktopProfile';
+import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { routes } from '@/lib/routes';
 import { cn } from '@/utils/cn';
 
-export function DesktopNavigation({ className }: { className?: string }) {
+interface DesktopNavigationProps {
+    user: ProfileUser | null;
+    className?: string;
+}
+
+export function DesktopNavigation({ user, className }: DesktopNavigationProps) {
     return (
-        <ul className={cn('flex items-center', className)}>
+        <ul className={cn('flex items-center lg:gap-1.5', className)}>
             <li>
                 <NavigationItem
                     href={routes.favoritesPage()}
@@ -23,7 +29,7 @@ export function DesktopNavigation({ className }: { className?: string }) {
                 />
             </li>
             <li>
-                <Profile />
+                <DesktopProfile user={user} />
             </li>
         </ul>
     );

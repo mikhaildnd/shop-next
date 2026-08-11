@@ -3,7 +3,7 @@
 :root {
   --bottom-nav-height: 64px;
 
-  --background: #fbfff8;
+  --background: #ffffff;
   --foreground: #171717;
   --spacing: 0.25rem;
 
@@ -136,6 +136,16 @@
   focus-ring
   active:opacity-90
   focus-visible:bg-(--color-orange) focus-visible:text-white;
+}
+
+@utility button-neutral {
+  @apply border border-gray-200
+  bg-gray-100
+  text-neutral-700
+  active:opacity-90
+  hover:bg-gray-200
+  focus-visible:bg-gray-200
+  focus-ring;
 }
 
 @utility button-xs {

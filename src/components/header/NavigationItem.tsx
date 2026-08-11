@@ -18,7 +18,7 @@ export function NavigationItem(props: NavigationItemProps) {
     return (
         <Link
             className={cn(
-                'flex cursor-pointer flex-col items-center gap-1.5 p-2',
+                'flex cursor-pointer flex-col items-center gap-1.5 p-1',
                 className,
             )}
             href={href}

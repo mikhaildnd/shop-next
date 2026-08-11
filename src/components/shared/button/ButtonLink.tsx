@@ -17,6 +17,7 @@ const variantClasses: Record<ButtonVariant, string> = {
     outline: 'button-outline',
     destructive: 'button-destructive',
     accent: 'button-accent',
+    neutral: 'button-neutral',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

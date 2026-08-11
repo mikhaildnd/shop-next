@@ -98,12 +98,6 @@ export async function changePassword(
     }
 }
 
-export async function signOut(): Promise<void> {
-    await auth.api.signOut({
-        headers: await headers(),
-    });
-}
-
 export async function deleteAccount(): Promise<void> {
     await auth.api.deleteUser({
         headers: await headers(),

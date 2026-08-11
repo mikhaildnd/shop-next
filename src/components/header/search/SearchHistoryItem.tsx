@@ -1,11 +1,8 @@
-import {
-    Folder as IconFolder,
-    History as IconHistory,
-    X as IconClose,
-} from 'lucide-react';
+import { Folder as IconFolder, History as IconHistory } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { CloseButton } from '@/components/shared/button/CloseButton';
 import {
     getSearchHistoryItemHref,
     getSearchHistoryItemTitle,
@@ -58,14 +55,11 @@ export function SearchHistoryItem({
                 </span>
             </Link>
 
-            <button
-                type="button"
+            <CloseButton
+                className="mr-2"
                 aria-label="Удалить элемент истории"
                 onClick={() => onRemove(item)}
-                className="group/remove mr-2 shrink-0 cursor-pointer rounded p-1 transition-colors hover:bg-gray-200 focus-visible:bg-gray-200 focus-visible:ring-1 focus-visible:ring-(--color-primary) focus-visible:outline-none md:p-1.5"
-            >
-                <IconClose className="size-5 text-gray-300 transition-colors group-hover/remove:text-gray-800 group-focus-visible/remove:text-gray-800" />
-            </button>
+            />
         </li>
     );
 }
