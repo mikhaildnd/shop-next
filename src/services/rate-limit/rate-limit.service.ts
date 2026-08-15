@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/db';
-import { RATE_LIMIT_RETENTION_SECONDS } from '@/services/rate-limit/rate-limit.consts';
+import { prisma } from '@/db';
+import { RATE_LIMIT_RETENTION_SECONDS } from '@/services/rate-limit/rate-limit.constants';
 
 import type {
     ActiveRateLimit,

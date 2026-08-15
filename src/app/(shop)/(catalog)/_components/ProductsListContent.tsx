@@ -1,6 +1,6 @@
 import { LoadMoreButton } from '@/app/(shop)/(catalog)/_components/LoadMoreButton';
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
-import { Pagination } from '@/components/shared/Pagination';
+import { Pagination } from '@/components/Pagination';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductsListContentProps {

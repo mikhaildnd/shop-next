@@ -2,7 +2,7 @@ import type {
     ChangeNameForm,
     ChangeNameFormErrors,
 } from '@/app/(shop)/profile/profile.types';
-import { validateName } from '@/services/user/validatiors/validate-name';
+import { validateName } from '@/services/user/validators/validate-name';
 
 export function validateChangeNameForm(
     form: ChangeNameForm,

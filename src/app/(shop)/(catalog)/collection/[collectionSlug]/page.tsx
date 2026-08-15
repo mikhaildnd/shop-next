@@ -3,15 +3,16 @@ import { notFound } from 'next/navigation';
 
 import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
 import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { buildCollectionBreadcrumbs } from '@/lib/breadcrumbs/buildCollectionBreadcrumbs';
+import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
+import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
+import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
+import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
 import { getProducts } from '@/services/product/product.service';
@@ -65,9 +66,15 @@ export default async function CollectionPage({
         notFound();
     }
 
-    const breadcrumbs = buildCollectionBreadcrumbs({
-        collection,
-    });
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            label: 'Главная',
+            href: routes.homePage(),
+        },
+        {
+            label: collection.title,
+        },
+    ];
 
     const hasIssues = listing.issues.length > 0 || pagination.issues.length > 0;
 

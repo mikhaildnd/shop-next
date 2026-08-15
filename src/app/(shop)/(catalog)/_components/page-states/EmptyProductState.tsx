@@ -1,5 +1,5 @@
-import { GoToCatalogButton } from '@/components/page-issues/ui/GoToCatalogButton';
-import { IssueMessage } from '@/components/page-issues/ui/IssueMessage';
+import { GoToCatalogButton } from '@/app/(shop)/(catalog)/_components/page-issues/GoToCatalogButton';
+import { IssueMessage } from '@/app/(shop)/(catalog)/_components/page-issues/IssueMessage';
 
 interface EmptyProductStateProps {
     title?: string;

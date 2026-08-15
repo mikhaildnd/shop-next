@@ -1,0 +1,26 @@
+import type { ReactNode } from 'react';
+
+import { cn } from '@/lib/cn';
+
+interface FilterChipProps {
+    active: boolean;
+    children: ReactNode;
+    onClick: () => void;
+}
+
+export function FilterChip({ active, children, onClick }: FilterChipProps) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={cn(
+                'cursor-pointer rounded-2xl px-2 py-1 text-sm focus-ring',
+                active
+                    ? 'bg-(--color-primary) text-white'
+                    : 'border border-(--color-primary)',
+            )}
+        >
+            {children}
+        </button>
+    );
+}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { footerLinks } from '@/consts/footerSocialLinks';
+import { footerLinks } from '@/components/footer/footer.constants';
 
 export function FooterNav({ className }: { className?: string }) {
     return (

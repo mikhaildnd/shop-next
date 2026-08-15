@@ -15,7 +15,7 @@ import type {
 import { auth } from '@/auth/auth';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { requireSession } from '@/auth/session';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { changeUserName } from '@/services/user/user.service';
 
 interface ChangeNameState {

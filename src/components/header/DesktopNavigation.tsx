@@ -3,8 +3,8 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { NavigationItem } from '@/components/header/NavigationItem';
 import { DesktopProfile } from '@/components/header/profile/DesktopProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 interface DesktopNavigationProps {
     user: ProfileUser | null;

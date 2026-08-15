@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/db';
-import { mapUserToDto } from '@/lib/mappers/user.mapper';
+import { prisma } from '@/db';
+import { mapUserToDto } from '@/services/user/user.mapper';
 import type { UserDto } from '@/services/user/user.types';
 
 export async function getUserById(id: string): Promise<UserDto | null> {

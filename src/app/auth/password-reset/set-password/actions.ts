@@ -12,7 +12,7 @@ import type {
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateSetPasswordForm } from '@/auth/form-validators/set-password';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { deleteRateLimit } from '@/services/rate-limit/rate-limit.service';
 
 export interface SetPasswordState {

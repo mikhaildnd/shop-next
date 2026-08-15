@@ -1,0 +1,53 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSwiper } from 'swiper/react';
+
+import { SliderPaginationBullet } from '@/components/slider/SliderPaginationBullet';
+import { cn } from '@/lib/cn';
+
+interface SliderPaginationProps {
+    totalSlides: number;
+    className?: string;
+}
+
+export function SliderPagination({
+    totalSlides,
+    className,
+}: SliderPaginationProps) {
+    const swiper = useSwiper();
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    useEffect(() => {
+        if (!swiper) return;
+
+        const handleChange = () => {
+            setActiveIndex(swiper.realIndex);
+        };
+
+        handleChange();
+
+        swiper.on('slideChange', handleChange);
+
+        return () => {
+            swiper.off('slideChange', handleChange);
+        };
+    }, [swiper]);
+
+    if (!swiper) return null;
+
+    return (
+        <div className={cn('flex justify-center gap-1.5', className)}>
+            {Array.from({ length: totalSlides }).map((_, idx) => {
+                const isActive = idx === activeIndex;
+                return (
+                    <SliderPaginationBullet
+                        key={idx}
+                        isActive={isActive}
+                        onClick={() => swiper.slideToLoop(idx)}
+                    />
+                );
+            })}
+        </div>
+    );
+}

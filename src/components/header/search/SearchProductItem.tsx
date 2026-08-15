@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { routes } from '@/lib/routes';
+import { formatPrice } from '@/lib/format-price';
+import { routes } from '@/routes';
 import type { ProductDto } from '@/services/product/product.types';
-import { formatPrice } from '@/utils/formatPrice';
 
 interface SearchProductItemProps {
     product: ProductDto;

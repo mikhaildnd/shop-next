@@ -7,9 +7,9 @@ import {
     resendPasswordResetOtp,
     verifyPasswordResetOtp,
 } from '@/app/auth/password-reset/verify/actions';
-import { OTP_LENGTH } from '@/auth/auth.consts';
+import { OTP_LENGTH } from '@/auth/auth.constants';
+import { LoadingButton } from '@/components/button/LoadingButton';
 import { OtpInput } from '@/components/form/OtpInput';
-import { LoadingButton } from '@/components/shared/button/LoadingButton';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 interface VerifyPasswordResetFormProps {

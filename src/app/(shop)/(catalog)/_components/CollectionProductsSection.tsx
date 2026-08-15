@@ -1,8 +1,8 @@
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
-import { DEFAULT_PRODUCT_FILTERS } from '@/lib/product-listing/filters/consts';
-import { DEFAULT_PRODUCT_SORT } from '@/lib/product-listing/sort/consts';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
+import { DEFAULT_PRODUCT_FILTERS } from '@/services/product/filters/filter.constants';
 import { getProducts } from '@/services/product/product.service';
+import { DEFAULT_PRODUCT_SORT } from '@/services/product/sort/sort.constants';
 
 interface CollectionProductsSectionProps {
     collectionSlug: string;

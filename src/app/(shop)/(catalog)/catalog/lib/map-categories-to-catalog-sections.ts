@@ -1,4 +1,4 @@
-import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/lib/catalog.types';
+import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/catalog.types';
 import type { CategoryDto } from '@/services/category/category.types';
 
 export function mapCategoriesToCatalogSections(

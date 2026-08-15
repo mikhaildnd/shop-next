@@ -9,13 +9,13 @@ import {
     EMAIL_CHANGE_ATTEMPT_LIFETIME_SECONDS,
     EMAIL_CHANGE_ATTEMPTS,
     EMAIL_CHANGE_TIMEOUT_SECONDS,
-} from '@/auth/auth.consts';
+} from '@/auth/auth.constants';
 import type { ChangeEmailForm, ChangeEmailFormErrors } from '@/auth/auth.types';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateChangeEmailForm } from '@/auth/form-validators/change-email';
 import { getSession } from '@/auth/session';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import {
     activateRateLimit,
     consumeRateLimit,

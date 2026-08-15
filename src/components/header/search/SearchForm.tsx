@@ -1,7 +1,7 @@
 import { Search as IconSearch, X as IconClose } from 'lucide-react';
 import type { ChangeEvent, SubmitEventHandler } from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 
 interface SearchFormProps {
     value: string;

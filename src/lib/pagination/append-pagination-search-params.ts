@@ -1,5 +1,8 @@
-import { PAGINATION_PARAMS, PAGINATION_VIEWS } from '@/lib/pagination/consts';
-import type { PaginationState } from '@/lib/pagination/types';
+import {
+    PAGINATION_PARAMS,
+    PAGINATION_VIEWS,
+} from '@/lib/pagination/pagination.constants';
+import type { PaginationState } from '@/lib/pagination/pagination.types';
 
 type AppendPaginationSearchParamsOptions = {
     params: URLSearchParams;

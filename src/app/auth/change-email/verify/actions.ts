@@ -10,13 +10,13 @@ import {
     EMAIL_CHANGE_OTP_ATTEMPT_LIFETIME_SECONDS,
     EMAIL_CHANGE_OTP_ATTEMPTS,
     EMAIL_CHANGE_OTP_TIMEOUT_SECONDS,
-} from '@/auth/auth.consts';
+} from '@/auth/auth.constants';
 import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateOtpForm } from '@/auth/form-validators/email-otp';
 import { requireSession } from '@/auth/session';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import {
     activateRateLimit,
     consumeRateLimit,

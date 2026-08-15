@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrappers/HorizontalScrollWrapper';
+import { getCategoryPath } from '@/app/(shop)/(catalog)/lib/get-category-path';
 import { ProductInfoCard } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductInfoCard';
 import { ProductPageSlider } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductPageSlider';
 import { ProductProperty } from '@/app/(shop)/(catalog)/product/[productSlug]/_components/ProductProperty';
+import { buildProductBreadcrumbs } from '@/app/(shop)/(catalog)/product/[productSlug]/lib/build-product-breadcrumbs';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
-import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
-import { buildProductBreadcrumbs } from '@/lib/breadcrumbs/buildProductBreadcrumbs';
-import { getCategoryPath } from '@/lib/category/get-category-path';
 import { getCategories } from '@/services/category/category.service';
 import { getProductBySlug } from '@/services/product/product.service';
 

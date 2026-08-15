@@ -9,12 +9,12 @@ import {
     SIGN_UP_ATTEMPT_LIFETIME_SECONDS,
     SIGN_UP_ATTEMPTS,
     SIGN_UP_TIMEOUT_SECONDS,
-} from '@/auth/auth.consts';
+} from '@/auth/auth.constants';
 import type { AuthSignUpForm, AuthSignUpFormErrors } from '@/auth/auth.types';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateSignUpEmailForm } from '@/auth/form-validators/sign-up-email';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import {
     activateRateLimit,
     consumeRateLimit,

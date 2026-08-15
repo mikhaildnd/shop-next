@@ -3,8 +3,8 @@ import { Heart, House as IconHome, ShoppingCart } from 'lucide-react';
 import { NavigationItem } from '@/components/header/NavigationItem';
 import { MobileProfile } from '@/components/header/profile/MobileProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
 

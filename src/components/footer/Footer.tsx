@@ -4,7 +4,7 @@ import { FooterNav } from '@/components/footer/FooterNav';
 import { FooterPhone } from '@/components/footer/FooterPhone';
 import { FooterSocials } from '@/components/footer/FooterSocials';
 import { Logo } from '@/components/logo/Logo';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 
 import styles from './Footer.module.css';
 

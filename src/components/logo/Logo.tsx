@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 import LogoImage from '../../../public/icons/logo.png';
 

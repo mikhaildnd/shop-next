@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import type { ProductCategoryDto } from '@/services/product/product.types';
 
 interface SearchCategoriesProps {

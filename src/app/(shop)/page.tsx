@@ -1,13 +1,13 @@
 import { Suspense } from 'react';
 
-import { MainSlider } from '@/app/(shop)/_components/mainSlider/MainSlider';
+import { BannerSpecialOffers } from '@/app/(shop)/_components/banners/BannerSpecialOffers';
+import { slides } from '@/app/(shop)/_components/main-slider/main-slider.data';
+import { MainSlider } from '@/app/(shop)/_components/main-slider/MainSlider';
+import { MapsLazy } from '@/app/(shop)/_components/maps/Maps.lazy';
+import { ProductsSectionSkeleton } from '@/app/(shop)/_components/products-section/ProductsSectionSkeleton';
 import { ProductsNewSection } from '@/app/(shop)/_components/ProductsNewSection';
 import { ProductsOfferSection } from '@/app/(shop)/_components/ProductsOfferSection';
-import { BannerSpecialOffers } from '@/components/banners/BannerSpecialOffers';
-import { MapsLazy } from '@/components/maps/Maps.lazy';
-import { ProductsSectionSkeleton } from '@/components/product/productsSection/ProductsSectionSkeleton';
-import { LazySection } from '@/components/shared/LazySection';
-import { slides } from '@/data/mainSlides';
+import { LazySection } from '@/components/wrappers/LazySection';
 
 export default async function HomePage() {
     return (

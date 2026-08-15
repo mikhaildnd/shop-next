@@ -1,13 +1,16 @@
-import { PAGINATION_ISSUES, PAGINATION_VIEWS } from '@/lib/pagination/consts';
-import { parseFromParam } from '@/lib/pagination/parse/parse-from-param';
-import { parsePageParam } from '@/lib/pagination/parse/parse-page-param';
-import { parseViewParam } from '@/lib/pagination/parse/parse-view-param';
+import {
+    PAGINATION_ISSUES,
+    PAGINATION_VIEWS,
+} from '@/lib/pagination/pagination.constants';
 import type {
     PaginationIssue,
     PaginationParams,
     PaginationSearchParams,
-} from '@/lib/pagination/types';
-import { isDefined } from '@/utils/type-guards/is-defined';
+} from '@/lib/pagination/pagination.types';
+import { parseFromParam } from '@/lib/pagination/parse/parse-from-param';
+import { parsePageParam } from '@/lib/pagination/parse/parse-page-param';
+import { parseViewParam } from '@/lib/pagination/parse/parse-view-param';
+import { isDefined } from '@/lib/type-guards/is-defined';
 
 type GetPaginationParamsOptions = {
     searchParams: PaginationSearchParams;

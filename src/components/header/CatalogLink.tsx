@@ -4,9 +4,9 @@ import { LayoutGrid } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { MouseEvent } from 'react';
 
-import { ButtonLink } from '@/components/shared/button/ButtonLink';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 interface CatalogLinkProps {
     className?: string;

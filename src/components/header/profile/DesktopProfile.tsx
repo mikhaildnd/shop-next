@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { signOut } from '@/auth/actions/sign-out';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { Dropdown } from '@/components/dropdown/Dropdown';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { ButtonLink } from '@/components/shared/button/ButtonLink';
-import { Dropdown } from '@/components/shared/dropdown/Dropdown';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 interface DesktopProfileProps {
     user: ProfileUser | null;
@@ -61,62 +61,53 @@ export function DesktopProfile({ user, className }: DesktopProfileProps) {
                 </p>
 
                 {user ? (
-                    <>
-                        <div className={menuGroupClassName}>
-                            <div className="flex flex-col py-2">
-                                <Link
-                                    className={menuItemClassName}
-                                    href={routes.profilePage()}
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    <UserRound className={menuIconClassName} />
-                                    Профиль
-                                </Link>
-                            </div>
-
-                            <div className="flex flex-col py-2">
-                                <form action={signOut}>
-                                    <button
-                                        className={cn(
-                                            'w-full cursor-pointer',
-                                            menuItemClassName,
-                                        )}
-                                    >
-                                        <LogOut className={menuIconClassName} />
-                                        Выйти
-                                    </button>
-                                </form>
-                            </div>
+                    <div className={menuGroupClassName}>
+                        <div className="flex flex-col py-2">
+                            <Link
+                                className={menuItemClassName}
+                                href={routes.profilePage()}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <UserRound className={menuIconClassName} />
+                                Профиль
+                            </Link>
                         </div>
-                    </>
+
+                        <div className="flex flex-col py-2">
+                            <form action={signOut}>
+                                <button
+                                    className={cn(
+                                        'w-full cursor-pointer',
+                                        menuItemClassName,
+                                    )}
+                                >
+                                    <LogOut className={menuIconClassName} />
+                                    Выйти
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 ) : (
-                    <>
-                        <p className="bg-(--color-primary)/30 p-2 text-center">
-                            Добро пожаловать,{' '}
-                            <span className="font-semibold">Гость</span>
-                        </p>
+                    <div className={menuGroupClassName}>
+                        <div className="flex flex-col gap-2 py-2">
+                            <ButtonLink
+                                size="sm"
+                                href={routes.signInPage()}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Вход
+                            </ButtonLink>
 
-                        <div className={menuGroupClassName}>
-                            <div className="flex flex-col gap-2 py-2">
-                                <ButtonLink
-                                    size="sm"
-                                    href={routes.signInPage()}
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    Вход
-                                </ButtonLink>
-
-                                <ButtonLink
-                                    size="sm"
-                                    href={routes.signUpPage()}
-                                    variant="outline"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    Регистрация
-                                </ButtonLink>
-                            </div>
+                            <ButtonLink
+                                size="sm"
+                                href={routes.signUpPage()}
+                                variant="outline"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Регистрация
+                            </ButtonLink>
                         </div>
-                    </>
+                    </div>
                 )}
             </Dropdown.Content>
         </Dropdown>

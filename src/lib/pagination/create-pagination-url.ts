@@ -1,5 +1,5 @@
 import { appendPaginationSearchParams } from '@/lib/pagination/append-pagination-search-params';
-import { PAGINATION_VIEWS } from '@/lib/pagination/consts';
+import { PAGINATION_VIEWS } from '@/lib/pagination/pagination.constants';
 import type { SearchParams } from '@/lib/url/types';
 
 import { buildSearchParams } from '../url/build-search-params';

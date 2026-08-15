@@ -4,16 +4,16 @@ import { SearchCategories } from '@/components/header/search/SearchCategories';
 import { SearchEmpty } from '@/components/header/search/SearchEmpty';
 import { SearchProducts } from '@/components/header/search/SearchProducts';
 import type { SearchResponse } from '@/lib/api/search.types';
-import type { SearchHistoryState } from '@/lib/search/search-history.types';
+import { cn } from '@/lib/cn';
+import type { SearchHistoryState } from '@/lib/search/search-history/search-history.types';
 import {
     createCategoryHistoryItem,
     createProductHistoryItem,
-} from '@/lib/search/search-history-items';
+} from '@/lib/search/search-history/search-history-items';
 import type {
     ProductCategoryDto,
     ProductDto,
 } from '@/services/product/product.types';
-import { cn } from '@/utils/cn';
 
 interface SearchResultsProps {
     results: SearchResponse;

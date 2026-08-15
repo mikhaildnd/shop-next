@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Logo } from '@/components/logo/Logo';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 
 interface AuthSurfaceHeaderProps {
     title: string;

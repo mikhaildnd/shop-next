@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ChangeUserNameForm } from '@/app/(shop)/profile/_components/ChangeUserNameForm';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
-import { Button } from '@/components/shared/button/Button';
+import { Button } from '@/components/button/Button';
 
 interface ProfileNameProps {
     name: string;

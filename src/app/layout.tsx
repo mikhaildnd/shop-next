@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Rubik } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 
 const fontMain = Rubik({
     variable: '--font-main',
