@@ -34,7 +34,6 @@
 * Product Listing отделён от Pagination.
 * Сервер формирует метаданные каталога.
 * Завершена архитектура мобильных фильтров.
-* DesktopFilters и MobileFilters используют общий ProductFiltersPanel.
 
 ---
 
@@ -54,6 +53,19 @@
 * Завершена архитектура страницы каталога категорий.
 * Desktop и mobile версии используют самостоятельные представления.
 * Унифицированы карточки категорий.
+
+---
+
+### Authentication
+
+* Интегрирован Better Auth с Prisma и PostgreSQL.
+* Реализованы sign in и sign up по email и паролю.
+* Реализована email OTP verification.
+* Реализованы email verification и подтверждение нового email.
+* Реализован password reset flow.
+* Реализованы sign out и session handling.
+* Реализована отправка auth-писем через Resend.
+* Реализовано ограничение частоты auth-операций.
 
 ---
 
