@@ -18,7 +18,7 @@
         "@iminside/react-yandex-maps": "^1.2.7",
         "@prisma/adapter-pg": "^7.9.1",
         "@prisma/client": "^7.9.1",
-        "better-auth": "^1.6.23",
+        "better-auth": "^1.6.29",
         "clsx": "^2.1.1",
         "lucide-react": "^1.16.0",
         "next": "16.3.1",
