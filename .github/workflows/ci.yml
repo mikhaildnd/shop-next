@@ -25,6 +25,9 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shop_next
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      NEXT_PUBLIC_YANDEX_MAP_API_KEY: ${{ vars.NEXT_PUBLIC_YANDEX_MAP_API_KEY }}
 
     steps:
       - name: Checkout
