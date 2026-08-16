@@ -93,7 +93,6 @@
   @apply flex cursor-pointer items-center justify-center rounded
   transition-colors
   disabled:pointer-events-none
-  disabled:cursor-not-allowed
   disabled:opacity-50;
 }
 
@@ -146,6 +145,13 @@
   hover:bg-gray-200
   focus-visible:bg-gray-200
   focus-ring;
+}
+
+@utility button-selected {
+  @apply bg-(--color-primary)
+  text-white
+  focus-ring
+  active:opacity-80;
 }
 
 @utility button-xs {

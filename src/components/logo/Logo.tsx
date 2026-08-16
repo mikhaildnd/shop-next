@@ -14,7 +14,7 @@ export function Logo({ className }: { className?: string }) {
             className={cn('flex shrink-0 items-center', className)}
         >
             <Image
-                className="shrink-0"
+                className="size-10.5"
                 src={LogoImage}
                 alt="Логотип магазина"
                 priority

@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn';
 
 function MapAreaSkeleton() {
     return (
-        <div className="absolute inset-0 z-10 h-[354px] w-full animate-pulse rounded-2xl bg-gray-200" />
+        <div className="pointer-events-none absolute inset-0 z-10 animate-pulse bg-gray-200" />
     );
 }
 
@@ -40,11 +40,12 @@ export function Maps() {
                                 <button
                                     key={key}
                                     onClick={() => setCurrentLocation(key)}
+                                    type="button"
                                     className={cn(
-                                        'cursor-pointer rounded p-2 text-xs transition-shadow duration-200 active:shadow-(--shadow-button-active)',
+                                        'button-base button-sm',
                                         isActive
-                                            ? 'bg-(--color-primary) text-white hover:shadow-(--shadow-button-default)'
-                                            : 'bg-[#f3f2f1] hover:shadow-(--shadow-button-secondary)',
+                                            ? 'button-selected'
+                                            : 'button-neutral',
                                     )}
                                 >
                                     {locations[key].name}
@@ -53,7 +54,7 @@ export function Maps() {
                         })}
                     </div>
 
-                    <div className="relative">
+                    <div className="relative h-88.5 overflow-hidden rounded-2xl">
                         {!isMapLoaded && <MapAreaSkeleton />}
 
                         <Map
