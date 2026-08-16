@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ChangeUserPasswordForm } from '@/app/(shop)/profile/_components/ChangeUserPasswordForm';
 import { ProfileItem } from '@/app/(shop)/profile/_components/ProfileItem';
-import { Button } from '@/components/shared/button/Button';
+import { Button } from '@/components/button/Button';
 
 export function ProfilePassword() {
     const [isEditing, setIsEditing] = useState(false);

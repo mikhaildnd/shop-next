@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { socialLinks } from '@/consts/footerSocialLinks';
-import { cn } from '@/utils/cn';
+import { socialLinks } from '@/components/footer/footer.constants';
+import { cn } from '@/lib/cn';
 
 const hoverClass = 'transition-opacity duration-300 hover:opacity-80';
 

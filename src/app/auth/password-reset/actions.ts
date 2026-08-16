@@ -9,7 +9,7 @@ import {
     PASSWORD_RESET_ATTEMPT_LIFETIME_SECONDS,
     PASSWORD_RESET_ATTEMPTS,
     PASSWORD_RESET_TIMEOUT_SECONDS,
-} from '@/auth/auth.consts';
+} from '@/auth/auth.constants';
 import type {
     AuthPasswordResetForm,
     AuthPasswordResetFormErrors,
@@ -17,7 +17,7 @@ import type {
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validatePasswordResetForm } from '@/auth/form-validators/password-reset';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import {
     activateRateLimit,
     consumeRateLimit,

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import type { CategoryDto } from '@/services/category/category.types';
 
 interface CatalogCategoryCardProps {

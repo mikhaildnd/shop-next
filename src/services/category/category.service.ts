@@ -1,7 +1,7 @@
 import { cache } from 'react';
 
+import { prisma } from '@/db';
 import type { Prisma } from '@/generated/prisma/client';
-import { prisma } from '@/lib/db';
 import type { CategoryDto } from '@/services/category/category.types';
 
 const categorySelect = {

@@ -4,18 +4,18 @@ import { notFound } from 'next/navigation';
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
 import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
 import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { CategoryTags } from '@/components/shared/CategoryTags';
-import { buildCatalogBreadcrumbs } from '@/lib/breadcrumbs/buildCatalogBreadcrumbs';
-import { getCategoryPath } from '@/lib/category/get-category-path';
-import { getDescendantCategorySlugs } from '@/lib/category/get-descendant-category-slugs';
+import { CategoryTags } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/_components/CategoryTags';
+import { buildCatalogBreadcrumbs } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/lib/build-catalog-breadcrumbs';
+import { getDescendantCategorySlugs } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/lib/get-descendant-category-slugs';
+import { getCategoryPath } from '@/app/(shop)/(catalog)/lib/get-category-path';
+import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
+import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
+import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
 import {
     getCategories,
     getCategoryBySlug,

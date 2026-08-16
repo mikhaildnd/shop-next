@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { EmailVerificationForm } from '@/app/auth/email-verification/_components/EmailVerificationForm';
 import { verifyEmailCookie } from '@/auth/cookies/verify-email-cookie';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
 
 export default async function VerifyEmailPage() {

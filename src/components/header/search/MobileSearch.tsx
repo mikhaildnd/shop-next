@@ -4,13 +4,13 @@ import { Search as IconSearch } from 'lucide-react';
 import type { ChangeEvent, SubmitEventHandler } from 'react';
 import { useState } from 'react';
 
+import { useMobileSearchOverlay } from '@/components/header/search/hooks/useMobileSearchOverlay';
 import { useSearchContext } from '@/components/header/search/SearchContext';
 import { SearchForm } from '@/components/header/search/SearchForm';
 import { SearchHistory } from '@/components/header/search/SearchHistory';
 import { SearchResults } from '@/components/header/search/SearchResults';
-import { useMobileSearchOverlay } from '@/components/header/search/useMobileSearchOverlay';
-import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/consts';
-import { createQueryHistoryItem } from '@/lib/search/search-history-items';
+import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/search.constants';
+import { createQueryHistoryItem } from '@/lib/search/search-history/search-history-items';
 
 export function MobileSearch({ className }: { className?: string }) {
     const { search, history } = useSearchContext();

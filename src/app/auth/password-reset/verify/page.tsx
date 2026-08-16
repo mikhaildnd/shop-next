@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { VerifyPasswordResetForm } from '@/app/auth/password-reset/verify/_components/VerifyPasswordResetForm';
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
 
 export default async function VerifyPasswordResetPage() {

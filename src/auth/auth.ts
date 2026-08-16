@@ -7,9 +7,9 @@ import {
     OTP_ALLOWED_ATTEMPTS,
     OTP_EXPIRES_IN,
     OTP_LENGTH,
-} from '@/auth/auth.consts';
+} from '@/auth/auth.constants';
+import { prisma } from '@/db';
 import { sendEmailOtp } from '@/email/email.service';
-import { prisma } from '@/lib/db';
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {

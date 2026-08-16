@@ -7,9 +7,9 @@ import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePasswor
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
 import { deleteAccount } from '@/app/(shop)/profile/actions';
 import { getSession } from '@/auth/session';
-import { ButtonLink } from '@/components/shared/button/ButtonLink';
-import { SubmitButton } from '@/components/shared/button/SubmitButton';
-import { routes } from '@/lib/routes';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { SubmitButton } from '@/components/button/SubmitButton';
+import { routes } from '@/routes';
 import { getUserById } from '@/services/user/user.service';
 
 export default async function ProfilePage() {

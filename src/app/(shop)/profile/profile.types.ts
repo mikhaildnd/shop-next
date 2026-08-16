@@ -1,4 +1,4 @@
-import type { FormErrors } from '@/lib/types/form-errors';
+import type { FormErrors } from '@/types/form-errors';
 
 export type ChangeNameForm = { name: string };
 export type ChangeNameFormErrors = FormErrors<ChangeNameForm>;

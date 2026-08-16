@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { ChangeEmailForm } from '@/app/auth/change-email/_components/ChangeEmailForm';
 import { getSession } from '@/auth/session';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { getRateLimitState } from '@/services/rate-limit/rate-limit.service';
 
 export default async function ChangeEmailPage() {

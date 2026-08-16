@@ -3,7 +3,7 @@
 import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from 'react';
 import { useRef, useState } from 'react';
 
-import { Input } from '@/components/shared/Input';
+import { Input } from '@/components/form/Input';
 
 interface OtpInputProps {
     name: string;

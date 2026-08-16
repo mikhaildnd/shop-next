@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { PasswordSetForm } from '@/app/auth/password-reset/set-password/_components/PasswordSetForm';
 import { passwordResetCookie } from '@/auth/cookies/password-reset-cookie';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 
 export default async function PasswordSetPage() {
     const passwordReset = await passwordResetCookie.get();

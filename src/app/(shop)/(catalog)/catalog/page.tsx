@@ -5,7 +5,7 @@ import { CatalogDesktop } from '@/app/(shop)/(catalog)/catalog/_components/Catal
 import { CatalogMobile } from '@/app/(shop)/(catalog)/catalog/_components/CatalogMobile';
 import { mapCategoriesToCatalogSections } from '@/app/(shop)/(catalog)/catalog/lib/map-categories-to-catalog-sections';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 import { getCategories } from '@/services/category/category.service';
 
 export const metadata: Metadata = {

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
+import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import {
     MIN_SEARCH_QUERY_LENGTH,
     SEARCH_QUERY_PARAM,
-} from '@/lib/search/consts';
+} from '@/lib/search/search.constants';
 import { findCategories } from '@/services/category/category.service';
 import { getProducts } from '@/services/product/product.service';
 

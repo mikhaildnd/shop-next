@@ -1,4 +1,4 @@
-import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/consts';
+import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/search.constants';
 
 export type SearchQueryState =
     | { status: 'empty' }

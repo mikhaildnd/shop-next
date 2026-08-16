@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 
 import { AuthSurfaceFooter } from './AuthSurfaceFooter';
 import { AuthSurfaceHeader } from './AuthSurfaceHeader';

@@ -1,6 +1,6 @@
 import { cache } from 'react';
 
-import { prisma } from '@/lib/db';
+import { prisma } from '@/db';
 import type { CollectionDto } from '@/services/collection/collection.types';
 
 export const getCollectionBySlug = cache(

@@ -7,11 +7,11 @@ import { useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { SliderNavigationButton } from '@/components/shared/slider/SliderNavigationButton';
-import { SliderPagination } from '@/components/shared/slider/SliderPagination';
+import { SliderNavigationButton } from '@/components/slider/SliderNavigationButton';
+import { SliderPagination } from '@/components/slider/SliderPagination';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
+import { cn } from '@/lib/cn';
 import type { ProductImageDto } from '@/services/product/product.types';
-import { cn } from '@/utils/cn';
 
 interface ProductPageSliderProps {
     slides: ProductImageDto[];

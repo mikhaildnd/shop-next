@@ -1,6 +1,6 @@
 import { SearchHistoryItem } from '@/components/header/search/SearchHistoryItem';
-import { getSearchHistoryItemKey } from '@/lib/search/search-history';
-import type { SearchHistoryState } from '@/lib/search/search-history.types';
+import { getSearchHistoryItemKey } from '@/lib/search/search-history/search-history';
+import type { SearchHistoryState } from '@/lib/search/search-history/search-history.types';
 
 interface SearchHistoryProps {
     history: SearchHistoryState;

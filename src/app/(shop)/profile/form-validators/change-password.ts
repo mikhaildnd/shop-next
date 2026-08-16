@@ -2,9 +2,9 @@ import type {
     ChangePasswordForm,
     ChangePasswordFormErrors,
 } from '@/app/(shop)/profile/profile.types';
-import { validateConfirmPassword } from '@/services/user/validatiors/validate-confirm-password';
-import { validateCurrentPassword } from '@/services/user/validatiors/validate-current-password';
-import { validatePassword } from '@/services/user/validatiors/validate-password';
+import { validateConfirmPassword } from '@/services/user/validators/validate-confirm-password';
+import { validateCurrentPassword } from '@/services/user/validators/validate-current-password';
+import { validatePassword } from '@/services/user/validators/validate-password';
 
 export function validateChangePasswordForm(
     form: ChangePasswordForm,

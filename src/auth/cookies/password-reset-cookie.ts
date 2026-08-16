@@ -2,7 +2,7 @@ import { createCookieStorage } from '@/auth/cookies/cookie-storage';
 import {
     PASSWORD_RESET_COOKIE,
     PASSWORD_RESET_COOKIE_MAX_AGE,
-} from '@/auth/cookies/cookies.consts';
+} from '@/auth/cookies/cookies.constants';
 
 type PasswordResetCookie = {
     email: string;

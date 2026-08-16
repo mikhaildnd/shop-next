@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 import LogoImage from '../../../public/icons/logo.png';
 
@@ -14,7 +14,7 @@ export function Logo({ className }: { className?: string }) {
             className={cn('flex shrink-0 items-center', className)}
         >
             <Image
-                className="shrink-0"
+                className="size-10.5"
                 src={LogoImage}
                 alt="Логотип магазина"
                 priority

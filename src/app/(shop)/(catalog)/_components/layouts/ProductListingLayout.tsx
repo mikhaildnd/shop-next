@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 
+import { ProductSortDropdown } from '@/app/(shop)/(catalog)/_components/product-filters/product-sort-dropdown/ProductSortDropdown';
+import { ProductDesktopFilters } from '@/app/(shop)/(catalog)/_components/product-filters/ProductDesktopFilters';
+import { ProductMobileFilters } from '@/app/(shop)/(catalog)/_components/product-filters/ProductMobileFilters';
+import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrappers/HorizontalScrollWrapper';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
-import { ProductDesktopFilters } from '@/components/product/productFilters/ProductDesktopFilters';
-import { ProductMobileFilters } from '@/components/product/productFilters/ProductMobileFilters';
-import { ProductSortDropdown } from '@/components/product/productFilters/ProductSortDropdown';
-import { HorizontalScrollWrapper } from '@/components/shared/HorizontalScrollWrapper';
-import type { BreadcrumbItem } from '@/lib/breadcrumbs/types';
-import type { ProductSort } from '@/lib/product-listing/sort/types';
+import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import type { ProductListingStats } from '@/services/product/product.types';
+import type { ProductSort } from '@/services/product/sort/sort.types';
 
 interface ProductListingLayoutProps {
     sort: ProductSort;

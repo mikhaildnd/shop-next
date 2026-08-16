@@ -2,18 +2,24 @@
 
 ## Stack
 
-* Next.js 16 (App Router)
+* Next.js 16.2.6 (App Router)
+* React 19
 * TypeScript
 * Prisma 7
 * PostgreSQL
 * Tailwind CSS v4
+* Better Auth
+* Resend
 * pnpm
+* Turbopack
 
 ---
 
 ## Database
 
 Проект использует PostgreSQL и Prisma.
+
+Prisma используется для работы с доменными моделями и инфраструктурными моделями авторизации и rate limiting.
 
 ---
 
@@ -27,17 +33,12 @@
 Поиск выполняется через:
 
 * debounced-запросы;
-* AbortController;
-* общий endpoint `/api/search`.
+* отмену устаревших запросов;
+* единый API endpoint.
 
-`SearchDropdown` отвечает только за отображение результатов.
+Мобильная и десктопная версии используют общее состояние поиска.
 
-Устройство поиска:
-
-* поиск использует общий `SearchContext`;
-* состояние поиска инкапсулировано в `useSearch`;
-* мобильная и десктопная версии используют общее состояние поиска;
-* UI разделён на отдельные desktop/mobile компоненты.
+История поиска хранится на клиенте в `localStorage`.
 
 ---
 
@@ -49,23 +50,23 @@
 * Collection;
 * Search.
 
-Логика листинга сосредоточена в домене `product-listing`.
+Логика листинга сосредоточена в app-слое каталога.
 
 Поток данных:
 
 ```text
 URL
     │
-    ├── parseProductListing()
-    ├── getPaginationParams()
+    ├── parsing и normalization
+    ├── pagination
     ▼
-getProducts()
+Product Service
     │
     ▼
-buildProductWhere()
+Prisma query
     │
     ▼
-Prisma
+PostgreSQL
 ```
 
 Поддерживаются параметры:
@@ -80,11 +81,11 @@ Prisma
 * page
 * view=append
 
-`parseProductListing()` преобразует URL в нормализованную модель фильтров и сортировки.
+URL преобразуется в нормализованную модель фильтров и сортировки.
 
-`getPaginationParams()` независимо обрабатывает параметры пагинации.
+Пагинация обрабатывается независимо от фильтров и сортировки.
 
-`getProducts()` получает уже нормализованные данные и не зависит от URL.
+Product Service получает уже нормализованные данные и не зависит от URL.
 
 Фильтры каталога используют серверные метаданные:
 
@@ -97,9 +98,9 @@ Prisma
 
 ## Product Listing UI
 
-Каталог использует единый `ProductListingLayout`.
+Каталог использует единый layout для Product Listing.
 
-Он объединяет:
+В него входят:
 
 * Filters
 * Sort
@@ -107,16 +108,11 @@ Prisma
 * Pagination
 * Load More
 
-Фильтры разделены на отдельные layout-компоненты:
+Desktop и mobile версии фильтров используют общую композицию.
 
-* `DesktopFilters`
-* `MobileFilters`
+Для полноэкранных мобильных панелей используется блокировка прокрутки body.
 
-Оба используют общий `ProductFiltersPanel`, который отвечает только за композицию набора фильтров.
-
-Для полноэкранных мобильных панелей используется `useLockBodyScroll`.
-
-`ProductGrid` отвечает только за отображение списка товаров.
+Отображение списка товаров отделено от управления фильтрами, сортировкой и пагинацией.
 
 ---
 
@@ -124,12 +120,12 @@ Prisma
 
 Страницы каталога используют единый механизм отображения состояний.
 
-Используются:
+Поддерживаются:
 
-* PageStateLayout
-* PageIssues
-* EmptyProductState
-* InvalidPageState
+* loading;
+* empty;
+* invalid page;
+* page issues.
 
 Состояния страницы обрабатываются отдельно от Product Listing.
 
@@ -139,13 +135,10 @@ Prisma
 
 Используются:
 
-* page
-* view=append
+* `page`
+* `view=append`
 
-URL формируются через:
-
-* `createPaginationUrl()`
-* `createLoadMoreUrl()`
+URL формируются специализированными функциями.
 
 Активная страница не является ссылкой.
 
@@ -161,24 +154,46 @@ URL формируются через:
 
 используют единый поток:
 
-* parseProductListing();
-* getPaginationParams();
-* getProducts();
-* ProductListingLayout;
-* PageStateLayout.
+* parsing и normalization Product Listing;
+* pagination;
+* получение товаров;
+* Product Listing UI;
+* обработка состояний страницы.
 
-Страница каталога категорий использует отдельную модель представления.
+Страница каталога категорий использует отдельную модель представления для desktop и mobile представлений.
 
-Поток данных:
+---
 
-```text
-CategoryDto[]
-        │
-        ▼
-mapCategoriesToCatalogSections()
-        │
-        ▼
-CatalogSection[]
-        │
-        ├── CatalogDesktop
-        └── CatalogMobile
+## Product Domain
+
+Работа с товарами организована через доменный сервис, DTO и общий Product Listing.
+
+---
+
+## Authentication
+
+В проекте интегрирован Better Auth.
+
+Инфраструктура авторизации располагается в src/auth. Page-specific auth flow и связанные с ним Server Actions располагаются в app/auth.
+
+* конфигурация Better Auth и Prisma adapter;
+* клиент Better Auth;
+* работа с сессией;
+* auth-specific cookies;
+* обработка auth errors;
+
+Реализованы следующие сценарии:
+
+* sign in по email и паролю;
+* sign up по email и паролю;
+* email verification через OTP;
+* password reset;
+* установка нового пароля;
+* смена email;
+* подтверждение нового email;
+* sign out.
+
+Email отправляется через отдельный email service, использующий Resend.
+
+Для защиты auth-операций используется отдельный rate-limit service.
+

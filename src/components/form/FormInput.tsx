@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 
-import { Input } from '@/components/shared/Input';
-import { cn } from '@/utils/cn';
+import { Input } from '@/components/form/Input';
+import { cn } from '@/lib/cn';
 
 interface FormInputProps extends ComponentProps<'input'> {
     error?: string;

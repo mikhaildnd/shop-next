@@ -1,16 +1,16 @@
 'use client';
 
-import { CircleUser, LogOut,UserRound } from 'lucide-react';
+import { CircleUser, LogOut, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
 import { signOut } from '@/auth/actions/sign-out';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { CloseButton } from '@/components/button/CloseButton';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { ButtonLink } from '@/components/shared/button/ButtonLink';
-import { CloseButton } from '@/components/shared/button/CloseButton';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 interface MobileProfileProps {
     user: ProfileUser | null;

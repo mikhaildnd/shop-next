@@ -3,10 +3,10 @@
 import { useActionState } from 'react';
 
 import { signUp } from '@/app/auth/sign-up/actions';
+import { LoadingButton } from '@/components/button/LoadingButton';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
-import { LoadingButton } from '@/components/shared/button/LoadingButton';
-import { Label } from '@/components/shared/Label';
+import { Label } from '@/components/form/Label';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
 
 export function EmailSignUpForm() {

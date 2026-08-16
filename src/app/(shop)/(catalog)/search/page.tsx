@@ -1,18 +1,19 @@
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
 import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
 import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { IssueMessage } from '@/app/(shop)/(catalog)/_components/page-issues/IssueMessage';
+import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
-import { IssueMessage } from '@/components/page-issues/ui/IssueMessage';
-import { PageIssues } from '@/components/page-issues/ui/PageIssues';
-import { buildSearchBreadcrumbs } from '@/lib/breadcrumbs/buildSearchBreadcrumbs';
+import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
+import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
+import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { PRODUCTS_PER_PAGE } from '@/lib/product-listing/consts';
-import { parseProductListing } from '@/lib/product-listing/parse-product-listing';
-import type { ProductListingSearchParams } from '@/lib/product-listing/types';
-import { SEARCH_QUERY_PARAM } from '@/lib/search/consts';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
+import { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
+import { routes } from '@/routes';
 import { getProducts } from '@/services/product/product.service';
 
 interface SearchPageProps {
@@ -23,7 +24,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const params = await searchParams;
     const state = normalizeSearchQuery(params[SEARCH_QUERY_PARAM]);
 
-    const breadcrumbs = buildSearchBreadcrumbs();
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            label: 'Главная',
+            href: routes.homePage(),
+        },
+        {
+            label: 'Поиск',
+        },
+    ];
 
     if (state.status === 'empty') {
         return (

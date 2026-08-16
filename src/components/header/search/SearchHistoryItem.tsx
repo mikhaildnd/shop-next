@@ -2,12 +2,12 @@ import { Folder as IconFolder, History as IconHistory } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { CloseButton } from '@/components/shared/button/CloseButton';
+import { CloseButton } from '@/components/button/CloseButton';
 import {
     getSearchHistoryItemHref,
     getSearchHistoryItemTitle,
-} from '@/lib/search/search-history';
-import type { SearchHistoryItem } from '@/lib/search/search-history.types';
+} from '@/lib/search/search-history/search-history';
+import type { SearchHistoryItem } from '@/lib/search/search-history/search-history.types';
 
 interface SearchHistoryItemProps {
     item: SearchHistoryItem;

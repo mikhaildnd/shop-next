@@ -8,9 +8,9 @@ import { SearchForm } from '@/components/header/search/SearchForm';
 import { SearchHistory } from '@/components/header/search/SearchHistory';
 import { SearchResults } from '@/components/header/search/SearchResults';
 import { useDismiss } from '@/hooks/useDismiss';
-import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/consts';
-import { createQueryHistoryItem } from '@/lib/search/search-history-items';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
+import { MIN_SEARCH_QUERY_LENGTH } from '@/lib/search/search.constants';
+import { createQueryHistoryItem } from '@/lib/search/search-history/search-history-items';
 
 export function DesktopSearch({ className }: { className?: string }) {
     const { search, history } = useSearchContext();

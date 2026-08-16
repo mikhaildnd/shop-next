@@ -1,8 +1,8 @@
-import { Button } from '@/components/shared/button/Button';
-import { StarRating } from '@/components/shared/StarRating';
+import { Button } from '@/components/button/Button';
+import { StarRating } from '@/components/product/StarRating';
+import { cn } from '@/lib/cn';
+import { formatPrice } from '@/lib/format-price';
 import type { ProductDto } from '@/services/product/product.types';
-import { cn } from '@/utils/cn';
-import { formatPrice } from '@/utils/formatPrice';
 
 interface ProductInfoCardProps {
     product: ProductDto;

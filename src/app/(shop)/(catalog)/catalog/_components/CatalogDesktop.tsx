@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { CatalogCategoryCard } from '@/app/(shop)/(catalog)/catalog/_components/CatalogCategoryCard';
-import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/lib/catalog.types';
-import { routes } from '@/lib/routes';
-import { cn } from '@/utils/cn';
+import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/catalog.types';
+import { cn } from '@/lib/cn';
+import { routes } from '@/routes';
 
 interface CatalogDesktopProps {
     catalogSections: CatalogSection[];

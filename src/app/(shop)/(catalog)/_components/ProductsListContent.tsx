@@ -1,6 +1,6 @@
 import { LoadMoreButton } from '@/app/(shop)/(catalog)/_components/LoadMoreButton';
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
-import { Pagination } from '@/components/shared/Pagination';
+import { Pagination } from '@/components/Pagination';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductsListContentProps {
@@ -27,7 +27,7 @@ export function ProductsListContent({
                 <div className="flex flex-col items-center gap-y-4 lg:gap-y-8">
                     {hasMore && (
                         <LoadMoreButton
-                            pendingText='"Загрузка..."'
+                            pendingText="Загрузка..."
                             nextPage={currentPage + 1}
                             from={startPage}
                             className="w-full"

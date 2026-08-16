@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { sendVerificationOtp, signIn } from '@/app/auth/sign-in/actions';
+import { LoadingButton } from '@/components/button/LoadingButton';
 import { FormGroup } from '@/components/form/FormGroup';
 import { FormInput } from '@/components/form/FormInput';
-import { LoadingButton } from '@/components/shared/button/LoadingButton';
-import { Label } from '@/components/shared/Label';
+import { Label } from '@/components/form/Label';
 import { useCountdownTimer } from '@/hooks/useCountdownTimer';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 
 export function EmailSignInForm() {
     const [state, formAction, isPending] = useActionState(signIn, {});

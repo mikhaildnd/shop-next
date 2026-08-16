@@ -1,5 +1,7 @@
+import type { Prisma } from '@/generated/prisma/client';
 import type { CategoryDto } from '@/services/category/category.types';
 import type { CollectionDto } from '@/services/collection/collection.types';
+import type { productInclude } from '@/services/product/product.constants';
 
 export type MeasureType = 'GRAM' | 'MILLILITER' | 'PIECE';
 
@@ -54,3 +56,7 @@ export type ProductsResponse = {
     totalProductsCount: number;
     listingStats: ProductListingStats;
 };
+
+export type ProductWithRelations = Prisma.ProductGetPayload<{
+    include: typeof productInclude;
+}>;

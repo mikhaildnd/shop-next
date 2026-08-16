@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { EmailSignInForm } from '@/app/auth/sign-in/_components/EmailSignInForm';
 import { getSession } from '@/auth/session';
-import { routes } from '@/lib/routes';
+import { routes } from '@/routes';
 
 export default async function SignInPage() {
     const session = await getSession();
@@ -25,7 +25,7 @@ export default async function SignInPage() {
                         Впервые на сайте?{' '}
                         <Link
                             href={routes.signUpPage()}
-                            className="focus-ring link-style"
+                            className="link-style focus-ring"
                         >
                             Создайте аккаунт
                         </Link>
