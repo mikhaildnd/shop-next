@@ -30,6 +30,8 @@ model Product {
   images          ProductImage[]
   category        Category?           @relation(fields: [categoryId], references: [id])
 
+  favorites Favorite[]
+
   @@index([categoryId])
   @@index([discountPercent])
   @@index([effectivePrice])
@@ -100,10 +102,25 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
+  favorites Favorite[]
+
   sessions Session[]
   accounts Account[]
 
   @@map("users")
+}
+
+model Favorite {
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+  @@index([productId])
+  @@map("favorites")
 }
 
 model Session {
