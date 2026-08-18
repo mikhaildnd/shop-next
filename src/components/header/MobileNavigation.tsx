@@ -1,5 +1,6 @@
-import { Heart, House as IconHome, ShoppingCart } from 'lucide-react';
+import { House as IconHome, ShoppingCart } from 'lucide-react';
 
+import { FavoritesNavigationItem } from '@/components/header/FavoritesNavigationItem';
 import { NavigationItem } from '@/components/header/NavigationItem';
 import { MobileProfile } from '@/components/header/profile/MobileProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
@@ -38,11 +39,7 @@ export function MobileNavigation({ user, className }: MobileNavigationProps) {
                     />
                 </li>
                 <li>
-                    <NavigationItem
-                        href={routes.favoritesPage()}
-                        Icon={Heart}
-                        text="Избранное"
-                    />
+                    <FavoritesNavigationItem />
                 </li>
                 <li>
                     <NavigationItem

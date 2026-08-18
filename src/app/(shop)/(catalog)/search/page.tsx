@@ -1,11 +1,10 @@
+import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
-import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
 import { IssueMessage } from '@/app/(shop)/(catalog)/_components/page-issues/IssueMessage';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
@@ -36,7 +35,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     if (state.status === 'empty') {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
@@ -46,13 +45,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     if (state.status === 'too-short') {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
@@ -62,7 +61,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
@@ -75,7 +74,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     if (listing.issues.length > 0 || pagination.issues.length > 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
@@ -85,7 +84,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
@@ -103,20 +102,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
                 <InvalidPageState />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     if (totalProductsCount === 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
@@ -125,23 +124,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     return (
-        <ProductListingLayout
-            sort={listing.sort}
-            listingStats={listingStats}
+        <CatalogPageLayout
             title="Результаты поиска"
             breadcrumbs={breadcrumbs}
         >
-            <ProductsListContent
+            <ProductListing
+                sort={listing.sort}
+                listingStats={listingStats}
                 products={products}
                 currentPage={pagination.currentPage}
                 totalPages={totalPages}
                 startPage={pagination.startPage}
             />
-        </ProductListingLayout>
+        </CatalogPageLayout>
     );
 }

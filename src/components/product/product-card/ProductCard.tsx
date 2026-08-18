@@ -1,8 +1,8 @@
-import { Heart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { Button } from '@/components/button/Button';
+import { FavoriteButton } from '@/components/favorite/FavoriteButton';
 import { StarRating } from '@/components/product/StarRating';
 import { formatPrice } from '@/lib/format-price';
 import type { ProductDto } from '@/services/product/product.types';
@@ -38,12 +38,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 </Link>
 
                 {/*FAVORITE BUTTON*/}
-                <button
-                    aria-label="В избранное"
-                    className="group absolute top-2 right-2 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-80 focus-ring"
-                >
-                    <Heart className="size-5.5 fill-transparent stroke-[1.5px] transition-[fill] duration-150 group-hover:fill-black" />
-                </button>
+                <FavoriteButton productId={product.id} />
 
                 {/*DISCOUNT PLATE*/}
                 {hasDiscount && (

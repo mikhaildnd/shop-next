@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
-import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
+import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
@@ -80,7 +79,7 @@ export default async function CollectionPage({
 
     if (hasIssues) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={collection.title}
                 breadcrumbs={breadcrumbs}
             >
@@ -88,7 +87,7 @@ export default async function CollectionPage({
                     listingIssues={listing.issues}
                     paginationIssues={pagination.issues}
                 />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
@@ -104,39 +103,39 @@ export default async function CollectionPage({
 
     if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={collection.title}
                 breadcrumbs={breadcrumbs}
             >
                 <InvalidPageState />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     if (totalProductsCount === 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={collection.title}
                 breadcrumbs={breadcrumbs}
             >
                 <EmptyProductState description="Попробуйте открыть другую коллекцию" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     return (
-        <ProductListingLayout
-            sort={listing.sort}
-            listingStats={listingStats}
+        <CatalogPageLayout
             title={collection.title}
             breadcrumbs={breadcrumbs}
         >
-            <ProductsListContent
+            <ProductListing
+                sort={listing.sort}
+                listingStats={listingStats}
                 products={products}
                 currentPage={pagination.currentPage}
                 totalPages={totalPages}
                 startPage={pagination.startPage}
             />
-        </ProductListingLayout>
+        </CatalogPageLayout>
     );
 }

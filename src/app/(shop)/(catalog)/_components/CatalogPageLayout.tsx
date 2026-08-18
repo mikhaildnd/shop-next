@@ -4,19 +4,19 @@ import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrap
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 
-interface PageStateLayoutProps {
+interface CatalogPageLayoutProps {
     title: string;
     breadcrumbs: BreadcrumbItem[];
     tags?: ReactNode;
     children: ReactNode;
 }
 
-export function PageStateLayout({
+export function CatalogPageLayout({
     title,
     breadcrumbs,
     tags,
     children,
-}: PageStateLayoutProps) {
+}: CatalogPageLayoutProps) {
     return (
         <div className="page-spacing">
             <HorizontalScrollWrapper>

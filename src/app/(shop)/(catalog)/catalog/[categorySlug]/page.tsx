@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
-import { PageStateLayout } from '@/app/(shop)/(catalog)/_components/layouts/PageStateLayout';
-import { ProductListingLayout } from '@/app/(shop)/(catalog)/_components/layouts/ProductListingLayout';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { ProductsListContent } from '@/app/(shop)/(catalog)/_components/ProductsListContent';
+import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { CategoryTags } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/_components/CategoryTags';
 import { buildCatalogBreadcrumbs } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/lib/build-catalog-breadcrumbs';
 import { getDescendantCategorySlugs } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/lib/get-descendant-category-slugs';
@@ -90,7 +89,7 @@ export default async function CategoryPage({
 
     if (hasIssues) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={category.title}
                 breadcrumbs={breadcrumbs}
                 tags={tags}
@@ -101,7 +100,7 @@ export default async function CategoryPage({
                 />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
@@ -117,44 +116,44 @@ export default async function CategoryPage({
 
     if (pagination.currentPage > totalPages && totalProductsCount > 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={category.title}
                 breadcrumbs={breadcrumbs}
                 tags={tags}
             >
                 <InvalidPageState />
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     if (totalProductsCount === 0) {
         return (
-            <PageStateLayout
+            <CatalogPageLayout
                 title={category.title}
                 breadcrumbs={breadcrumbs}
             >
                 <EmptyProductState description="Попробуйте открыть другую категорию" />
 
                 <CollectionProductsSection collectionSlug="promotion" />
-            </PageStateLayout>
+            </CatalogPageLayout>
         );
     }
 
     return (
-        <ProductListingLayout
-            sort={listing.sort}
-            listingStats={listingStats}
-            breadcrumbs={breadcrumbs}
+        <CatalogPageLayout
             title={category.title}
+            breadcrumbs={breadcrumbs}
             tags={tags}
         >
-            <ProductsListContent
+            <ProductListing
+                sort={listing.sort}
+                listingStats={listingStats}
                 products={products}
                 currentPage={pagination.currentPage}
                 totalPages={totalPages}
                 startPage={pagination.startPage}
             />
-        </ProductListingLayout>
+        </CatalogPageLayout>
     );
 }

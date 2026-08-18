@@ -14,26 +14,29 @@ import { getProductOrderBy } from '@/services/product/sort/get-product-order-by'
 import type { ProductSort } from '@/services/product/sort/sort.types';
 
 type GetProductsParams = {
-    filters?: ProductFilters;
-    sort: ProductSort;
     take?: number;
     skip?: number;
+    filters?: ProductFilters;
+    sort: ProductSort;
     categorySlugs?: string[];
     collectionSlug?: string;
+    favoriteIds?: string[];
 };
 
 export async function getProducts({
     take,
     skip = 0,
-    categorySlugs,
-    collectionSlug,
     sort,
     filters,
+    categorySlugs,
+    collectionSlug,
+    favoriteIds,
 }: GetProductsParams): Promise<ProductsResponse> {
     const listingWhere = buildProductWhere({
         filters,
         categorySlugs,
         collectionSlug,
+        favoriteIds,
     });
 
     const priceStatsWhere = buildProductWhere({
@@ -47,6 +50,7 @@ export async function getProducts({
             : undefined,
         categorySlugs,
         collectionSlug,
+        favoriteIds,
     });
 
     const [products, totalProductsCount, priceAggregates, saleProduct] =
