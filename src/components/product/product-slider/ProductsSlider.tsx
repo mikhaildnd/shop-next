@@ -33,7 +33,7 @@ export function ProductsSlider({
         >
             {products.map((product) => (
                 <SwiperSlide
-                    className="!h-auto"
+                    className="h-auto!"
                     key={product.id}
                 >
                     <ProductCard
