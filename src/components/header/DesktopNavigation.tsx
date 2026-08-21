@@ -1,5 +1,6 @@
-import { Heart, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 
+import { FavoritesNavigationItem } from '@/components/header/FavoritesNavigationItem';
 import { NavigationItem } from '@/components/header/NavigationItem';
 import { DesktopProfile } from '@/components/header/profile/DesktopProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
@@ -15,11 +16,7 @@ export function DesktopNavigation({ user, className }: DesktopNavigationProps) {
     return (
         <ul className={cn('flex items-center lg:gap-1.5', className)}>
             <li>
-                <NavigationItem
-                    href={routes.favoritesPage()}
-                    Icon={Heart}
-                    text="Избранное"
-                />
+                <FavoritesNavigationItem />
             </li>
             <li>
                 <NavigationItem

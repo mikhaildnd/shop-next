@@ -117,7 +117,6 @@ Prisma schema, миграции и seed.
 Документация проекта.
 
 * `current-state.md`
-* `progress.md`
 * `architecture.md`
 * `project-structure.md`
 * `style-guide.md`

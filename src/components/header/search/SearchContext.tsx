@@ -5,12 +5,10 @@ import { createContext, useContext } from 'react';
 
 import { useSearch } from '@/components/header/search/hooks/useSearch';
 import { useSearchHistory } from '@/components/header/search/hooks/useSearchHistory';
-import type { SearchState } from '@/components/header/search/search.types';
-import type { SearchHistoryState } from '@/lib/search/search-history/search-history.types';
 
 type SearchContextValue = {
-    search: SearchState;
-    history: SearchHistoryState;
+    search: ReturnType<typeof useSearch>;
+    history: ReturnType<typeof useSearchHistory>;
 };
 
 const SearchContext = createContext<SearchContextValue | null>(null);

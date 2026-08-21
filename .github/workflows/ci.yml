@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: shop_next
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d shop_next"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shop_next
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      NEXT_PUBLIC_YANDEX_MAP_API_KEY: ${{ vars.NEXT_PUBLIC_YANDEX_MAP_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.17.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
+      - name: Apply migrations
+        run: pnpm prisma migrate deploy
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Generate Next.js types
+        run: pnpm next typegen
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build

@@ -1,5 +1,6 @@
 import type {
     ProductDto,
+    ProductListingItemDto,
     ProductWithRelations,
 } from '@/services/product/product.types';
 
@@ -45,4 +46,14 @@ export function mapProductToDto(product: ProductWithRelations): ProductDto {
         createdAt: product.createdAt.toISOString(),
         updatedAt: product.updatedAt.toISOString(),
     };
+}
+
+export function mapProductsToListingItems(
+    products: ProductDto[],
+    isFavorite: boolean,
+): ProductListingItemDto[] {
+    return products.map((product) => ({
+        ...product,
+        isFavorite,
+    }));
 }

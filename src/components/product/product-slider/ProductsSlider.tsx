@@ -9,12 +9,12 @@ import { ProductCard } from '@/components/product/product-card/ProductCard';
 import { PRODUCTS_SLIDER_CONFIG } from '@/components/product/product-slider/products-slider.constants';
 import { cn } from '@/lib/cn';
 import { routes } from '@/routes';
-import type { ProductDto } from '@/services/product/product.types';
+import type { ProductListingItemDto } from '@/services/product/product.types';
 
 interface ProductsSliderProps {
     onSwiper?: (swiper: SwiperType) => void;
     onReady?: () => void;
-    products: ProductDto[];
+    products: ProductListingItemDto[];
     className?: string;
 }
 
@@ -33,7 +33,7 @@ export function ProductsSlider({
         >
             {products.map((product) => (
                 <SwiperSlide
-                    className="!h-auto"
+                    className="h-auto!"
                     key={product.id}
                 >
                     <ProductCard
