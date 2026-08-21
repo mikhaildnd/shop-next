@@ -8,12 +8,13 @@ import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListin
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
 import { routes } from '@/routes';
-import { getProducts } from '@/services/product/product.service';
+import { getProductsForListing } from '@/services/product/use-cases/get-products-for-listing';
 
 interface SearchPageProps {
     searchParams: Promise<ProductListingSearchParams>;
@@ -88,12 +89,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        take: pagination.take,
-        skip: pagination.skip,
-        filters: listing.filters,
-        sort: listing.sort,
-    });
+    const session = await getSession();
+
+    const { products, totalProductsCount, listingStats } =
+        await getProductsForListing({
+            userId: session?.user.id,
+            take: pagination.take,
+            skip: pagination.skip,
+            filters: listing.filters,
+            sort: listing.sort,
+        });
 
     const totalPages = Math.max(
         1,

@@ -8,12 +8,12 @@ import { ProductsSectionHeader } from '@/app/(shop)/_components/products-section
 import { ProductsSliderLazy } from '@/components/product/product-slider/ProductsSlider.lazy';
 import { useSliderNavigation } from '@/hooks/useSliderNavigation';
 import { cn } from '@/lib/cn';
-import type { ProductDto } from '@/services/product/product.types';
+import type { ProductListingItemDto } from '@/services/product/product.types';
 
 interface ProductSectionProps {
     title: string;
     link: string;
-    products: ProductDto[];
+    products: ProductListingItemDto[];
 }
 
 const CONTENT_HEIGHT = 'min-h-[260px] sm:min-h-[300px] lg:min-h-[400px]';

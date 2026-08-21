@@ -5,10 +5,10 @@ import { useEffect, useEffectEvent, useState } from 'react';
 import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { ProductListingSkeleton } from '@/app/(shop)/(catalog)/_components/ProductListingSkeleton';
-import { getFavoriteProducts } from '@/app/(shop)/(catalog)/favorites/actions';
+import { getFavoriteProductsByIdsAction } from '@/app/(shop)/(catalog)/favorites/actions';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
+import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
 
 interface FavoritesListingProps {
@@ -16,13 +16,15 @@ interface FavoritesListingProps {
     pagination: PaginationParams;
 }
 
-type FavoritesResult = Awaited<ReturnType<typeof getFavoriteProducts>>;
+type FavoritesResult = Awaited<
+    ReturnType<typeof getFavoriteProductsByIdsAction>
+>;
 
 export function FavoritesListing({
     listing,
     pagination,
 }: FavoritesListingProps) {
-    const { favoriteIds, isHydrated } = useFavoritesContext();
+    const { favoriteIds, isHydrated } = useLocalFavorites();
 
     const [result, setResult] = useState<FavoritesResult | null>();
 
@@ -31,7 +33,7 @@ export function FavoritesListing({
             return null;
         }
 
-        return getFavoriteProducts({
+        return getFavoriteProductsByIdsAction({
             favoriteIds: [...favoriteIds],
             listing,
             pagination,

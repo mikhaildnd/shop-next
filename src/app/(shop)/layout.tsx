@@ -5,6 +5,7 @@ import { FavoritesProvider } from '@/components/favorite/FavoritesContext';
 import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
+import { getFavoriteCount } from '@/services/favorite/favorite.service';
 
 interface ShopLayoutProps {
     children: ReactNode;
@@ -19,10 +20,15 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
         ? { name: user.name, email: user.email }
         : null;
 
+    const favoriteCount = user ? await getFavoriteCount(user.id) : 0;
+
     return (
-        <FavoritesProvider>
+        <FavoritesProvider
+            isAuthenticated={Boolean(session)}
+            initialFavoriteCount={favoriteCount}
+        >
             <Header user={profileUser} />
-            <main className="wrapper grow overflow-x-hidden">{children}</main>
+            <main className="wrapper grow overflow-x-clip">{children}</main>
             <Footer className="pb-(--bottom-nav-height) md:pb-0" />
         </FavoritesProvider>
     );

@@ -9,7 +9,6 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
-    // TODO мб вынести эту логику отображения в родителя
     if (items.length === 0) {
         return null;
     }

@@ -14,7 +14,7 @@ interface FavoritesNavigationItemProps {
 export function FavoritesNavigationItem({
     className,
 }: FavoritesNavigationItemProps) {
-    const { favoriteIds } = useFavoritesContext();
+    const { favoriteCount } = useFavoritesContext();
 
     return (
         <Link
@@ -29,15 +29,13 @@ export function FavoritesNavigationItem({
                     aria-label="Избранное"
                     className={cn(
                         'size-5.5 stroke-[1.5px] transition-[fill] duration-150',
-                        favoriteIds.size > 0
-                            ? 'fill-black'
-                            : 'fill-transparent',
+                        favoriteCount > 0 ? 'fill-black' : 'fill-transparent',
                     )}
                 />
 
-                {favoriteIds.size > 0 && (
+                {favoriteCount > 0 && (
                     <span className="absolute -top-2 left-[calc(50%+4px)] flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-primary) px-1 text-xs text-white">
-                        {favoriteIds.size}
+                        {favoriteCount}
                     </span>
                 )}
             </div>

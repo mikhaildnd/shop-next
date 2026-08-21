@@ -9,12 +9,13 @@ import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListin
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import { getProducts } from '@/services/product/product.service';
+import { getProductsForListing } from '@/services/product/use-cases/get-products-for-listing';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -29,7 +30,7 @@ export async function generateMetadata({
 }: CollectionPageProps): Promise<Metadata> {
     const { collectionSlug: slug } = await params;
 
-    const collection = await getCollectionBySlug(slug);
+    const collection: CollectionDto | null = await getCollectionBySlug(slug);
 
     if (!collection) {
         return {
@@ -91,13 +92,17 @@ export default async function CollectionPage({
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        take: pagination.take,
-        skip: pagination.skip,
-        collectionSlug: collection?.slug,
-        filters: listing.filters,
-        sort: listing.sort,
-    });
+    const session = await getSession();
+
+    const { products, totalProductsCount, listingStats } =
+        await getProductsForListing({
+            userId: session?.user.id,
+            take: pagination.take,
+            skip: pagination.skip,
+            collectionSlug: collection?.slug,
+            filters: listing.filters,
+            sort: listing.sort,
+        });
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 

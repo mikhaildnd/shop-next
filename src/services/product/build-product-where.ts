@@ -7,6 +7,7 @@ type BuildProductQueryOptions = {
     categorySlugs?: string[];
     collectionSlug?: string;
     favoriteIds?: string[];
+    favoritesForUserId?: string;
 };
 
 export function buildProductWhere({
@@ -14,6 +15,7 @@ export function buildProductWhere({
     categorySlugs,
     collectionSlug,
     favoriteIds,
+    favoritesForUserId,
 }: BuildProductQueryOptions) {
     const where: Prisma.ProductWhereInput = filters
         ? getProductWhere(filters)
@@ -40,6 +42,14 @@ export function buildProductWhere({
     if (favoriteIds !== undefined) {
         where.id = {
             in: favoriteIds,
+        };
+    }
+
+    if (favoritesForUserId) {
+        where.favorites = {
+            some: {
+                userId: favoritesForUserId,
+            },
         };
     }
 

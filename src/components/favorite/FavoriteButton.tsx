@@ -7,18 +7,22 @@ import { cn } from '@/lib/cn';
 
 interface FavoriteButtonProps {
     productId: string;
+    initialIsFavorite: boolean;
 }
 
-export function FavoriteButton({ productId }: FavoriteButtonProps) {
+export function FavoriteButton({
+    productId,
+    initialIsFavorite,
+}: FavoriteButtonProps) {
     const { isFavorite, toggleFavorite } = useFavoritesContext();
 
-    const favorite = isFavorite(productId);
+    const favorite = isFavorite(productId, initialIsFavorite);
 
     return (
         <button
             type="button"
             aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
-            onClick={() => toggleFavorite(productId)}
+            onClick={() => toggleFavorite(productId, initialIsFavorite)}
             className="group absolute top-2 right-2 flex size-10 cursor-pointer items-center justify-center rounded-full bg-white opacity-80 focus-ring"
         >
             <Heart

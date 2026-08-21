@@ -21,6 +21,7 @@ type GetProductsParams = {
     categorySlugs?: string[];
     collectionSlug?: string;
     favoriteIds?: string[];
+    favoritesForUserId?: string;
 };
 
 export async function getProducts({
@@ -31,12 +32,14 @@ export async function getProducts({
     categorySlugs,
     collectionSlug,
     favoriteIds,
+    favoritesForUserId,
 }: GetProductsParams): Promise<ProductsResponse> {
     const listingWhere = buildProductWhere({
         filters,
         categorySlugs,
         collectionSlug,
         favoriteIds,
+        favoritesForUserId,
     });
 
     const priceStatsWhere = buildProductWhere({
@@ -51,6 +54,7 @@ export async function getProducts({
         categorySlugs,
         collectionSlug,
         favoriteIds,
+        favoritesForUserId,
     });
 
     const [products, totalProductsCount, priceAggregates, saleProduct] =

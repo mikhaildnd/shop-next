@@ -1,9 +1,9 @@
 import { ProductCard } from '@/components/product/product-card/ProductCard';
 import { routes } from '@/routes';
-import type { ProductDto } from '@/services/product/product.types';
+import type { ProductListingItemDto } from '@/services/product/product.types';
 
 interface ProductGridProps {
-    products: ProductDto[];
+    products: ProductListingItemDto[];
 }
 
 export function ProductGrid({ products }: ProductGridProps) {

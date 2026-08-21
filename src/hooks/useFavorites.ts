@@ -1,69 +1,88 @@
 'use client';
 
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useEffect } from 'react';
 
-import {
-    addFavorite as addFavoriteStorage,
-    getFavoriteIds,
-    getServerFavoriteIds,
-    removeFavorite as removeFavoriteStorage,
-    subscribeToFavorites,
-} from '@/lib/favorite/favorite-storage';
+import { mergeFavoritesAction } from '@/app/(shop)/(catalog)/favorites/actions';
+import { useLocalFavorites } from '@/hooks/useLocalFavorites';
+import { useServerFavorites } from '@/hooks/useServerFavorites';
 
-interface UseFavoritesReturn {
-    isHydrated: boolean;
-    favoriteIds: Set<string>;
-    isFavorite: (productId: string) => boolean;
-    addFavorite: (productId: string) => void;
-    removeFavorite: (productId: string) => void;
-    toggleFavorite: (productId: string) => void;
+interface UseFavoritesOptions {
+    isAuthenticated: boolean;
+    initialFavoriteCount: number;
 }
 
-export function useFavorites(): UseFavoritesReturn {
-    const favoriteIds = useSyncExternalStore(
-        subscribeToFavorites,
-        getFavoriteIds,
-        getServerFavoriteIds,
-    );
+interface UseFavoritesReturn {
+    favoriteCount: number;
+    isFavorite: (productId: string, initialIsFavorite: boolean) => boolean;
+    toggleFavorite: (productId: string, initialIsFavorite: boolean) => void;
+}
 
-    const isHydrated = useSyncExternalStore(
-        subscribeToFavorites,
-        () => true,
-        () => false,
-    );
+export function useFavorites({
+    isAuthenticated,
+    initialFavoriteCount,
+}: UseFavoritesOptions): UseFavoritesReturn {
+    const localFavorites = useLocalFavorites();
+    const serverFavorites = useServerFavorites({
+        initialFavoriteCount,
+    });
 
-    const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+    const {
+        favoriteIds: localFavoriteIds,
+        isHydrated: isLocalHydrated,
+        clearFavorites,
+        isFavorite: isLocalFavorite,
+        toggleFavorite: toggleLocalFavorite,
+    } = localFavorites;
 
-    const addFavorite = useCallback((productId: string) => {
-        addFavoriteStorage(productId);
-    }, []);
+    const {
+        favoriteCount: serverFavoriteCount,
+        isFavorite: isServerFavorite,
+        toggleFavorite: toggleServerFavorite,
+        syncFavoriteCount,
+    } = serverFavorites;
 
-    const removeFavorite = useCallback((productId: string) => {
-        removeFavoriteStorage(productId);
-    }, []);
+    useEffect(() => {
+        if (!isAuthenticated || !isLocalHydrated) {
+            return;
+        }
 
-    const isFavorite = useCallback(
-        (productId: string) => favoriteIdSet.has(productId),
-        [favoriteIdSet],
-    );
+        if (localFavoriteIds.size === 0) {
+            return;
+        }
 
-    const toggleFavorite = useCallback(
-        (productId: string) => {
-            if (favoriteIdSet.has(productId)) {
-                removeFavorite(productId);
-            } else {
-                addFavorite(productId);
+        async function mergeFavorites() {
+            try {
+                const favoriteCount = await mergeFavoritesAction([
+                    ...localFavoriteIds,
+                ]);
+
+                syncFavoriteCount(favoriteCount);
+                clearFavorites();
+            } catch {
+                // Keep local favorites when the merge fails.
             }
-        },
-        [favoriteIdSet, addFavorite, removeFavorite],
-    );
+        }
+
+        void mergeFavorites();
+    }, [
+        isAuthenticated,
+        isLocalHydrated,
+        localFavoriteIds,
+        syncFavoriteCount,
+        clearFavorites,
+    ]);
+
+    if (isAuthenticated) {
+        return {
+            favoriteCount: serverFavoriteCount,
+            isFavorite: isServerFavorite,
+            toggleFavorite: toggleServerFavorite,
+        };
+    }
 
     return {
-        isHydrated,
-        favoriteIds: favoriteIdSet,
-        isFavorite,
-        addFavorite,
-        removeFavorite,
-        toggleFavorite,
+        favoriteCount: isLocalHydrated ? localFavoriteIds.size : 0,
+        isFavorite: (productId) => isLocalFavorite(productId),
+        toggleFavorite: (productId) => toggleLocalFavorite(productId),
     };
 }

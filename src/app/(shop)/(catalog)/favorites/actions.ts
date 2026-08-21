@@ -1,31 +1,34 @@
 'use server';
 
-import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import type { PaginationParams } from '@/lib/pagination/pagination.types';
-import { getProducts } from '@/services/product/product.service';
+import { requireSession } from '@/auth/session';
+import {
+    addFavorite,
+    getFavoriteProductsByIds,
+    mergeFavorites,
+    removeFavorite,
+} from '@/services/favorite/favorite.service';
+import type { GetFavoriteProductsByIdsParams } from '@/services/favorite/favorite.types';
 
-interface GetFavoriteProductsParams {
-    favoriteIds: string[];
-    listing: ParsedProductListing;
-    pagination: PaginationParams;
+export async function getFavoriteProductsByIdsAction(
+    params: GetFavoriteProductsByIdsParams,
+) {
+    return getFavoriteProductsByIds(params);
 }
 
-export async function getFavoriteProducts({
-    favoriteIds,
-    listing,
-    pagination,
-}: GetFavoriteProductsParams) {
-    const result = await getProducts({
-        favoriteIds,
-        ...listing,
-        take: pagination.take,
-        skip: pagination.skip,
-    });
+export async function mergeFavoritesAction(favoriteIds: string[]) {
+    const session = await requireSession();
 
-    return {
-        ...result,
-        sort: listing.sort,
-        currentPage: pagination.currentPage,
-        startPage: pagination.startPage,
-    };
+    return mergeFavorites(session.user.id, favoriteIds);
+}
+
+export async function addFavoriteAction(productId: string) {
+    const session = await requireSession();
+
+    await addFavorite(session.user.id, productId);
+}
+
+export async function removeFavoriteAction(productId: string) {
+    const session = await requireSession();
+
+    await removeFavorite(session.user.id, productId);
 }

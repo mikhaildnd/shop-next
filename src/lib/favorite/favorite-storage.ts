@@ -1,21 +1,27 @@
-import { FAVORITES_STORAGE_KEY } from '@/lib/favorite/favorite-storage.constants';
+import {
+    FAVORITES_STORAGE_KEY,
+    SERVER_FAVORITE_IDS,
+} from '@/lib/favorite/favorite-storage.constants';
 
 type FavoriteListener = () => void;
 
 const listeners = new Set<FavoriteListener>();
-
-const SERVER_FAVORITE_IDS: string[] = [];
 
 function parseFavoriteIds(value: string | null): string[] {
     if (!value) {
         return [];
     }
 
-    const parsed = JSON.parse(value);
+    try {
+        const parsed = JSON.parse(value);
 
-    return Array.isArray(parsed) && parsed.every((id) => typeof id === 'string')
-        ? parsed
-        : [];
+        return Array.isArray(parsed) &&
+            parsed.every((id) => typeof id === 'string')
+            ? parsed
+            : [];
+    } catch {
+        return [];
+    }
 }
 
 function readFavoriteIds(): string[] {
@@ -84,6 +90,12 @@ export function addFavorite(productId: string): string[] {
 }
 
 export function removeFavorite(productId: string): string[] {
+    const favoriteIds = getFavoriteIds();
+
+    if (!favoriteIds.includes(productId)) {
+        return favoriteIds;
+    }
+
     const nextFavoriteIds = getFavoriteIds().filter((id) => id !== productId);
 
     localStorage.setItem(

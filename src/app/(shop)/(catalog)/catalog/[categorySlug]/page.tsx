@@ -14,12 +14,14 @@ import { getCategoryPath } from '@/app/(shop)/(catalog)/lib/get-category-path';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { getSession } from '@/auth/session';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import {
     getCategories,
     getCategoryBySlug,
 } from '@/services/category/category.service';
-import { getProducts } from '@/services/product/product.service';
+import type { CategoryDto } from '@/services/category/category.types';
+import { getProductsForListing } from '@/services/product/use-cases/get-products-for-listing';
 
 interface CategoryPageProps {
     params: Promise<{
@@ -34,7 +36,7 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
     const { categorySlug: slug } = await params;
 
-    const category = await getCategoryBySlug(slug);
+    const category: CategoryDto | null = await getCategoryBySlug(slug);
 
     if (!category) {
         return {
@@ -104,13 +106,17 @@ export default async function CategoryPage({
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        take: pagination.take,
-        skip: pagination.skip,
-        categorySlugs,
-        filters: listing.filters,
-        sort: listing.sort,
-    });
+    const session = await getSession();
+
+    const { products, totalProductsCount, listingStats } =
+        await getProductsForListing({
+            userId: session?.user.id,
+            take: pagination.take,
+            skip: pagination.skip,
+            categorySlugs,
+            filters: listing.filters,
+            sort: listing.sort,
+        });
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
