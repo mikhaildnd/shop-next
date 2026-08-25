@@ -3,11 +3,11 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 import {
-    addFavorite as addFavoriteStorage,
-    clearFavorites as clearFavoritesStorage,
+    addFavorite,
+    clearFavorites,
     getFavoriteIds,
     getServerFavoriteIds,
-    removeFavorite as removeFavoriteStorage,
+    removeFavorite,
     subscribeToFavorites,
 } from '@/lib/favorite/favorite-storage';
 
@@ -36,14 +36,6 @@ export function useLocalFavorites(): UseLocalFavoritesReturn {
 
     const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
 
-    const addFavorite = useCallback((productId: string) => {
-        addFavoriteStorage(productId);
-    }, []);
-
-    const removeFavorite = useCallback((productId: string) => {
-        removeFavoriteStorage(productId);
-    }, []);
-
     const isFavorite = useCallback(
         (productId: string) => favoriteIdSet.has(productId),
         [favoriteIdSet],
@@ -59,10 +51,6 @@ export function useLocalFavorites(): UseLocalFavoritesReturn {
         },
         [favoriteIdSet, addFavorite, removeFavorite],
     );
-
-    const clearFavorites = useCallback(() => {
-        clearFavoritesStorage();
-    }, []);
 
     return {
         isHydrated,

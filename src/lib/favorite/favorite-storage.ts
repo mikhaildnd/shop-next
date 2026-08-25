@@ -1,11 +1,12 @@
-import {
-    FAVORITES_STORAGE_KEY,
-    SERVER_FAVORITE_IDS,
-} from '@/lib/favorite/favorite-storage.constants';
+import { FAVORITES_STORAGE_KEY } from '@/lib/favorite/favorite-storage.constants';
 
 type FavoriteListener = () => void;
 
 const listeners = new Set<FavoriteListener>();
+
+function isFavoriteId(value: unknown): value is string {
+    return typeof value === 'string';
+}
 
 function parseFavoriteIds(value: string | null): string[] {
     if (!value) {
@@ -13,10 +14,9 @@ function parseFavoriteIds(value: string | null): string[] {
     }
 
     try {
-        const parsed = JSON.parse(value);
+        const parsed: unknown = JSON.parse(value);
 
-        return Array.isArray(parsed) &&
-            parsed.every((id) => typeof id === 'string')
+        return Array.isArray(parsed) && parsed.every(isFavoriteId)
             ? parsed
             : [];
     } catch {
@@ -26,7 +26,7 @@ function parseFavoriteIds(value: string | null): string[] {
 
 function readFavoriteIds(): string[] {
     if (typeof window === 'undefined') {
-        return SERVER_FAVORITE_IDS;
+        return [];
     }
 
     return parseFavoriteIds(localStorage.getItem(FAVORITES_STORAGE_KEY));
@@ -38,8 +38,10 @@ export function getFavoriteIds(): string[] {
     return favoriteIdsSnapshot;
 }
 
+const EMPTY_FAVORITE_IDS: string[] = [];
+
 export function getServerFavoriteIds(): string[] {
-    return SERVER_FAVORITE_IDS;
+    return EMPTY_FAVORITE_IDS;
 }
 
 export function subscribeToFavorites(listener: FavoriteListener): () => void {
