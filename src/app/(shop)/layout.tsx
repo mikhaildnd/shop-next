@@ -6,6 +6,7 @@ import { FavoritesProvider } from '@/components/favorite/FavoritesContext';
 import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
+import { getCart } from '@/services/cart/cart.service';
 import { getFavoriteCount } from '@/services/favorite/favorite.service';
 
 interface ShopLayoutProps {
@@ -23,8 +24,13 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
 
     const favoriteCount = user ? await getFavoriteCount(user.id) : 0;
 
+    const initialCartState = user ? await getCart(user.id) : { items: [] };
+
     return (
-        <CartProvider>
+        <CartProvider
+            isAuthenticated={Boolean(session)}
+            initialCartState={initialCartState}
+        >
             <FavoritesProvider
                 isAuthenticated={Boolean(session)}
                 initialFavoriteCount={favoriteCount}

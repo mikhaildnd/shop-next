@@ -3,16 +3,26 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
-import { useLocalCart } from '@/hooks/useLocalCart';
+import { useCart } from '@/hooks/useCart';
+import type { CartDto } from '@/services/cart/cart.types';
 
-const CartContext = createContext<ReturnType<typeof useLocalCart> | null>(null);
+const CartContext = createContext<ReturnType<typeof useCart> | null>(null);
 
 interface CartProviderProps {
+    isAuthenticated: boolean;
+    initialCartState: CartDto;
     children: ReactNode;
 }
 
-export function CartProvider({ children }: CartProviderProps) {
-    const cart = useLocalCart();
+export function CartProvider({
+    isAuthenticated,
+    initialCartState,
+    children,
+}: CartProviderProps) {
+    const cart = useCart({
+        isAuthenticated,
+        initialCartState,
+    });
 
     return <CartContext.Provider value={cart}>{children}</CartContext.Provider>;
 }
