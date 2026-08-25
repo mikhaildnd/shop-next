@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Button } from '@/components/button/Button';
+import { CartButton } from '@/components/cart/CartButton';
 import { FavoriteButton } from '@/components/favorite/FavoriteButton';
 import { StarRating } from '@/components/product/StarRating';
 import { formatPrice } from '@/lib/format-price';
@@ -85,7 +85,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 </div>
 
                 {/*ACTIONS SEGMENT*/}
-                <Button variant="accent">В корзину</Button>
+                <CartButton productId={product.id} />
             </div>
         </article>
     );

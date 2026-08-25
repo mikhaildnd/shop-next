@@ -1,5 +1,3 @@
-import { Suspense } from 'react';
-
 import { CatalogLink } from '@/components/header/CatalogLink';
 import { DesktopNavigation } from '@/components/header/DesktopNavigation';
 import { MobileNavigation } from '@/components/header/MobileNavigation';
@@ -18,12 +16,10 @@ export function Header({ user }: HeaderProps) {
         <header className="relative z-10 flex wrapper items-center gap-x-4 bg-white py-2 shadow-(--shadow-default) md:gap-x-5 xl:gap-x-6 xl:py-3">
             <Logo />
             <CatalogLink className="hidden md:flex" />
-            <Suspense fallback={null}>
-                <SearchProvider>
-                    <DesktopSearch className="hidden grow md:block" />
-                    <MobileSearch className="ml-auto md:hidden" />
-                </SearchProvider>
-            </Suspense>
+            <SearchProvider>
+                <DesktopSearch className="hidden grow md:block" />
+                <MobileSearch className="ml-auto md:hidden" />
+            </SearchProvider>
             <DesktopNavigation
                 className="hidden md:flex"
                 user={user}

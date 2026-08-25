@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { getSession } from '@/auth/session';
+import { CartProvider } from '@/components/cart/CartContext';
 import { FavoritesProvider } from '@/components/favorite/FavoritesContext';
 import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
@@ -23,13 +24,15 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     const favoriteCount = user ? await getFavoriteCount(user.id) : 0;
 
     return (
-        <FavoritesProvider
-            isAuthenticated={Boolean(session)}
-            initialFavoriteCount={favoriteCount}
-        >
-            <Header user={profileUser} />
-            <main className="wrapper grow overflow-x-clip">{children}</main>
-            <Footer className="pb-(--bottom-nav-height) md:pb-0" />
-        </FavoritesProvider>
+        <CartProvider>
+            <FavoritesProvider
+                isAuthenticated={Boolean(session)}
+                initialFavoriteCount={favoriteCount}
+            >
+                <Header user={profileUser} />
+                <main className="wrapper grow overflow-x-clip">{children}</main>
+                <Footer className="pb-(--bottom-nav-height) md:pb-0" />
+            </FavoritesProvider>
+        </CartProvider>
     );
 }
