@@ -1,11 +1,8 @@
-import { ShoppingCart } from 'lucide-react';
-
+import { CartNavigationItem } from '@/components/header/CartNavigationItem';
 import { FavoritesNavigationItem } from '@/components/header/FavoritesNavigationItem';
-import { NavigationItem } from '@/components/header/NavigationItem';
 import { DesktopProfile } from '@/components/header/profile/DesktopProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { cn } from '@/lib/cn';
-import { routes } from '@/routes';
 
 interface DesktopNavigationProps {
     user: ProfileUser | null;
@@ -19,11 +16,7 @@ export function DesktopNavigation({ user, className }: DesktopNavigationProps) {
                 <FavoritesNavigationItem />
             </li>
             <li>
-                <NavigationItem
-                    href={routes.cartPage()}
-                    Icon={ShoppingCart}
-                    text="Корзина"
-                />
+                <CartNavigationItem />
             </li>
             <li>
                 <DesktopProfile user={user} />

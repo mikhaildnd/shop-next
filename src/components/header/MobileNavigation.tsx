@@ -1,5 +1,6 @@
-import { House as IconHome, ShoppingCart } from 'lucide-react';
+import { House as IconHome } from 'lucide-react';
 
+import { CartNavigationItem } from '@/components/header/CartNavigationItem';
 import { FavoritesNavigationItem } from '@/components/header/FavoritesNavigationItem';
 import { NavigationItem } from '@/components/header/NavigationItem';
 import { MobileProfile } from '@/components/header/profile/MobileProfile';
@@ -42,11 +43,7 @@ export function MobileNavigation({ user, className }: MobileNavigationProps) {
                     <FavoritesNavigationItem />
                 </li>
                 <li>
-                    <NavigationItem
-                        href={routes.cartPage()}
-                        Icon={ShoppingCart}
-                        text="Корзина"
-                    />
+                    <CartNavigationItem />
                 </li>
                 <li>
                     <MobileProfile user={user} />
