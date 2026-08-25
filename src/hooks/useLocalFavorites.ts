@@ -49,7 +49,7 @@ export function useLocalFavorites(): UseLocalFavoritesReturn {
                 addFavorite(productId);
             }
         },
-        [favoriteIdSet, addFavorite, removeFavorite],
+        [favoriteIdSet],
     );
 
     return {
