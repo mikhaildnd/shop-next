@@ -9,13 +9,12 @@ import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListin
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import { getProductsForListing } from '@/services/product/use-cases/get-products-for-listing';
+import { getProducts } from '@/services/product/product.service';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -92,17 +91,13 @@ export default async function CollectionPage({
         );
     }
 
-    const session = await getSession();
-
-    const { products, totalProductsCount, listingStats } =
-        await getProductsForListing({
-            userId: session?.user.id,
-            take: pagination.take,
-            skip: pagination.skip,
-            collectionSlug: collection?.slug,
-            filters: listing.filters,
-            sort: listing.sort,
-        });
+    const { products, totalProductsCount, listingStats } = await getProducts({
+        take: pagination.take,
+        skip: pagination.skip,
+        collectionSlug: collection?.slug,
+        filters: listing.filters,
+        sort: listing.sort,
+    });
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 

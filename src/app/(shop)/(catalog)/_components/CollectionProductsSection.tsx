@@ -1,9 +1,8 @@
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
-import { getSession } from '@/auth/session';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import { DEFAULT_PRODUCT_FILTERS } from '@/services/product/filters/filter.constants';
+import { getProducts } from '@/services/product/product.service';
 import { DEFAULT_PRODUCT_SORT } from '@/services/product/sort/sort.constants';
-import { getProductsForListing } from '@/services/product/use-cases/get-products-for-listing';
 
 interface CollectionProductsSectionProps {
     collectionSlug: string;
@@ -14,13 +13,10 @@ export async function CollectionProductsSection({
     collectionSlug,
     take = 12,
 }: CollectionProductsSectionProps) {
-    const session = await getSession();
-
     const [collection, { products }] = await Promise.all([
         getCollectionBySlug(collectionSlug),
 
-        getProductsForListing({
-            userId: session?.user.id,
+        getProducts({
             collectionSlug,
             take,
             filters: DEFAULT_PRODUCT_FILTERS,

@@ -8,34 +8,39 @@ import {
 } from '@/app/(shop)/(catalog)/favorites/actions';
 
 interface UseServerFavoritesOptions {
+    initialFavoriteIds: string[];
     initialFavoriteCount: number;
 }
 
 interface UseServerFavoritesReturn {
     favoriteCount: number;
-    isFavorite: (productId: string, initialIsFavorite: boolean) => boolean;
-    toggleFavorite: (productId: string, initialIsFavorite: boolean) => void;
+    isFavorite: (productId: string) => boolean;
+    toggleFavorite: (productId: string) => void;
     syncFavoriteCount: (count: number) => void;
 }
 
 export function useServerFavorites({
+    initialFavoriteIds,
     initialFavoriteCount,
 }: UseServerFavoritesOptions): UseServerFavoritesReturn {
     const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
+
     const [favoriteStates, setFavoriteStates] = useState<
         Record<string, boolean>
-    >({});
+    >(() =>
+        Object.fromEntries(
+            initialFavoriteIds.map((productId) => [productId, true]),
+        ),
+    );
+
     const isFavorite = useCallback(
-        (productId: string, initialIsFavorite: boolean) => {
-            return favoriteStates[productId] ?? initialIsFavorite;
-        },
+        (productId: string) => favoriteStates[productId] ?? false,
         [favoriteStates],
     );
 
     const addFavorite = useCallback(
-        async (productId: string, initialIsFavorite: boolean) => {
-            const previousIsFavorite =
-                favoriteStates[productId] ?? initialIsFavorite;
+        async (productId: string) => {
+            const previousIsFavorite = favoriteStates[productId] ?? false;
 
             if (previousIsFavorite) {
                 return;
@@ -65,9 +70,8 @@ export function useServerFavorites({
     );
 
     const removeFavorite = useCallback(
-        async (productId: string, initialIsFavorite: boolean) => {
-            const previousIsFavorite =
-                favoriteStates[productId] ?? initialIsFavorite;
+        async (productId: string) => {
+            const previousIsFavorite = favoriteStates[productId] ?? false;
 
             if (!previousIsFavorite) {
                 return;
@@ -97,16 +101,15 @@ export function useServerFavorites({
     );
 
     const toggleFavorite = useCallback(
-        (productId: string, initialIsFavorite: boolean) => {
-            const currentIsFavorite =
-                favoriteStates[productId] ?? initialIsFavorite;
+        (productId: string) => {
+            const currentIsFavorite = favoriteStates[productId] ?? false;
 
             if (currentIsFavorite) {
-                void removeFavorite(productId, initialIsFavorite);
+                void removeFavorite(productId);
                 return;
             }
 
-            void addFavorite(productId, initialIsFavorite);
+            void addFavorite(productId);
         },
         [favoriteStates, addFavorite, removeFavorite],
     );

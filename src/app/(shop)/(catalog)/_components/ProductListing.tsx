@@ -5,7 +5,7 @@ import { ProductMobileFilters } from '@/app/(shop)/(catalog)/_components/product
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
 import { Pagination } from '@/components/Pagination';
 import type {
-    ProductListingItemDto,
+    ProductDto,
     ProductListingStats,
 } from '@/services/product/product.types';
 import type { ProductSort } from '@/services/product/sort/sort.types';
@@ -13,7 +13,7 @@ import type { ProductSort } from '@/services/product/sort/sort.types';
 interface ProductListingProps {
     sort: ProductSort;
     listingStats: ProductListingStats;
-    products: ProductListingItemDto[];
+    products: ProductDto[];
     currentPage: number;
     totalPages: number;
     startPage: number;

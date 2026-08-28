@@ -11,16 +11,22 @@ const FavoritesContext = createContext<ReturnType<typeof useFavorites> | null>(
 
 interface FavoritesProviderProps {
     isAuthenticated: boolean;
+    initialFavoriteIds: string[];
     initialFavoriteCount: number;
     children: ReactNode;
 }
 
 export function FavoritesProvider({
     isAuthenticated,
+    initialFavoriteIds,
     initialFavoriteCount,
     children,
 }: FavoritesProviderProps) {
-    const favorites = useFavorites({ isAuthenticated, initialFavoriteCount });
+    const favorites = useFavorites({
+        isAuthenticated,
+        initialFavoriteCount,
+        initialFavoriteIds,
+    });
 
     return (
         <FavoritesContext.Provider value={favorites}>
