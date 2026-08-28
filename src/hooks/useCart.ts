@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { mergeCartAction } from '@/app/(shop)/(catalog)/cart/actions';
+import { mergeCartAction } from '@/app/(shop)/cart/actions';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartDto } from '@/services/cart/cart.types';
+
+type CartType = 'server' | 'local';
+type MergeStatus = 'idle' | 'merging' | 'error';
 
 interface UseCartOptions {
     isAuthenticated: boolean;
@@ -13,7 +16,7 @@ interface UseCartOptions {
 }
 
 export function useCart({ isAuthenticated, initialCartState }: UseCartOptions) {
-    const initialCartItems = initialCartState.items.map(
+    const initialCartEntries = initialCartState.items.map(
         ({ product, quantity }) => ({
             productId: product.id,
             quantity,
@@ -23,50 +26,90 @@ export function useCart({ isAuthenticated, initialCartState }: UseCartOptions) {
     const localCart = useLocalCart();
 
     const serverCart = useServerCart({
-        initialCartItems,
+        initialCartEntries,
     });
 
     const {
-        cartItems: localCartItems,
+        cartEntries: localCartEntries,
         isHydrated: isLocalHydrated,
-        clearCart: clearLocalCart,
+        removeMergedCartEntries,
     } = localCart;
 
-    const { syncCartItems } = serverCart;
+    const { syncCartEntries } = serverCart;
+
+    const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
+    const [mergeAttempt, setMergeAttempt] = useState(0);
+    const isMergingRef = useRef(false);
+
+    const retryMerge = useCallback(() => {
+        if (isMergingRef.current) {
+            return;
+        }
+
+        setMergeStatus('idle');
+        setMergeAttempt((attempt) => attempt + 1);
+    }, []);
 
     useEffect(() => {
-        if (!isAuthenticated || !isLocalHydrated) {
+        if (!isAuthenticated) {
             return;
         }
 
-        if (localCartItems.length === 0) {
+        if (!isLocalHydrated || isMergingRef.current) {
             return;
         }
+
+        if (localCartEntries.length === 0) {
+            return;
+        }
+
+        const entriesToMerge = localCartEntries.map((entry) => ({ ...entry }));
+
+        isMergingRef.current = true;
 
         async function mergeCart() {
-            try {
-                const cart = await mergeCartAction(localCartItems);
+            setMergeStatus('merging');
 
-                const cartItems = cart.items.map(({ product, quantity }) => ({
+            try {
+                const cart = await mergeCartAction(entriesToMerge);
+
+                const cartEntries = cart.items.map(({ product, quantity }) => ({
                     productId: product.id,
                     quantity,
                 }));
 
-                syncCartItems(cartItems);
-                clearLocalCart();
+                syncCartEntries(cartEntries);
+                removeMergedCartEntries(entriesToMerge);
+                setMergeStatus('idle');
+                setMergeAttempt((attempt) => attempt + 1);
             } catch {
-                // Keep local cart when the merge fails.
+                setMergeStatus('error');
+            } finally {
+                isMergingRef.current = false;
             }
         }
 
-        void mergeCart();
+        async function startMerge() {
+            await Promise.resolve();
+            await mergeCart();
+        }
+
+        void startMerge();
     }, [
         isAuthenticated,
         isLocalHydrated,
-        localCartItems,
-        syncCartItems,
-        clearLocalCart,
+        localCartEntries,
+        syncCartEntries,
+        removeMergedCartEntries,
+        mergeAttempt,
     ]);
 
-    return isAuthenticated ? serverCart : localCart;
+    const cartType: CartType = isAuthenticated ? 'server' : 'local';
+
+    return {
+        ...(isAuthenticated ? serverCart : localCart),
+        cartType,
+        mergeStatus,
+        retryMerge,
+    };
 }

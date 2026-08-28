@@ -6,7 +6,11 @@ import { createContext, useContext } from 'react';
 import { useCart } from '@/hooks/useCart';
 import type { CartDto } from '@/services/cart/cart.types';
 
-const CartContext = createContext<ReturnType<typeof useCart> | null>(null);
+type CartContextValue = ReturnType<typeof useCart> & {
+    initialCartState: CartDto;
+};
+
+const CartContext = createContext<CartContextValue | null>(null);
 
 interface CartProviderProps {
     isAuthenticated: boolean;
@@ -24,7 +28,16 @@ export function CartProvider({
         initialCartState,
     });
 
-    return <CartContext.Provider value={cart}>{children}</CartContext.Provider>;
+    return (
+        <CartContext.Provider
+            value={{
+                ...cart,
+                initialCartState,
+            }}
+        >
+            {children}
+        </CartContext.Provider>
+    );
 }
 
 export function useCartContext() {

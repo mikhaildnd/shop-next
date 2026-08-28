@@ -2,35 +2,37 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
-import type { CartItem } from '@/lib/cart/cart.types';
+import type { CartEntry } from '@/lib/cart/cart.types';
 import {
-    addCartItem,
+    addCartEntry,
     clearCart,
-    decrementCartItem,
-    getCartItems,
-    getServerCartItems,
-    incrementCartItem,
-    removeCartItem,
+    decrementCartEntry,
+    getCartEntries,
+    getServerCartEntries,
+    incrementCartEntry,
+    removeCartEntry,
+    removeMergedCartEntries,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
 
 interface UseLocalCartResult {
-    cartItems: CartItem[];
+    cartEntries: CartEntry[];
     isHydrated: boolean;
-    addCartItem: (productId: string) => void;
-    incrementCartItem: (productId: string) => void;
-    decrementCartItem: (productId: string) => void;
-    removeCartItem: (productId: string) => void;
+    addCartEntry: (productId: string) => void;
+    incrementCartEntry: (productId: string) => void;
+    decrementCartEntry: (productId: string) => void;
+    removeCartEntry: (productId: string) => void;
     clearCart: () => void;
+    removeMergedCartEntries: (items: CartEntry[]) => void;
     cartCount: number;
-    getCartItemQuantity: (productId: string) => number;
+    getCartEntryQuantity: (productId: string) => number | undefined;
 }
 
 export function useLocalCart(): UseLocalCartResult {
-    const cartItems = useSyncExternalStore(
+    const cartEntries = useSyncExternalStore(
         subscribeToCart,
-        getCartItems,
-        getServerCartItems,
+        getCartEntries,
+        getServerCartEntries,
     );
 
     const isHydrated = useSyncExternalStore(
@@ -39,29 +41,32 @@ export function useLocalCart(): UseLocalCartResult {
         () => false,
     );
 
-    const getCartItemQuantity = useCallback(
+    const getCartEntryQuantity = useCallback(
         (productId: string) => {
-            const item = cartItems.find((item) => item.productId === productId);
+            const entry = cartEntries.find(
+                (item) => item.productId === productId,
+            );
 
-            return item?.quantity ?? 0;
+            return entry?.quantity;
         },
-        [cartItems],
+        [cartEntries],
     );
 
-    const cartCount = cartItems.reduce(
+    const cartCount = cartEntries.reduce(
         (total, item) => total + item.quantity,
         0,
     );
 
     return {
-        cartItems,
+        cartEntries,
         isHydrated,
-        addCartItem,
-        removeCartItem,
-        incrementCartItem,
-        decrementCartItem,
+        addCartEntry,
+        removeCartEntry,
+        incrementCartEntry,
+        decrementCartEntry,
         clearCart,
+        removeMergedCartEntries,
         cartCount,
-        getCartItemQuantity,
+        getCartEntryQuantity,
     };
 }

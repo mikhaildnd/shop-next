@@ -1,5 +1,5 @@
 import { prisma } from '@/db';
-import type { CartItem } from '@/lib/cart/cart.types';
+import type { CartEntry } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
 import { productInclude } from '@/services/product/product.constants';
 import { mapProductToDto } from '@/services/product/product.mapper';
@@ -11,6 +11,9 @@ export async function getCart(userId: string): Promise<CartDto> {
         },
         include: {
             items: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
                 include: {
                     product: {
                         include: productInclude,
@@ -207,7 +210,7 @@ export async function clearCart(userId: string): Promise<void> {
 
 export async function mergeCart(
     userId: string,
-    items: CartItem[],
+    entries: CartEntry[],
 ): Promise<CartDto> {
     const cart = await prisma.cart.upsert({
         where: {
@@ -220,7 +223,7 @@ export async function mergeCart(
     });
 
     await prisma.$transaction(
-        items.map(({ productId, quantity }) =>
+        entries.map(({ productId, quantity }) =>
             prisma.cartItem.upsert({
                 where: {
                     cartId_productId: {

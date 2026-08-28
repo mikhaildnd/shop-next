@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
     addCartItemAction,
@@ -8,159 +8,231 @@ import {
     decrementCartItemAction,
     incrementCartItemAction,
     removeCartItemAction,
-} from '@/app/(shop)/(catalog)/cart/actions';
-import type { CartItem } from '@/lib/cart/cart.types';
+} from '@/app/(shop)/cart/actions';
+import type { CartEntry } from '@/lib/cart/cart.types';
 
 interface UseServerCartOptions {
-    initialCartItems: CartItem[];
+    initialCartEntries: CartEntry[];
 }
 
 interface UseServerCartResult {
-    cartItems: CartItem[];
-    addCartItem: (productId: string) => void;
-    incrementCartItem: (productId: string) => void;
-    decrementCartItem: (productId: string) => void;
-    removeCartItem: (productId: string) => void;
-    clearCart: () => void;
+    cartEntries: CartEntry[];
+    addCartEntry: (productId: string) => Promise<void>;
+    incrementCartEntry: (productId: string) => Promise<void>;
+    decrementCartEntry: (productId: string) => Promise<void>;
+    removeCartEntry: (productId: string) => Promise<void>;
+    clearCart: () => Promise<void>;
     cartCount: number;
-    getCartItemQuantity: (productId: string) => number;
-    syncCartItems: (items: CartItem[]) => void;
+    getCartEntryQuantity: (productId: string) => number | undefined;
+    syncCartEntries: (entries: CartEntry[]) => void;
 }
 
+type CartMutation = {
+    id: number;
+    apply: (entries: CartEntry[]) => CartEntry[];
+};
+
 export function useServerCart({
-    initialCartItems,
+    initialCartEntries,
 }: UseServerCartOptions): UseServerCartResult {
-    const [cartItems, setCartItems] = useState(initialCartItems);
+    const [cartEntries, setCartEntries] = useState(initialCartEntries);
 
-    const getCartItemQuantity = useCallback(
+    const cartEntriesRef = useRef(initialCartEntries);
+    const confirmedCartEntriesRef = useRef(initialCartEntries);
+    const pendingMutationsRef = useRef<CartMutation[]>([]);
+    const mutationQueueRef = useRef(Promise.resolve());
+    const nextMutationIdRef = useRef(0);
+
+    const updateVisibleCartEntries = useCallback(() => {
+        const nextCartEntries = pendingMutationsRef.current.reduce(
+            (entries, mutation) => mutation.apply(entries),
+            confirmedCartEntriesRef.current,
+        );
+
+        cartEntriesRef.current = nextCartEntries;
+        setCartEntries(nextCartEntries);
+    }, []);
+
+    const enqueueMutation = useCallback(
+        (mutation: CartMutation, action: () => Promise<void>) => {
+            pendingMutationsRef.current.push(mutation);
+            updateVisibleCartEntries();
+
+            const execute = async () => {
+                try {
+                    await action();
+
+                    confirmedCartEntriesRef.current = mutation.apply(
+                        confirmedCartEntriesRef.current,
+                    );
+                } catch {
+                    // The visible cart is recalculated below without this mutation.
+                } finally {
+                    pendingMutationsRef.current =
+                        pendingMutationsRef.current.filter(
+                            (pendingMutation) =>
+                                pendingMutation.id !== mutation.id,
+                        );
+
+                    updateVisibleCartEntries();
+                }
+            };
+
+            const queuedMutation = mutationQueueRef.current.then(
+                execute,
+                execute,
+            );
+
+            mutationQueueRef.current = queuedMutation.catch(() => undefined);
+
+            return queuedMutation;
+        },
+        [updateVisibleCartEntries],
+    );
+
+    const createMutation = useCallback(
+        (apply: CartMutation['apply']): CartMutation => ({
+            id: nextMutationIdRef.current++,
+            apply,
+        }),
+        [],
+    );
+
+    const getCartEntryQuantity = useCallback(
         (productId: string) => {
-            const item = cartItems.find((item) => item.productId === productId);
-
-            return item?.quantity ?? 0;
-        },
-        [cartItems],
-    );
-
-    const addCartItem = useCallback(
-        async (productId: string) => {
-            const existingItem = cartItems.find(
-                (item) => item.productId === productId,
+            const entry = cartEntries.find(
+                (entry) => entry.productId === productId,
             );
 
-            if (existingItem) {
-                return;
-            }
-
-            setCartItems((current) => [
-                ...current,
-                {
-                    productId,
-                    quantity: 1,
-                },
-            ]);
-
-            try {
-                await addCartItemAction(productId);
-            } catch {
-                setCartItems((current) =>
-                    current.filter((item) => item.productId !== productId),
-                );
-            }
+            return entry?.quantity;
         },
-        [cartItems],
+        [cartEntries],
     );
 
-    const incrementCartItem = useCallback(
-        async (productId: string) => {
-            const previousCartItems = cartItems;
+    const addCartEntry = useCallback(
+        (productId: string) => {
+            if (
+                cartEntriesRef.current.some(
+                    (entry) => entry.productId === productId,
+                )
+            ) {
+                return Promise.resolve();
+            }
 
-            setCartItems((current) =>
-                current.map((item) =>
-                    item.productId === productId
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item,
+            return enqueueMutation(
+                createMutation((entries) => [
+                    { productId, quantity: 1 },
+                    ...entries,
+                ]),
+                () => addCartItemAction(productId),
+            );
+        },
+        [createMutation, enqueueMutation],
+    );
+
+    const incrementCartEntry = useCallback(
+        (productId: string) => {
+            if (
+                !cartEntriesRef.current.some(
+                    (entry) => entry.productId === productId,
+                )
+            ) {
+                return Promise.resolve();
+            }
+
+            return enqueueMutation(
+                createMutation((entries) =>
+                    entries.map((entry) =>
+                        entry.productId === productId
+                            ? { ...entry, quantity: entry.quantity + 1 }
+                            : entry,
+                    ),
                 ),
+                () => incrementCartItemAction(productId),
             );
-
-            try {
-                await incrementCartItemAction(productId);
-            } catch {
-                setCartItems(previousCartItems);
-            }
         },
-        [cartItems],
+        [createMutation, enqueueMutation],
     );
 
-    const decrementCartItem = useCallback(
-        async (productId: string) => {
-            const previousCartItems = cartItems;
-
-            setCartItems((current) =>
-                current
-                    .map((item) =>
-                        item.productId === productId
-                            ? { ...item, quantity: item.quantity - 1 }
-                            : item,
-                    )
-                    .filter((item) => item.quantity > 0),
-            );
-
-            try {
-                await decrementCartItemAction(productId);
-            } catch {
-                setCartItems(previousCartItems);
+    const decrementCartEntry = useCallback(
+        (productId: string) => {
+            if (
+                !cartEntriesRef.current.some(
+                    (entry) => entry.productId === productId,
+                )
+            ) {
+                return Promise.resolve();
             }
+
+            return enqueueMutation(
+                createMutation((entries) =>
+                    entries
+                        .map((entry) =>
+                            entry.productId === productId
+                                ? { ...entry, quantity: entry.quantity - 1 }
+                                : entry,
+                        )
+                        .filter((item) => item.quantity > 0),
+                ),
+                () => decrementCartItemAction(productId),
+            );
         },
-        [cartItems],
+        [createMutation, enqueueMutation],
     );
 
-    const removeCartItem = useCallback(
-        async (productId: string) => {
-            const previousCartItems = cartItems;
-
-            setCartItems((current) =>
-                current.filter((item) => item.productId !== productId),
-            );
-
-            try {
-                await removeCartItemAction(productId);
-            } catch {
-                setCartItems(previousCartItems);
+    const removeCartEntry = useCallback(
+        (productId: string) => {
+            if (
+                !cartEntriesRef.current.some(
+                    (entry) => entry.productId === productId,
+                )
+            ) {
+                return Promise.resolve();
             }
+
+            return enqueueMutation(
+                createMutation((entries) =>
+                    entries.filter((entry) => entry.productId !== productId),
+                ),
+                () => removeCartItemAction(productId),
+            );
         },
-        [cartItems],
+        [createMutation, enqueueMutation],
     );
 
-    const clearCart = useCallback(async () => {
-        const previousCartItems = cartItems;
-
-        setCartItems([]);
-
-        try {
-            await clearCartAction();
-        } catch {
-            setCartItems(previousCartItems);
+    const clearCart = useCallback(() => {
+        if (cartEntriesRef.current.length === 0) {
+            return Promise.resolve();
         }
-    }, [cartItems]);
 
-    const cartCount = cartItems.reduce(
-        (total, item) => total + item.quantity,
+        return enqueueMutation(
+            createMutation(() => []),
+            clearCartAction,
+        );
+    }, [createMutation, enqueueMutation]);
+
+    const cartCount = cartEntries.reduce(
+        (total, entry) => total + entry.quantity,
         0,
     );
 
-    const syncCartItems = useCallback((items: CartItem[]) => {
-        setCartItems(items);
-    }, []);
+    const syncCartEntries = useCallback(
+        (entries: CartEntry[]) => {
+            confirmedCartEntriesRef.current = entries;
+            updateVisibleCartEntries();
+        },
+        [updateVisibleCartEntries],
+    );
 
     return {
-        cartItems,
-        addCartItem,
-        incrementCartItem,
-        decrementCartItem,
-        removeCartItem,
+        cartEntries,
+        addCartEntry: addCartEntry,
+        incrementCartEntry,
+        decrementCartEntry,
+        removeCartEntry,
         clearCart,
         cartCount,
-        getCartItemQuantity,
-        syncCartItems,
+        getCartEntryQuantity,
+        syncCartEntries,
     };
 }
