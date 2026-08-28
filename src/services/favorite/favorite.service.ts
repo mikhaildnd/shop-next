@@ -79,14 +79,6 @@ export async function removeFavorite(
     });
 }
 
-export async function getFavoriteCount(userId: string): Promise<number> {
-    return prisma.favorite.count({
-        where: {
-            userId,
-        },
-    });
-}
-
 export async function mergeFavorites(
     userId: string,
     productIds: string[],
@@ -119,16 +111,10 @@ export async function mergeFavorites(
     });
 }
 
-export async function getFavoriteProductIds(
-    userId: string,
-    productIds: string[],
-): Promise<string[]> {
+export async function getFavoriteIds(userId: string): Promise<string[]> {
     const favorites = await prisma.favorite.findMany({
         where: {
             userId,
-            productId: {
-                in: productIds,
-            },
         },
         select: {
             productId: true,

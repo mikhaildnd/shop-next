@@ -5,10 +5,10 @@ import { CartButton } from '@/components/cart/CartButton';
 import { FavoriteButton } from '@/components/favorite/FavoriteButton';
 import { StarRating } from '@/components/product/StarRating';
 import { formatPrice } from '@/lib/format-price';
-import type { ProductListingItemDto } from '@/services/product/product.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductCardProps {
-    product: ProductListingItemDto;
+    product: ProductDto;
     href: string;
 }
 
@@ -40,7 +40,8 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 {/*FAVORITE BUTTON*/}
                 <FavoriteButton
                     productId={product.id}
-                    initialIsFavorite={product.isFavorite}
+                    className="absolute top-2 right-2 bg-white opacity-80"
+                    shape="round"
                 />
 
                 {/*DISCOUNT PLATE*/}

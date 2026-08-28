@@ -7,7 +7,7 @@ import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { getCart } from '@/services/cart/cart.service';
-import { getFavoriteCount } from '@/services/favorite/favorite.service';
+import { getFavoriteIds } from '@/services/favorite/favorite.service';
 
 interface ShopLayoutProps {
     children: ReactNode;
@@ -22,7 +22,9 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
         ? { name: user.name, email: user.email }
         : null;
 
-    const favoriteCount = user ? await getFavoriteCount(user.id) : 0;
+    const favoriteIds = user ? await getFavoriteIds(user.id) : [];
+
+    const favoriteCount = favoriteIds.length;
 
     const initialCartState = user ? await getCart(user.id) : { items: [] };
 
@@ -33,6 +35,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
         >
             <FavoritesProvider
                 isAuthenticated={Boolean(session)}
+                initialFavoriteIds={favoriteIds}
                 initialFavoriteCount={favoriteCount}
             >
                 <Header user={profileUser} />

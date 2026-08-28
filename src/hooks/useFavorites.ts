@@ -8,21 +8,25 @@ import { useServerFavorites } from '@/hooks/useServerFavorites';
 
 interface UseFavoritesOptions {
     isAuthenticated: boolean;
+    initialFavoriteIds: string[];
     initialFavoriteCount: number;
 }
 
 interface UseFavoritesReturn {
     favoriteCount: number;
-    isFavorite: (productId: string, initialIsFavorite: boolean) => boolean;
-    toggleFavorite: (productId: string, initialIsFavorite: boolean) => void;
+    isFavorite: (productId: string) => boolean;
+    toggleFavorite: (productId: string) => void;
 }
 
 export function useFavorites({
     isAuthenticated,
+    initialFavoriteIds,
     initialFavoriteCount,
 }: UseFavoritesOptions): UseFavoritesReturn {
     const localFavorites = useLocalFavorites();
+
     const serverFavorites = useServerFavorites({
+        initialFavoriteIds,
         initialFavoriteCount,
     });
 

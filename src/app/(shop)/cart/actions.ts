@@ -1,7 +1,7 @@
 'use server';
 
 import { requireSession } from '@/auth/session';
-import type { CartItem } from '@/lib/cart/cart.types';
+import type { CartEntry } from '@/lib/cart/cart.types';
 import {
     addCartItem,
     clearCart,
@@ -10,6 +10,7 @@ import {
     mergeCart,
     removeCartItem,
 } from '@/services/cart/cart.service';
+import { getProductsByIds } from '@/services/product/product.service';
 
 export async function addCartItemAction(productId: string) {
     const session = await requireSession();
@@ -41,8 +42,12 @@ export async function clearCartAction() {
     await clearCart(session.user.id);
 }
 
-export async function mergeCartAction(items: CartItem[]) {
+export async function mergeCartAction(entries: CartEntry[]) {
     const session = await requireSession();
 
-    return mergeCart(session.user.id, items);
+    return mergeCart(session.user.id, entries);
+}
+
+export async function getProductsByIdsAction(productIds: string[]) {
+    return getProductsByIds(productIds);
 }

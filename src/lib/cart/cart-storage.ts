@@ -1,26 +1,26 @@
-import type { CartItem } from '@/lib/cart/cart.types';
+import type { CartEntry } from '@/lib/cart/cart.types';
 import { CART_STORAGE_KEY } from '@/lib/cart/cart-storage.constants';
 
 type CartListener = () => void;
 
 const listeners = new Set<CartListener>();
 
-function isCartItem(value: unknown): value is CartItem {
+function isCartEntry(value: unknown): value is CartEntry {
     if (typeof value !== 'object' || value === null) {
         return false;
     }
 
-    const item = value as Record<string, unknown>;
+    const entry = value as Record<string, unknown>;
 
     return (
-        typeof item.productId === 'string' &&
-        typeof item.quantity === 'number' &&
-        Number.isInteger(item.quantity) &&
-        item.quantity > 0
+        typeof entry.productId === 'string' &&
+        typeof entry.quantity === 'number' &&
+        Number.isInteger(entry.quantity) &&
+        entry.quantity > 0
     );
 }
 
-function parseCartItems(value: string | null): CartItem[] {
+function parseCartEntries(value: string | null): CartEntry[] {
     if (!value) {
         return [];
     }
@@ -28,30 +28,30 @@ function parseCartItems(value: string | null): CartItem[] {
     try {
         const parsed: unknown = JSON.parse(value);
 
-        return Array.isArray(parsed) ? parsed.filter(isCartItem) : [];
+        return Array.isArray(parsed) ? parsed.filter(isCartEntry) : [];
     } catch {
         return [];
     }
 }
 
-function readCartItems(): CartItem[] {
+function readCartEntries(): CartEntry[] {
     if (typeof window === 'undefined') {
         return [];
     }
 
-    return parseCartItems(localStorage.getItem(CART_STORAGE_KEY));
+    return parseCartEntries(localStorage.getItem(CART_STORAGE_KEY));
 }
 
-let cartItemsSnapshot = readCartItems();
+let cartEntriesSnapshot = readCartEntries();
 
-export function getCartItems(): CartItem[] {
-    return cartItemsSnapshot;
+export function getCartEntries(): CartEntry[] {
+    return cartEntriesSnapshot;
 }
 
-const EMPTY_CART_ITEMS: CartItem[] = [];
+const EMPTY_CART_ENTRIES: CartEntry[] = [];
 
-export function getServerCartItems(): CartItem[] {
-    return EMPTY_CART_ITEMS;
+export function getServerCartEntries(): CartEntry[] {
+    return EMPTY_CART_ENTRIES;
 }
 
 export function subscribeToCart(listener: CartListener): () => void {
@@ -62,7 +62,7 @@ export function subscribeToCart(listener: CartListener): () => void {
             return;
         }
 
-        cartItemsSnapshot = readCartItems();
+        cartEntriesSnapshot = readCartEntries();
         listener();
     }
 
@@ -76,119 +76,148 @@ export function subscribeToCart(listener: CartListener): () => void {
 }
 
 function notifyListeners(): void {
-    cartItemsSnapshot = readCartItems();
+    cartEntriesSnapshot = readCartEntries();
 
     listeners.forEach((listener) => {
         listener();
     });
 }
 
-export function addCartItem(productId: string): CartItem[] {
-    const cartItems = getCartItems();
+export function addCartEntry(productId: string): CartEntry[] {
+    const cartEntries = getCartEntries();
 
-    const existingItem = cartItems.find((item) => item.productId === productId);
+    const existingEntry = cartEntries.find(
+        (entry) => entry.productId === productId,
+    );
 
-    if (existingItem) {
-        return cartItems;
+    if (existingEntry) {
+        return cartEntries;
     }
 
-    const nextCartItems = [
-        ...cartItems,
+    const nextCartEntries = [
         {
             productId,
             quantity: 1,
         },
+        ...cartEntries,
     ];
 
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartItems));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
 
     notifyListeners();
 
-    return nextCartItems;
+    return nextCartEntries;
 }
 
-export function removeCartItem(productId: string): CartItem[] {
-    const cartItems = getCartItems();
+export function removeCartEntry(productId: string): CartEntry[] {
+    const cartEntries = getCartEntries();
 
-    const nextCartItems = cartItems.filter(
-        (item) => item.productId !== productId,
+    const nextCartEntries = cartEntries.filter(
+        (entry) => entry.productId !== productId,
     );
 
-    if (nextCartItems.length === cartItems.length) {
-        return cartItems;
+    if (nextCartEntries.length === cartEntries.length) {
+        return cartEntries;
     }
 
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartItems));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
 
     notifyListeners();
 
-    return nextCartItems;
+    return nextCartEntries;
 }
 
-export function incrementCartItem(productId: string): CartItem[] {
-    const cartItems = getCartItems();
+export function incrementCartEntry(productId: string): CartEntry[] {
+    const cartEntries = getCartEntries();
 
-    const existingItem = cartItems.find((item) => item.productId === productId);
+    const existingEntry = cartEntries.find(
+        (entry) => entry.productId === productId,
+    );
 
-    if (!existingItem) {
-        return cartItems;
+    if (!existingEntry) {
+        return cartEntries;
     }
 
-    const nextCartItems = cartItems.map((item) => {
-        if (item.productId !== productId) {
-            return item;
+    const nextCartEntries = cartEntries.map((entry) => {
+        if (entry.productId !== productId) {
+            return entry;
         }
 
         return {
-            ...item,
-            quantity: item.quantity + 1,
+            ...entry,
+            quantity: entry.quantity + 1,
         };
     });
 
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartItems));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
 
     notifyListeners();
 
-    return nextCartItems;
+    return nextCartEntries;
 }
 
-export function decrementCartItem(productId: string): CartItem[] {
-    const cartItems = getCartItems();
+export function decrementCartEntry(productId: string): CartEntry[] {
+    const cartEntries = getCartEntries();
 
-    const existingItem = cartItems.find((item) => item.productId === productId);
+    const existingEntry = cartEntries.find(
+        (entry) => entry.productId === productId,
+    );
 
-    if (!existingItem) {
-        return cartItems;
+    if (!existingEntry) {
+        return cartEntries;
     }
 
-    if (existingItem.quantity === 1) {
-        return removeCartItem(productId);
+    if (existingEntry.quantity === 1) {
+        return removeCartEntry(productId);
     }
 
-    const nextCartItems = cartItems.map((item) => {
-        if (item.productId !== productId) {
-            return item;
+    const nextCartEntries = cartEntries.map((entry) => {
+        if (entry.productId !== productId) {
+            return entry;
         }
 
         return {
-            ...item,
-            quantity: item.quantity - 1,
+            ...entry,
+            quantity: entry.quantity - 1,
         };
     });
 
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartItems));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
 
     notifyListeners();
 
-    return nextCartItems;
+    return nextCartEntries;
 }
 
 export function clearCart(): void {
-    if (getCartItems().length === 0) {
+    if (getCartEntries().length === 0) {
         return;
     }
 
     localStorage.removeItem(CART_STORAGE_KEY);
+
+    notifyListeners();
+}
+
+export function removeMergedCartEntries(mergedEntries: CartEntry[]): void {
+    const mergedQuantities = new Map(
+        mergedEntries.map(({ productId, quantity }) => [productId, quantity]),
+    );
+
+    const cartEntries = getCartEntries();
+    const nextCartEntries = cartEntries.filter(
+        (entry) => mergedQuantities.get(entry.productId) !== entry.quantity,
+    );
+
+    if (nextCartEntries.length === cartEntries.length) {
+        return;
+    }
+
+    if (nextCartEntries.length === 0) {
+        localStorage.removeItem(CART_STORAGE_KEY);
+    } else {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
+    }
 
     notifyListeners();
 }

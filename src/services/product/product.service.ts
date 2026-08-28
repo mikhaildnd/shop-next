@@ -126,3 +126,22 @@ export const getProductBySlug = cache(
         return mapProductToDto(product);
     },
 );
+
+export const getProductsByIds = cache(
+    async (ids: string[]): Promise<ProductDto[]> => {
+        if (ids.length === 0) {
+            return [];
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: productInclude,
+        });
+
+        return products.map(mapProductToDto);
+    },
+);
