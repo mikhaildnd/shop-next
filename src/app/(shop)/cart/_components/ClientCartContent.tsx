@@ -4,11 +4,11 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
-import { useLocalCart } from '@/hooks/useLocalCart';
+import { useCartContext } from '@/components/cart/CartContext';
 import type { ProductDto } from '@/services/product/product.types';
 
 export function ClientCartContent() {
-    const { cartEntries, isHydrated } = useLocalCart();
+    const { cartEntries } = useCartContext();
 
     const [products, setProducts] = useState<ProductDto[]>();
 
@@ -24,7 +24,7 @@ export function ClientCartContent() {
     });
 
     useEffect(() => {
-        if (!isHydrated || productIdsKey.length === 0) {
+        if (productIdsKey.length === 0) {
             return;
         }
 
@@ -43,7 +43,7 @@ export function ClientCartContent() {
         return () => {
             cancelled = true;
         };
-    }, [isHydrated, productIdsKey]);
+    }, [productIdsKey]);
 
     const productsById = useMemo(
         () => new Map(products?.map((product) => [product.id, product])),
@@ -60,7 +60,7 @@ export function ClientCartContent() {
         [cartEntries, productsById],
     );
 
-    if (!isHydrated || (cartEntries.length > 0 && products === undefined)) {
+    if (cartEntries.length > 0 && products === undefined) {
         return null;
     }
 

@@ -1,21 +1,29 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
     addCartItemAction,
     clearCartAction,
     decrementCartItemAction,
     incrementCartItemAction,
+    mergeCartAction,
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
 import type { CartEntry } from '@/lib/cart/cart.types';
+import {
+    getCartEntries,
+    removeMergedCartEntries,
+} from '@/lib/cart/cart-storage';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 
 interface UseServerCartOptions {
-    initialCartEntries: CartEntry[];
+    initialCartState: CartDto;
 }
 
-interface UseServerCartResult {
+type MergeStatus = 'idle' | 'merging' | 'error';
+
+export interface UseServerCartResult {
     cartEntries: CartEntry[];
     addCartEntry: (productId: string) => Promise<void>;
     incrementCartEntry: (productId: string) => Promise<void>;
@@ -24,7 +32,10 @@ interface UseServerCartResult {
     clearCart: () => Promise<void>;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    syncCartEntries: (entries: CartEntry[]) => void;
+    mutationError: boolean;
+    mergeStatus: MergeStatus;
+    retryMerge: () => void;
+    initialCartItems: CartItemDto[];
 }
 
 type CartMutation = {
@@ -33,9 +44,25 @@ type CartMutation = {
 };
 
 export function useServerCart({
-    initialCartEntries,
+    initialCartState,
 }: UseServerCartOptions): UseServerCartResult {
+    const [initialCartItems, setInitialCartItems] = useState(
+        initialCartState.items,
+    );
+
+    const initialCartEntries = initialCartState.items.map(
+        ({ product, quantity }) => ({
+            productId: product.id,
+            quantity,
+        }),
+    );
+
     const [cartEntries, setCartEntries] = useState(initialCartEntries);
+    const [mutationError, setMutationError] = useState(false);
+
+    const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
+    const [mergeAttempt, setMergeAttempt] = useState(0);
+    const isMergingRef = useRef(false);
 
     const cartEntriesRef = useRef(initialCartEntries);
     const confirmedCartEntriesRef = useRef(initialCartEntries);
@@ -53,8 +80,68 @@ export function useServerCart({
         setCartEntries(nextCartEntries);
     }, []);
 
+    const retryMerge = useCallback(() => {
+        if (isMergingRef.current) {
+            return;
+        }
+
+        setMergeStatus('idle');
+        setMergeAttempt((attempt) => attempt + 1);
+    }, []);
+
+    useEffect(() => {
+        if (isMergingRef.current) {
+            return;
+        }
+
+        const localCartEntries = getCartEntries();
+
+        if (localCartEntries.length === 0) {
+            return;
+        }
+
+        const entriesToMerge = localCartEntries.map((entry) => ({ ...entry }));
+
+        isMergingRef.current = true;
+
+        async function mergeCart() {
+            setMergeStatus('merging');
+
+            try {
+                const cart = await mergeCartAction(entriesToMerge);
+
+                setInitialCartItems(cart.items);
+
+                confirmedCartEntriesRef.current = cart.items.map(
+                    ({ product, quantity }) => ({
+                        productId: product.id,
+                        quantity,
+                    }),
+                );
+                updateVisibleCartEntries();
+
+                removeMergedCartEntries(entriesToMerge);
+                setMergeStatus('idle');
+                setMergeAttempt((attempt) => attempt + 1);
+            } catch {
+                setMergeStatus('error');
+            } finally {
+                isMergingRef.current = false;
+            }
+        }
+
+        async function startMerge() {
+            await Promise.resolve();
+            await mergeCart();
+        }
+
+        void startMerge();
+    }, [setInitialCartItems, mergeAttempt, updateVisibleCartEntries]);
+
     const enqueueMutation = useCallback(
         (mutation: CartMutation, action: () => Promise<void>) => {
+            setMutationError(false);
+
             pendingMutationsRef.current.push(mutation);
             updateVisibleCartEntries();
 
@@ -66,7 +153,7 @@ export function useServerCart({
                         confirmedCartEntriesRef.current,
                     );
                 } catch {
-                    // The visible cart is recalculated below without this mutation.
+                    setMutationError(true);
                 } finally {
                     pendingMutationsRef.current =
                         pendingMutationsRef.current.filter(
@@ -216,23 +303,18 @@ export function useServerCart({
         0,
     );
 
-    const syncCartEntries = useCallback(
-        (entries: CartEntry[]) => {
-            confirmedCartEntriesRef.current = entries;
-            updateVisibleCartEntries();
-        },
-        [updateVisibleCartEntries],
-    );
-
     return {
         cartEntries,
-        addCartEntry: addCartEntry,
+        addCartEntry,
         incrementCartEntry,
         decrementCartEntry,
         removeCartEntry,
         clearCart,
         cartCount,
         getCartEntryQuantity,
-        syncCartEntries,
+        mutationError,
+        mergeStatus,
+        retryMerge,
+        initialCartItems,
     };
 }

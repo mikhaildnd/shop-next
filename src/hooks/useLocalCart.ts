@@ -1,23 +1,22 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 
 import type { CartEntry } from '@/lib/cart/cart.types';
 import {
-    addCartEntry,
-    clearCart,
-    decrementCartEntry,
+    addCartEntry as addCartEntryToStorage,
+    clearCart as clearCartStorage,
+    decrementCartEntry as decrementCartEntryFromStorage,
     getCartEntries,
     getServerCartEntries,
-    incrementCartEntry,
-    removeCartEntry,
-    removeMergedCartEntries,
+    incrementCartEntry as incrementCartEntryInStorage,
+    removeCartEntry as removeCartEntryFromStorage,
+    removeMergedCartEntries as removeMergedCartEntriesFromStorage,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
 
-interface UseLocalCartResult {
+export interface UseLocalCartResult {
     cartEntries: CartEntry[];
-    isHydrated: boolean;
     addCartEntry: (productId: string) => void;
     incrementCartEntry: (productId: string) => void;
     decrementCartEntry: (productId: string) => void;
@@ -26,6 +25,7 @@ interface UseLocalCartResult {
     removeMergedCartEntries: (items: CartEntry[]) => void;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
+    mutationError: boolean;
 }
 
 export function useLocalCart(): UseLocalCartResult {
@@ -35,11 +35,67 @@ export function useLocalCart(): UseLocalCartResult {
         getServerCartEntries,
     );
 
-    const isHydrated = useSyncExternalStore(
-        subscribeToCart,
-        () => true,
-        () => false,
-    );
+    const [mutationError, setMutationError] = useState(false);
+
+    const addCartEntry = useCallback((productId: string) => {
+        setMutationError(false);
+
+        try {
+            addCartEntryToStorage(productId);
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
+
+    const removeCartEntry = useCallback((productId: string) => {
+        setMutationError(false);
+
+        try {
+            removeCartEntryFromStorage(productId);
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
+
+    const incrementCartEntry = useCallback((productId: string) => {
+        setMutationError(false);
+
+        try {
+            incrementCartEntryInStorage(productId);
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
+
+    const decrementCartEntry = useCallback((productId: string) => {
+        setMutationError(false);
+
+        try {
+            decrementCartEntryFromStorage(productId);
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
+
+    const clearCart = useCallback(() => {
+        setMutationError(false);
+
+        try {
+            clearCartStorage();
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
+
+    const removeMergedCartEntries = useCallback((items: CartEntry[]) => {
+        setMutationError(false);
+
+        try {
+            removeMergedCartEntriesFromStorage(items);
+        } catch {
+            setMutationError(true);
+        }
+    }, []);
 
     const getCartEntryQuantity = useCallback(
         (productId: string) => {
@@ -59,7 +115,6 @@ export function useLocalCart(): UseLocalCartResult {
 
     return {
         cartEntries,
-        isHydrated,
         addCartEntry,
         removeCartEntry,
         incrementCartEntry,
@@ -68,5 +123,6 @@ export function useLocalCart(): UseLocalCartResult {
         removeMergedCartEntries,
         cartCount,
         getCartEntryQuantity,
+        mutationError,
     };
 }

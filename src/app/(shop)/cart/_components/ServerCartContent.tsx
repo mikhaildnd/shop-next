@@ -6,13 +6,14 @@ import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { useCartContext } from '@/components/cart/CartContext';
 
 export function ServerCartContent() {
-    const { cartEntries, initialCartState } = useCartContext();
-
-    const initialItems = initialCartState.items;
+    const { cartEntries, initialCartItems } = useCartContext();
 
     const productsById = useMemo(
-        () => new Map(initialItems.map(({ product }) => [product.id, product])),
-        [initialItems],
+        () =>
+            new Map(
+                initialCartItems.map(({ product }) => [product.id, product]),
+            ),
+        [initialCartItems],
     );
 
     const items = useMemo(
