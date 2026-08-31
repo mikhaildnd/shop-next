@@ -3,12 +3,24 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
-import { useCart } from '@/hooks/useCart';
-import type { CartDto } from '@/services/cart/cart.types';
+import { NotificationToast } from '@/components/NotificationToast';
+import { useLocalCart } from '@/hooks/useLocalCart';
+import { useServerCart } from '@/hooks/useServerCart';
+import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 
-type CartContextValue = ReturnType<typeof useCart> & {
-    initialCartState: CartDto;
-};
+interface CartContextValue {
+    cartEntries: CartEntry[];
+    cartCount: number;
+    getCartEntryQuantity: (productId: string) => number | undefined;
+    addCartEntry: (productId: string) => void | Promise<void>;
+    incrementCartEntry: (productId: string) => void | Promise<void>;
+    decrementCartEntry: (productId: string) => void | Promise<void>;
+    removeCartEntry: (productId: string) => void | Promise<void>;
+    clearCart: () => void | Promise<void>;
+    mutationError: boolean;
+    initialCartItems: CartItemDto[];
+}
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -18,25 +30,91 @@ interface CartProviderProps {
     children: ReactNode;
 }
 
+interface LocalCartProviderProps {
+    children: ReactNode;
+}
+
+interface ServerCartProviderProps {
+    initialCartState: CartDto;
+    children: ReactNode;
+}
+
 export function CartProvider({
     isAuthenticated,
     initialCartState,
     children,
 }: CartProviderProps) {
-    const cart = useCart({
-        isAuthenticated,
+    if (isAuthenticated) {
+        return (
+            <ServerCartProvider initialCartState={initialCartState}>
+                {children}
+            </ServerCartProvider>
+        );
+    }
+
+    return <LocalCartProvider>{children}</LocalCartProvider>;
+}
+
+function LocalCartProvider({ children }: LocalCartProviderProps) {
+    const cart = useLocalCart();
+
+    const contextValue: CartContextValue = {
+        cartEntries: cart.cartEntries,
+        cartCount: cart.cartCount,
+        getCartEntryQuantity: cart.getCartEntryQuantity,
+        addCartEntry: cart.addCartEntry,
+        incrementCartEntry: cart.incrementCartEntry,
+        decrementCartEntry: cart.decrementCartEntry,
+        removeCartEntry: cart.removeCartEntry,
+        clearCart: cart.clearCart,
+        mutationError: cart.mutationError,
+        initialCartItems: [],
+    };
+
+    return (
+        <>
+            <CartContext.Provider value={contextValue}>
+                {children}
+            </CartContext.Provider>
+
+            {cart.mutationError && (
+                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
+            )}
+        </>
+    );
+}
+
+function ServerCartProvider({
+    initialCartState,
+    children,
+}: ServerCartProviderProps) {
+    const cart = useServerCart({
         initialCartState,
     });
 
+    const contextValue: CartContextValue = {
+        cartEntries: cart.cartEntries,
+        cartCount: cart.cartCount,
+        getCartEntryQuantity: cart.getCartEntryQuantity,
+        addCartEntry: cart.addCartEntry,
+        incrementCartEntry: cart.incrementCartEntry,
+        decrementCartEntry: cart.decrementCartEntry,
+        removeCartEntry: cart.removeCartEntry,
+        clearCart: cart.clearCart,
+        mutationError: cart.mutationError,
+        initialCartItems: cart.initialCartItems,
+    };
+
     return (
-        <CartContext.Provider
-            value={{
-                ...cart,
-                initialCartState,
-            }}
-        >
-            {children}
-        </CartContext.Provider>
+        <>
+            <CartContext.Provider value={contextValue}>
+                {children}
+            </CartContext.Provider>
+
+            {cart.mutationError && (
+                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
+            )}
+        </>
     );
 }
 
