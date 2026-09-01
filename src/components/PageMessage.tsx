@@ -1,16 +1,16 @@
 import type { ReactNode } from 'react';
 
-import type { IssueMessage } from '@/app/(shop)/(catalog)/_components/page-issues/page-issues.types';
-
-interface IssueMessageProps extends IssueMessage {
+interface PageMessageProps {
+    title: string;
+    description?: string;
     children?: ReactNode;
 }
 
-export function IssueMessage({
+export function PageMessage({
     title,
     description,
     children,
-}: IssueMessageProps) {
+}: PageMessageProps) {
     return (
         <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-(--color-primary)/50 bg-white py-20 text-center">
             <h2 className="mb-2 text-2xl font-semibold">{title}</h2>

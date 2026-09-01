@@ -4,7 +4,10 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
+import { ButtonLink } from '@/components/button/ButtonLink';
 import { useCartContext } from '@/components/cart/CartContext';
+import { PageMessage } from '@/components/PageMessage';
+import { routes } from '@/routes';
 import type { ProductDto } from '@/services/product/product.types';
 
 export function CartContent() {
@@ -62,7 +65,14 @@ export function CartContent() {
     );
 
     if (cartEntries.length === 0) {
-        return null;
+        return (
+            <PageMessage
+                title="Корзина пуста"
+                description="Добавьте товары в корзину, чтобы оформить заказ"
+            >
+                <ButtonLink href={routes.catalogPage()}>В каталог</ButtonLink>
+            </PageMessage>
+        );
     }
 
     return <CartItems items={items} />;
