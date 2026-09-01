@@ -10,7 +10,7 @@ import {
     mergeCartAction,
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
-import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
     getCartEntries,
     removeMergedCartEntries,
@@ -25,7 +25,10 @@ type MergeStatus = 'idle' | 'merging' | 'error';
 
 export interface UseServerCartResult {
     cartEntries: CartEntry[];
-    addCartEntry: (productId: string) => Promise<void>;
+    addCartEntry: (
+        productId: string,
+        snapshot: CartProductSnapshot,
+    ) => Promise<void>;
     incrementCartEntry: (productId: string) => Promise<void>;
     decrementCartEntry: (productId: string) => Promise<void>;
     removeCartEntry: (productId: string) => Promise<void>;
@@ -51,9 +54,10 @@ export function useServerCart({
     );
 
     const initialCartEntries = initialCartState.items.map(
-        ({ product, quantity }) => ({
+        ({ product, quantity, snapshot }) => ({
             productId: product.id,
             quantity,
+            snapshot,
         }),
     );
 
@@ -113,11 +117,13 @@ export function useServerCart({
                 setInitialCartItems(cart.items);
 
                 confirmedCartEntriesRef.current = cart.items.map(
-                    ({ product, quantity }) => ({
+                    ({ product, quantity, snapshot }) => ({
                         productId: product.id,
                         quantity,
+                        snapshot,
                     }),
                 );
+
                 updateVisibleCartEntries();
 
                 removeMergedCartEntries(entriesToMerge);
@@ -197,7 +203,7 @@ export function useServerCart({
     );
 
     const addCartEntry = useCallback(
-        (productId: string) => {
+        (productId: string, snapshot: CartProductSnapshot) => {
             if (
                 cartEntriesRef.current.some(
                     (entry) => entry.productId === productId,
@@ -208,10 +214,14 @@ export function useServerCart({
 
             return enqueueMutation(
                 createMutation((entries) => [
-                    { productId, quantity: 1 },
+                    {
+                        productId,
+                        quantity: 1,
+                        snapshot,
+                    },
                     ...entries,
                 ]),
-                () => addCartItemAction(productId),
+                () => addCartItemAction(productId, snapshot),
             );
         },
         [createMutation, enqueueMutation],

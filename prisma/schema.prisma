@@ -125,11 +125,12 @@ model Cart {
 }
 
 model CartItem {
-  cartId    String   @map("cart_id")
-  productId String   @map("product_id")
-  quantity  Int
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  cartId                 String   @map("cart_id")
+  productId              String   @map("product_id")
+  quantity               Int
+  snapshotEffectivePrice Decimal  @map("snapshot_effective_price") @db.Decimal(10, 2)
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
   cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)

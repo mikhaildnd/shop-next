@@ -1,7 +1,7 @@
 'use server';
 
 import { requireSession } from '@/auth/session';
-import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartItem,
     clearCart,
@@ -12,10 +12,13 @@ import {
 } from '@/services/cart/cart.service';
 import { getProductsByIds } from '@/services/product/product.service';
 
-export async function addCartItemAction(productId: string) {
+export async function addCartItemAction(
+    productId: string,
+    snapshot: CartProductSnapshot,
+) {
     const session = await requireSession();
 
-    await addCartItem(session.user.id, productId);
+    await addCartItem(session.user.id, productId, snapshot);
 }
 
 export async function incrementCartItemAction(productId: string) {

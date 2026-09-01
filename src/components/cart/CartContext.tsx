@@ -6,14 +6,17 @@ import { createContext, useContext } from 'react';
 import { NotificationToast } from '@/components/NotificationToast';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
-import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    addCartEntry: (productId: string) => void | Promise<void>;
+    addCartEntry: (
+        productId: string,
+        snapshot: CartProductSnapshot,
+    ) => void | Promise<void>;
     incrementCartEntry: (productId: string) => void | Promise<void>;
     decrementCartEntry: (productId: string) => void | Promise<void>;
     removeCartEntry: (productId: string) => void | Promise<void>;
