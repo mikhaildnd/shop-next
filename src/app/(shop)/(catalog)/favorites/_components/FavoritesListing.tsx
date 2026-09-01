@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { ProductListingSkeleton } from '@/app/(shop)/(catalog)/_components/ProductListingSkeleton';
@@ -8,8 +8,8 @@ import { getFavoriteProductsByIdsAction } from '@/app/(shop)/(catalog)/favorites
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { ButtonLink } from '@/components/button/ButtonLink';
+import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
 import { PageMessage } from '@/components/PageMessage';
-import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
 import { routes } from '@/routes';
 
@@ -26,9 +26,11 @@ export function FavoritesListing({
     listing,
     pagination,
 }: FavoritesListingProps) {
-    const { favoriteIds, isHydrated } = useLocalFavorites();
+    const { favoriteIds } = useFavoritesContext();
 
     const [result, setResult] = useState<FavoritesResult | null>();
+
+    const hasLoadedInitialFavorites = useRef(false);
 
     const loadFavorites = useEffectEvent(async () => {
         if (favoriteIds.size === 0) {
@@ -43,7 +45,32 @@ export function FavoritesListing({
     });
 
     useEffect(() => {
-        if (!isHydrated) {
+        if (hasLoadedInitialFavorites.current) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function load() {
+            const nextResult = await loadFavorites();
+
+            if (cancelled) {
+                return;
+            }
+
+            setResult(nextResult);
+            hasLoadedInitialFavorites.current = true;
+        }
+
+        void load();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [favoriteIds]);
+
+    useEffect(() => {
+        if (!hasLoadedInitialFavorites.current) {
             return;
         }
 
@@ -62,9 +89,9 @@ export function FavoritesListing({
         return () => {
             cancelled = true;
         };
-    }, [listing, pagination, isHydrated]);
+    }, [listing, pagination]);
 
-    if (!isHydrated || result === undefined) {
+    if (result === undefined) {
         return <ProductListingSkeleton sort={listing.sort} />;
     }
 

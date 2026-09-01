@@ -12,7 +12,6 @@ import {
 } from '@/lib/favorite/favorite-storage';
 
 interface UseLocalFavoritesReturn {
-    isHydrated: boolean;
     favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
     addFavorite: (productId: string) => void;
@@ -26,12 +25,6 @@ export function useLocalFavorites(): UseLocalFavoritesReturn {
         subscribeToFavorites,
         getFavoriteIds,
         getServerFavoriteIds,
-    );
-
-    const isHydrated = useSyncExternalStore(
-        subscribeToFavorites,
-        () => true,
-        () => false,
     );
 
     const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
@@ -53,7 +46,6 @@ export function useLocalFavorites(): UseLocalFavoritesReturn {
     );
 
     return {
-        isHydrated,
         favoriteIds: favoriteIdSet,
         isFavorite,
         addFavorite,

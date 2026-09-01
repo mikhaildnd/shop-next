@@ -1,11 +1,16 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
     addFavoriteAction,
+    mergeFavoritesAction,
     removeFavoriteAction,
 } from '@/app/(shop)/(catalog)/favorites/actions';
+import {
+    clearFavorites,
+    getFavoriteIds,
+} from '@/lib/favorite/favorite-storage';
 
 interface UseServerFavoritesOptions {
     initialFavoriteIds: string[];
@@ -16,8 +21,11 @@ interface UseServerFavoritesReturn {
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void;
-    syncFavoriteCount: (count: number) => void;
+    mergeStatus: MergeStatus;
+    retryMerge: () => void;
 }
+
+type MergeStatus = 'idle' | 'merging' | 'error';
 
 export function useServerFavorites({
     initialFavoriteIds,
@@ -32,6 +40,9 @@ export function useServerFavorites({
             initialFavoriteIds.map((productId) => [productId, true]),
         ),
     );
+
+    const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
+    const [mergeAttempt, setMergeAttempt] = useState(0);
 
     const isFavorite = useCallback(
         (productId: string) => favoriteStates[productId] ?? false,
@@ -114,14 +125,59 @@ export function useServerFavorites({
         [favoriteStates, addFavorite, removeFavorite],
     );
 
-    const syncFavoriteCount = useCallback((count: number) => {
-        setFavoriteCount(count);
+    const retryMerge = useCallback(() => {
+        setMergeStatus('idle');
+        setMergeAttempt((attempt) => attempt + 1);
     }, []);
+
+    useEffect(() => {
+        const favoriteIds = getFavoriteIds();
+
+        if (favoriteIds.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function merge() {
+            setMergeStatus('merging');
+
+            try {
+                const favoriteCount = await mergeFavoritesAction(favoriteIds);
+
+                if (cancelled) {
+                    return;
+                }
+
+                setFavoriteStates((current) => ({
+                    ...current,
+                    ...Object.fromEntries(
+                        favoriteIds.map((productId) => [productId, true]),
+                    ),
+                }));
+
+                setFavoriteCount(favoriteCount);
+                clearFavorites();
+                setMergeStatus('idle');
+            } catch {
+                if (!cancelled) {
+                    setMergeStatus('error');
+                }
+            }
+        }
+
+        void merge();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [mergeAttempt]);
 
     return {
         favoriteCount,
         isFavorite,
         toggleFavorite,
-        syncFavoriteCount,
+        mergeStatus,
+        retryMerge,
     };
 }
