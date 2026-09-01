@@ -1,5 +1,5 @@
 import { GoToCatalogButton } from '@/app/(shop)/(catalog)/_components/page-issues/GoToCatalogButton';
-import { IssueMessage } from '@/app/(shop)/(catalog)/_components/page-issues/IssueMessage';
+import { PageMessage } from '@/components/PageMessage';
 
 interface EmptyProductStateProps {
     title?: string;
@@ -11,11 +11,11 @@ export function EmptyProductState({
     description = 'Попробуйте изменить параметры поиска',
 }: EmptyProductStateProps) {
     return (
-        <IssueMessage
+        <PageMessage
             title={title}
             description={description}
         >
             <GoToCatalogButton />
-        </IssueMessage>
+        </PageMessage>
     );
 }
