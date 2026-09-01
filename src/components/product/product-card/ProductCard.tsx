@@ -86,7 +86,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                 </div>
 
                 {/*ACTIONS SEGMENT*/}
-                <CartButton productId={product.id} />
+                <CartButton product={product} />
             </div>
         </article>
     );

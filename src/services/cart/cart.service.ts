@@ -1,5 +1,5 @@
 import { prisma } from '@/db';
-import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
 import { productInclude } from '@/services/product/product.constants';
 import { mapProductToDto } from '@/services/product/product.mapper';
@@ -33,6 +33,9 @@ export async function getCart(userId: string): Promise<CartDto> {
         items: cart.items.map((item) => ({
             product: mapProductToDto(item.product),
             quantity: item.quantity,
+            snapshot: {
+                effectivePrice: Number(item.snapshotEffectivePrice),
+            },
         })),
     };
 }
@@ -40,6 +43,7 @@ export async function getCart(userId: string): Promise<CartDto> {
 export async function addCartItem(
     userId: string,
     productId: string,
+    snapshot: CartProductSnapshot,
 ): Promise<void> {
     await prisma.$transaction(async (tx) => {
         const cart = await tx.cart.upsert({
@@ -63,6 +67,7 @@ export async function addCartItem(
                 cartId: cart.id,
                 productId,
                 quantity: 1,
+                snapshotEffectivePrice: snapshot.effectivePrice,
             },
             update: {},
         });
@@ -223,7 +228,7 @@ export async function mergeCart(
     });
 
     await prisma.$transaction(
-        entries.map(({ productId, quantity }) =>
+        entries.map(({ productId, quantity, snapshot }) =>
             prisma.cartItem.upsert({
                 where: {
                     cartId_productId: {
@@ -233,11 +238,13 @@ export async function mergeCart(
                 },
                 update: {
                     quantity,
+                    snapshotEffectivePrice: snapshot.effectivePrice,
                 },
                 create: {
                     cartId: cart.id,
                     productId,
                     quantity,
+                    snapshotEffectivePrice: snapshot.effectivePrice,
                 },
             }),
         ),

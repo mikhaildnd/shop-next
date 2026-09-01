@@ -1,4 +1,4 @@
-import type { CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import { CART_STORAGE_KEY } from '@/lib/cart/cart-storage.constants';
 
 type CartListener = () => void;
@@ -12,11 +12,24 @@ function isCartEntry(value: unknown): value is CartEntry {
 
     const entry = value as Record<string, unknown>;
 
+    if (
+        typeof entry.productId !== 'string' ||
+        typeof entry.quantity !== 'number' ||
+        !Number.isInteger(entry.quantity) ||
+        entry.quantity <= 0
+    ) {
+        return false;
+    }
+
+    if (typeof entry.snapshot !== 'object' || entry.snapshot === null) {
+        return false;
+    }
+
+    const snapshot = entry.snapshot as Record<string, unknown>;
+
     return (
-        typeof entry.productId === 'string' &&
-        typeof entry.quantity === 'number' &&
-        Number.isInteger(entry.quantity) &&
-        entry.quantity > 0
+        typeof snapshot.effectivePrice === 'number' &&
+        Number.isFinite(snapshot.effectivePrice)
     );
 }
 
@@ -83,7 +96,10 @@ function notifyListeners(): void {
     });
 }
 
-export function addCartEntry(productId: string): CartEntry[] {
+export function addCartEntry(
+    productId: string,
+    snapshot: CartProductSnapshot,
+): CartEntry[] {
     const cartEntries = getCartEntries();
 
     const existingEntry = cartEntries.find(
@@ -98,6 +114,7 @@ export function addCartEntry(productId: string): CartEntry[] {
         {
             productId,
             quantity: 1,
+            snapshot,
         },
         ...cartEntries,
     ];

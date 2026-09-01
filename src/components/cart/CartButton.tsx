@@ -3,25 +3,30 @@
 import { Button } from '@/components/button/Button';
 import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartButtonProps {
-    productId: string;
+    product: ProductDto;
     className?: string;
 }
 
-export function CartButton({ productId, className }: CartButtonProps) {
+export function CartButton({ product, className }: CartButtonProps) {
     const { addCartEntry, getCartEntryQuantity } = useCartContext();
 
-    const isInCart = getCartEntryQuantity(productId) !== undefined;
+    const isInCart = getCartEntryQuantity(product.id) !== undefined;
 
     if (isInCart) {
-        return <CartItemQuantity productId={productId} />;
+        return <CartItemQuantity productId={product.id} />;
     }
 
     return (
         <Button
             className={className}
-            onClick={() => addCartEntry(productId)}
+            onClick={() =>
+                addCartEntry(product.id, {
+                    effectivePrice: product.effectivePrice,
+                })
+            }
             variant="accent"
         >
             В корзину

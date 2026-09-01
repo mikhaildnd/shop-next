@@ -18,10 +18,10 @@ export function ServerCartContent() {
 
     const items = useMemo(
         () =>
-            cartEntries.flatMap(({ productId, quantity }) => {
+            cartEntries.flatMap(({ productId, quantity, snapshot }) => {
                 const product = productsById.get(productId);
 
-                return product ? [{ product, quantity }] : [];
+                return product ? [{ product, quantity, snapshot }] : [];
             }),
         [cartEntries, productsById],
     );
