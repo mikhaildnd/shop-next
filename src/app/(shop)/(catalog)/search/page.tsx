@@ -1,13 +1,13 @@
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
+import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
@@ -119,9 +119,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 title="Результаты поиска"
                 breadcrumbs={breadcrumbs}
             >
-                <EmptyProductState
+                <PageMessage
+                    title="Товары не найдены"
                     description={`По запросу "${state.query}" ничего не найдено`}
-                />
+                >
+                    <ButtonLink href={routes.catalogPage()}>
+                        В каталог
+                    </ButtonLink>
+                </PageMessage>
 
                 <CollectionProductsSection collectionSlug="promotion" />
             </CatalogPageLayout>

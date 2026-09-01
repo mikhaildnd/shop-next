@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { CategoryTags } from '@/app/(shop)/(catalog)/catalog/[categorySlug]/_components/CategoryTags';
@@ -14,7 +13,10 @@ import { getCategoryPath } from '@/app/(shop)/(catalog)/lib/get-category-path';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
+import { routes } from '@/routes';
 import {
     getCategories,
     getCategoryBySlug,
@@ -134,7 +136,14 @@ export default async function CategoryPage({
                 title={category.title}
                 breadcrumbs={breadcrumbs}
             >
-                <EmptyProductState description="Попробуйте открыть другую категорию" />
+                <PageMessage
+                    title="Товары не найдены"
+                    description="Попробуйте выбрать другую категорию"
+                >
+                    <ButtonLink href={routes.catalogPage()}>
+                        В каталог
+                    </ButtonLink>
+                </PageMessage>
 
                 <CollectionProductsSection collectionSlug="promotion" />
             </CatalogPageLayout>

@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation';
 
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
@@ -118,7 +119,11 @@ export default async function CollectionPage({
                 title={collection.title}
                 breadcrumbs={breadcrumbs}
             >
-                <EmptyProductState description="Попробуйте открыть другую коллекцию" />
+                <PageMessage title="Товары не найдены">
+                    <ButtonLink href={routes.catalogPage()}>
+                        В каталог
+                    </ButtonLink>
+                </PageMessage>
             </CatalogPageLayout>
         );
     }

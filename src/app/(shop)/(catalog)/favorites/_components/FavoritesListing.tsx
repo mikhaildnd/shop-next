@@ -2,14 +2,16 @@
 
 import { useEffect, useEffectEvent, useState } from 'react';
 
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { ProductListingSkeleton } from '@/app/(shop)/(catalog)/_components/ProductListingSkeleton';
 import { getFavoriteProductsByIdsAction } from '@/app/(shop)/(catalog)/favorites/actions';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { PageMessage } from '@/components/PageMessage';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
+import { routes } from '@/routes';
 
 interface FavoritesListingProps {
     listing: ParsedProductListing;
@@ -68,7 +70,12 @@ export function FavoritesListing({
 
     if (result === null || result.totalProductsCount === 0) {
         return (
-            <EmptyProductState description="Добавьте товары в избранное, чтобы они появились здесь" />
+            <PageMessage
+                title="В избранном пока ничего нет"
+                description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
+            >
+                <ButtonLink href={routes.catalogPage()}>В каталог</ButtonLink>
+            </PageMessage>
         );
     }
 

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 interface PageMessageProps {
     title: string;
-    description: string;
+    description?: string;
     children?: ReactNode;
 }
 

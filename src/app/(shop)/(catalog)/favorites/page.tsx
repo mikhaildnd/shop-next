@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
 import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { EmptyProductState } from '@/app/(shop)/(catalog)/_components/page-states/EmptyProductState';
 import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
+import { ButtonLink } from '@/components/button/ButtonLink';
+import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getFavoriteProducts } from '@/services/favorite/favorite.service';
@@ -80,7 +81,14 @@ export default async function FavoritesPage({
                 breadcrumbs={breadcrumbs}
             >
                 {result.totalProductsCount === 0 ? (
-                    <EmptyProductState description="Добавьте товары в избранное, чтобы они появились здесь" />
+                    <PageMessage
+                        title="В избранном пока ничего нет"
+                        description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
+                    >
+                        <ButtonLink href={routes.catalogPage()}>
+                            В каталог
+                        </ButtonLink>
+                    </PageMessage>
                 ) : (
                     <ProductListing
                         sort={result.sort}

@@ -1,7 +1,8 @@
-import { GoToCatalogButton } from '@/app/(shop)/(catalog)/_components/page-issues/GoToCatalogButton';
 import { PAGINATION_ISSUE_GROUPS } from '@/app/(shop)/(catalog)/_components/page-issues/page-issues.constants';
+import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import type { PaginationIssue } from '@/lib/pagination/pagination.types';
+import { routes } from '@/routes';
 
 interface PaginationIssuesProps {
     issues: PaginationIssue[];
@@ -15,7 +16,9 @@ export function PaginationIssues({ issues }: PaginationIssuesProps) {
                     title={group.message.title}
                     description={group.message.description}
                 >
-                    <GoToCatalogButton />
+                    <ButtonLink href={routes.catalogPage()}>
+                        В каталог
+                    </ButtonLink>
                 </PageMessage>
             );
         }
