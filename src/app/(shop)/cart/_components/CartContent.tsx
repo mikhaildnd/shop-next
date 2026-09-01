@@ -7,10 +7,12 @@ import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { useCartContext } from '@/components/cart/CartContext';
 import type { ProductDto } from '@/services/product/product.types';
 
-export function ClientCartContent() {
-    const { cartEntries } = useCartContext();
+export function CartContent() {
+    const { cartEntries, initialCartItems } = useCartContext();
 
-    const [products, setProducts] = useState<ProductDto[]>();
+    const [products, setProducts] = useState<ProductDto[]>(
+        initialCartItems.map(({ product }) => product),
+    );
 
     const productIdsKey = [...cartEntries]
         .map((item) => item.productId)
@@ -46,25 +48,20 @@ export function ClientCartContent() {
     }, [productIdsKey]);
 
     const productsById = useMemo(
-        () => new Map(products?.map((product) => [product.id, product])),
+        () => new Map(products.map((product) => [product.id, product])),
         [products],
     );
 
     const items = useMemo(
         () =>
-            cartEntries.flatMap(({ productId, quantity, snapshot }) => {
-                const product = productsById.get(productId);
-
-                return product ? [{ product, quantity, snapshot }] : [];
-            }),
+            cartEntries.map((entry) => ({
+                ...entry,
+                product: productsById.get(entry.productId),
+            })),
         [cartEntries, productsById],
     );
 
-    if (cartEntries.length > 0 && products === undefined) {
-        return null;
-    }
-
-    if (items.length === 0) {
+    if (cartEntries.length === 0) {
         return null;
     }
 

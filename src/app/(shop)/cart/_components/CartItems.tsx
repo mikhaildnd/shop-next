@@ -1,80 +1,52 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import { CartItem } from '@/app/(shop)/cart/_components/CartItem';
+import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
+import type { CartEntry } from '@/lib/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
-import { CartItemRemoveButton } from '@/app/(shop)/cart/_components/CartItemRemoveButton';
-import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
-import { FavoriteButton } from '@/components/favorite/FavoriteButton';
-import { formatPrice } from '@/lib/format-price';
-import { routes } from '@/routes';
-import type { CartItemDto } from '@/services/cart/cart.types';
+type CartListItem = CartEntry & {
+    product?: ProductDto;
+};
 
 interface CartItemsProps {
-    items: CartItemDto[];
+    items: CartListItem[];
 }
 
 export function CartItems({ items }: CartItemsProps) {
+    const hasPriceChanges = items.some(
+        (item) =>
+            item.product &&
+            item.snapshot.effectivePrice !== item.product.effectivePrice,
+    );
+
     return (
-        <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
-            {items.map((item) => {
-                const { product } = item;
-                const hasDiscount = product.discountPercent > 0;
-                const mainImage = product.images[0];
+        <>
+            {hasPriceChanges && (
+                <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-md">
+                    <p className="font-semibold">
+                        Цена некоторых товаров изменилась
+                    </p>
+                    <p className="mt-1">
+                        Проверьте цены перед оформлением заказа.
+                    </p>
+                </div>
+            )}
 
-                return (
-                    <article
-                        key={product.id}
-                        className="flex gap-4 p-4"
-                    >
-                        <Link
-                            href={routes.productPage(product.slug)}
-                            className="relative size-24 shrink-0 overflow-hidden rounded"
-                        >
-                            {mainImage && (
-                                <Image
-                                    src={mainImage.url}
-                                    alt={mainImage.alt ?? product.title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="96px"
-                                />
-                            )}
-                        </Link>
-
-                        <div className="flex min-w-0 flex-col gap-2">
-                            <Link
-                                href={routes.productPage(product.slug)}
-                                className="line-clamp-2 text-[#414141] hover:text-(--color-primary) hover:underline"
-                            >
-                                {product.title}
-                            </Link>
-
-                            <div className="flex items-center gap-2">
-                                <p className="font-bold text-[#414141]">
-                                    {formatPrice(product.effectivePrice)} ₸
-                                </p>
-
-                                {hasDiscount && (
-                                    <p className="text-sm text-[#bfbfbf] line-through">
-                                        {formatPrice(product.regularPrice)} ₸
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="mt-auto flex items-center gap-4">
-                                <CartItemQuantity
-                                    productId={product.id}
-                                    size="sm"
-                                    variant="neutral"
-                                />
-
-                                <CartItemRemoveButton productId={product.id} />
-
-                                <FavoriteButton productId={product.id} />
-                            </div>
-                        </div>
-                    </article>
-                );
-            })}
-        </div>
+            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
+                {items.map((item) =>
+                    item.product ? (
+                        <CartItem
+                            key={item.productId}
+                            item={{
+                                product: item.product,
+                                quantity: item.quantity,
+                                snapshot: item.snapshot,
+                            }}
+                        />
+                    ) : (
+                        <CartItemSkeleton key={item.productId} />
+                    ),
+                )}
+            </div>
+        </>
     );
 }
