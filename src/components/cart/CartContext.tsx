@@ -108,15 +108,33 @@ function ServerCartProvider({
         initialCartItems: cart.initialCartItems,
     };
 
+    const notification =
+        cart.mergeStatus === 'merging'
+            ? {
+                  message: 'Синхронизация корзины...',
+                  loading: true,
+              }
+            : cart.mergeStatus === 'error'
+              ? {
+                    message: 'Не удалось синхронизировать корзину.',
+                    action: {
+                        label: 'Повторить',
+                        onClick: cart.retryMerge,
+                    },
+                }
+              : cart.mutationError
+                ? {
+                      message: 'Произошла ошибка. Попробуйте ещё раз.',
+                  }
+                : null;
+
     return (
         <>
             <CartContext.Provider value={contextValue}>
                 {children}
             </CartContext.Provider>
 
-            {cart.mutationError && (
-                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
-            )}
+            {notification && <NotificationToast {...notification} />}
         </>
     );
 }
