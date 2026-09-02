@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
+import { NotificationToast } from '@/components/NotificationToast';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import { useServerFavorites } from '@/hooks/useServerFavorites';
 
@@ -11,6 +12,7 @@ interface FavoritesContextValue {
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void | Promise<void>;
+    mutationError: boolean;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -60,12 +62,19 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
         favoriteCount: favorites.favoriteIds.size,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
+        mutationError: favorites.mutationError,
     };
 
     return (
-        <FavoritesContext.Provider value={contextValue}>
-            {children}
-        </FavoritesContext.Provider>
+        <>
+            <FavoritesContext.Provider value={contextValue}>
+                {children}
+            </FavoritesContext.Provider>
+
+            {favorites.mutationError && (
+                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
+            )}
+        </>
     );
 }
 
@@ -84,12 +93,37 @@ function ServerFavoritesProvider({
         favoriteCount: favorites.favoriteCount,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
+        mutationError: favorites.mutationError,
     };
 
+    const notification =
+        favorites.mergeStatus === 'merging' && favorites.mergeAttempt > 0
+            ? {
+                  message: 'Синхронизация избранного...',
+                  loading: true,
+              }
+            : favorites.mergeStatus === 'error'
+              ? {
+                    message: 'Не удалось синхронизировать избранное.',
+                    action: {
+                        label: 'Повторить',
+                        onClick: favorites.retryMerge,
+                    },
+                }
+              : favorites.mutationError
+                ? {
+                      message: 'Произошла ошибка. Попробуйте ещё раз.',
+                  }
+                : null;
+
     return (
-        <FavoritesContext.Provider value={contextValue}>
-            {children}
-        </FavoritesContext.Provider>
+        <>
+            <FavoritesContext.Provider value={contextValue}>
+                {children}
+            </FavoritesContext.Provider>
+
+            {notification && <NotificationToast {...notification} />}
+        </>
     );
 }
 

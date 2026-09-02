@@ -23,6 +23,8 @@ interface UseServerFavoritesReturn {
     toggleFavorite: (productId: string) => void;
     mergeStatus: MergeStatus;
     retryMerge: () => void;
+    mutationError: boolean;
+    mergeAttempt: number;
 }
 
 type MergeStatus = 'idle' | 'merging' | 'error';
@@ -44,6 +46,8 @@ export function useServerFavorites({
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
 
+    const [mutationError, setMutationError] = useState(false);
+
     const isFavorite = useCallback(
         (productId: string) => favoriteStates[productId] ?? false,
         [favoriteStates],
@@ -51,6 +55,8 @@ export function useServerFavorites({
 
     const addFavorite = useCallback(
         async (productId: string) => {
+            setMutationError(false);
+
             const previousIsFavorite = favoriteStates[productId] ?? false;
 
             if (previousIsFavorite) {
@@ -67,6 +73,8 @@ export function useServerFavorites({
             try {
                 await addFavoriteAction(productId);
             } catch {
+                setMutationError(true);
+
                 setFavoriteStates((current) => ({
                     ...current,
                     [productId]: previousIsFavorite,
@@ -82,6 +90,8 @@ export function useServerFavorites({
 
     const removeFavorite = useCallback(
         async (productId: string) => {
+            setMutationError(false);
+
             const previousIsFavorite = favoriteStates[productId] ?? false;
 
             if (!previousIsFavorite) {
@@ -98,6 +108,8 @@ export function useServerFavorites({
             try {
                 await removeFavoriteAction(productId);
             } catch {
+                setMutationError(true);
+
                 setFavoriteStates((current) => ({
                     ...current,
                     [productId]: previousIsFavorite,
@@ -179,5 +191,7 @@ export function useServerFavorites({
         toggleFavorite,
         mergeStatus,
         retryMerge,
+        mutationError,
+        mergeAttempt,
     };
 }
