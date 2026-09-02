@@ -37,6 +37,7 @@ export interface UseServerCartResult {
     getCartEntryQuantity: (productId: string) => number | undefined;
     mutationError: boolean;
     mergeStatus: MergeStatus;
+    mergeAttempt: number;
     retryMerge: () => void;
     initialCartItems: CartItemDto[];
 }
@@ -325,6 +326,7 @@ export function useServerCart({
         mutationError,
         mergeStatus,
         retryMerge,
+        mergeAttempt,
         initialCartItems,
     };
 }

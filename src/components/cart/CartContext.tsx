@@ -109,7 +109,7 @@ function ServerCartProvider({
     };
 
     const notification =
-        cart.mergeStatus === 'merging'
+        cart.mergeStatus === 'merging' && cart.mergeAttempt > 0
             ? {
                   message: 'Синхронизация корзины...',
                   loading: true,
