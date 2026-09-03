@@ -35,7 +35,7 @@ export interface UseServerCartResult {
     clearCart: () => Promise<void>;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    mutationError: boolean;
+    mutationError: Error | null;
     mergeStatus: MergeStatus;
     mergeAttempt: number;
     retryMerge: () => void;
@@ -63,7 +63,7 @@ export function useServerCart({
     );
 
     const [cartEntries, setCartEntries] = useState(initialCartEntries);
-    const [mutationError, setMutationError] = useState(false);
+    const [mutationError, setMutationError] = useState<Error | null>(null);
 
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
@@ -147,7 +147,7 @@ export function useServerCart({
 
     const enqueueMutation = useCallback(
         (mutation: CartMutation, action: () => Promise<void>) => {
-            setMutationError(false);
+            setMutationError(null);
 
             pendingMutationsRef.current.push(mutation);
             updateVisibleCartEntries();
@@ -159,8 +159,12 @@ export function useServerCart({
                     confirmedCartEntriesRef.current = mutation.apply(
                         confirmedCartEntriesRef.current,
                     );
-                } catch {
-                    setMutationError(true);
+                } catch (error) {
+                    setMutationError(
+                        error instanceof Error
+                            ? error
+                            : new Error('Unknown error'),
+                    );
                 } finally {
                     pendingMutationsRef.current =
                         pendingMutationsRef.current.filter(

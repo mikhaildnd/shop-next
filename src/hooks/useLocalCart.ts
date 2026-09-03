@@ -25,7 +25,7 @@ export interface UseLocalCartResult {
     removeMergedCartEntries: (items: CartEntry[]) => void;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    mutationError: boolean;
+    mutationError: Error | null;
 }
 
 export function useLocalCart(): UseLocalCartResult {
@@ -35,68 +35,80 @@ export function useLocalCart(): UseLocalCartResult {
         getServerCartEntries,
     );
 
-    const [mutationError, setMutationError] = useState(false);
+    const [mutationError, setMutationError] = useState<Error | null>(null);
 
     const addCartEntry = useCallback(
         (productId: string, snapshot: CartProductSnapshot) => {
-            setMutationError(false);
+            setMutationError(null);
 
             try {
                 addCartEntryToStorage(productId, snapshot);
-            } catch {
-                setMutationError(true);
+            } catch (error) {
+                setMutationError(
+                    error instanceof Error ? error : new Error('Unknown error'),
+                );
             }
         },
         [],
     );
 
     const removeCartEntry = useCallback((productId: string) => {
-        setMutationError(false);
+        setMutationError(null);
 
         try {
             removeCartEntryFromStorage(productId);
-        } catch {
-            setMutationError(true);
+        } catch (error) {
+            setMutationError(
+                error instanceof Error ? error : new Error('Unknown error'),
+            );
         }
     }, []);
 
     const incrementCartEntry = useCallback((productId: string) => {
-        setMutationError(false);
+        setMutationError(null);
 
         try {
             incrementCartEntryInStorage(productId);
-        } catch {
-            setMutationError(true);
+        } catch (error) {
+            setMutationError(
+                error instanceof Error ? error : new Error('Unknown error'),
+            );
         }
     }, []);
 
     const decrementCartEntry = useCallback((productId: string) => {
-        setMutationError(false);
+        setMutationError(null);
 
         try {
             decrementCartEntryFromStorage(productId);
-        } catch {
-            setMutationError(true);
+        } catch (error) {
+            setMutationError(
+                error instanceof Error ? error : new Error('Unknown error'),
+            );
         }
     }, []);
 
     const clearCart = useCallback(() => {
-        setMutationError(false);
+        setMutationError(null);
 
         try {
             clearCartStorage();
-        } catch {
-            setMutationError(true);
+        } catch (error) {
+            setMutationError(
+                error instanceof Error ? error : new Error('Unknown error'),
+            );
         }
     }, []);
 
     const removeMergedCartEntries = useCallback((items: CartEntry[]) => {
-        setMutationError(false);
+        setMutationError(null);
 
         try {
             removeMergedCartEntriesFromStorage(items);
-        } catch {
-            setMutationError(true);
+        } catch (error) {
+            setMutationError(
+                error instanceof Error ? error : new Error('Unknown error'),
+            );
         }
     }, []);
 

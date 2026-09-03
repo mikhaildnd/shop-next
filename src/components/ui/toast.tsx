@@ -49,7 +49,7 @@ function Toast({ className, ...props }: ToastPrimitive.Root.Props) {
             className={cn(
                 'group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-2xl border bg-popover text-popover-foreground shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
                 '[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]',
-                'h-(--height) [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(var(--scale))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms]',
+                'h-(--height) [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(calc(var(--scale)*var(--toast-pulse-scale)))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms]',
                 "after:absolute after:top-full after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-['']",
                 'data-expanded:h-(--toast-height) data-expanded:[transform:translateX(var(--toast-swipe-movement-x))_translateY(var(--offset-y))]',
                 'data-limited:opacity-0 data-starting-style:[transform:translateY(150%)]',
@@ -199,16 +199,23 @@ function ToastIcon({ type }: { type: string | undefined }) {
     );
 }
 
-function ToastList() {
-    const { toasts } = ToastPrimitive.useToastManager();
+function ToastItem({ toast }: { toast: ToastPrimitive.Root.ToastObject }) {
+    let pulseClassName: string | undefined;
 
-    return toasts.map((toastItem) => (
+    if (toast.updateKey) {
+        pulseClassName =
+            toast.updateKey % 2 === 0
+                ? 'animate-toast-pulse-even'
+                : 'animate-toast-pulse-odd';
+    }
+
+    return (
         <Toast
-            key={toastItem.id}
-            toast={toastItem}
+            toast={toast}
+            className={pulseClassName}
         >
             <ToastContent>
-                <ToastIcon type={toastItem.type} />
+                <ToastIcon type={toast.type} />
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <ToastTitle />
                     <ToastDescription />
@@ -217,6 +224,17 @@ function ToastList() {
                 <ToastClose />
             </ToastContent>
         </Toast>
+    );
+}
+
+function ToastList() {
+    const { toasts } = ToastPrimitive.useToastManager();
+
+    return toasts.map((toastItem) => (
+        <ToastItem
+            key={toastItem.id}
+            toast={toastItem}
+        />
     ));
 }
 
