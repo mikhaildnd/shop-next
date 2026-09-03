@@ -1,3 +1,4 @@
+import { ImageOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -14,8 +15,8 @@ export function CatalogCategoryCard({ category }: CatalogCategoryCardProps) {
             href={routes.categoryPage(category.slug)}
             className="group flex h-full w-full flex-col rounded-lg transition-colors focus-visible:ring-1 focus-visible:ring-(--color-primary) focus-visible:outline-none"
         >
-            <div className="relative mb-1 aspect-[140/115] w-full overflow-hidden rounded-lg bg-gray-50">
-                {category.image && (
+            <div className="relative mb-1 aspect-140/115 w-full overflow-hidden rounded-lg bg-gray-50">
+                {category.image ? (
                     <Image
                         quality={100}
                         src={category.image}
@@ -24,6 +25,13 @@ export function CatalogCategoryCard({ category }: CatalogCategoryCardProps) {
                         sizes="(max-width: 768px) 40vw, 160px"
                         className="object-contain transition-opacity group-hover:opacity-90 group-focus-visible:opacity-90"
                     />
+                ) : (
+                    <div className="flex size-full items-center justify-center">
+                        <ImageOff
+                            aria-hidden="true"
+                            className="size-10 text-gray-300"
+                        />
+                    </div>
                 )}
             </div>
 

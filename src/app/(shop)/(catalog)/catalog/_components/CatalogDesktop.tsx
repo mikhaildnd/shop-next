@@ -127,7 +127,7 @@ export function CatalogDesktop({
 
             <section>
                 <Link
-                    className="mb-4 flex items-center gap-x-2"
+                    className="mb-4 flex items-center gap-x-2 transition-colors hover:text-(--color-primary)"
                     href={routes.categoryPage(activeGroup.parentCategory.slug)}
                 >
                     <h3 className="text-xl font-semibold">
@@ -136,16 +136,13 @@ export function CatalogDesktop({
 
                     <ChevronRight
                         aria-hidden="true"
-                        className="text-primary size-4 stroke-2"
+                        className="size-4 stroke-2"
                     />
                 </Link>
 
                 <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,160px))] gap-6">
                     {activeGroup.childCategories.map((category) => (
-                        <li
-                            // className="w-44"
-                            key={category.id}
-                        >
+                        <li key={category.id}>
                             <CatalogCategoryCard category={category} />
                         </li>
                     ))}

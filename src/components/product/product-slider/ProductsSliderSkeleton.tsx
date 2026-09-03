@@ -3,7 +3,7 @@ import { ProductCardSkeleton } from '@/components/product/product-card/ProductCa
 export function ProductsSliderSkeleton() {
     return (
         <div className="overflow-hidden">
-            <div className="flex gap-2 sm:gap-3 lg:gap-4">
+            <div className="flex gap-2 pl-3 sm:gap-3 lg:gap-4 lg:pl-0">
                 {Array.from({ length: 4 }).map((_, idx) => (
                     <div
                         key={idx}

@@ -24,11 +24,9 @@ export default async function HomePage() {
             <Suspense fallback={<ProductsSectionSkeleton />}>
                 <ProductsOfferSection />
             </Suspense>
-            <LazySection>
-                <Suspense fallback={<ProductsSectionSkeleton />}>
-                    <ProductsNewSection />
-                </Suspense>
-            </LazySection>
+            <Suspense fallback={<ProductsSectionSkeleton />}>
+                <ProductsNewSection />
+            </Suspense>
             <BannerSpecialOffers />
             <LazySection>
                 <MapsLazy />

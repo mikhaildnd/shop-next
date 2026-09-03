@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
+import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrappers/HorizontalScrollWrapper';
 import { CatalogCategoryCard } from '@/app/(shop)/(catalog)/catalog/_components/CatalogCategoryCard';
 import type { CatalogSection } from '@/app/(shop)/(catalog)/catalog/catalog.types';
 import { cn } from '@/lib/cn';
@@ -21,9 +22,8 @@ export function CatalogMobile({
                 return (
                     <div key={parentCategory.id}>
                         <Link
-                            className="mb-4 flex items-center gap-x-2"
+                            className="mb-4 flex items-center gap-x-2 transition-colors hover:text-(--color-primary)"
                             href={routes.categoryPage(parentCategory.slug)}
-                            key={parentCategory.id}
                         >
                             <h3 className="text-xl font-semibold">
                                 {parentCategory.title}
@@ -31,20 +31,24 @@ export function CatalogMobile({
 
                             <ChevronRight
                                 aria-hidden="true"
-                                className="text-primary size-4 stroke-2"
+                                className="size-4 stroke-2"
                             />
                         </Link>
 
-                        <ul className="flex gap-4 overflow-x-auto pb-2">
-                            {childCategories.map((category) => (
-                                <li
-                                    key={category.id}
-                                    className="w-32 shrink-0"
-                                >
-                                    <CatalogCategoryCard category={category} />
-                                </li>
-                            ))}
-                        </ul>
+                        <HorizontalScrollWrapper>
+                            <ul className="flex gap-4 pb-2">
+                                {childCategories.map((category) => (
+                                    <li
+                                        key={category.id}
+                                        className="w-32 shrink-0"
+                                    >
+                                        <CatalogCategoryCard
+                                            category={category}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        </HorizontalScrollWrapper>
                     </div>
                 );
             })}

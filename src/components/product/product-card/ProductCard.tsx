@@ -1,3 +1,4 @@
+import { ImageOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -15,7 +16,6 @@ interface ProductCardProps {
 export function ProductCard({ product, href }: ProductCardProps) {
     const hasDiscount = product.discountPercent > 0;
 
-    //TODO сделать фолбек изображения
     const mainImage = product.images[0];
 
     return (
@@ -26,7 +26,7 @@ export function ProductCard({ product, href }: ProductCardProps) {
                     href={href}
                     className="absolute inset-0"
                 >
-                    {mainImage && (
+                    {mainImage ? (
                         <Image
                             src={mainImage.url}
                             alt={mainImage.alt ?? product.title}
@@ -34,6 +34,13 @@ export function ProductCard({ product, href }: ProductCardProps) {
                             className="object-cover"
                             sizes="(max-width: 768px) 160px, (max-width: 1280px) 224px, 272px"
                         />
+                    ) : (
+                        <div className="flex size-full items-center justify-center bg-gray-50">
+                            <ImageOff
+                                aria-hidden="true"
+                                className="size-12 text-gray-300"
+                            />
+                        </div>
                     )}
                 </Link>
 
@@ -61,14 +68,14 @@ export function ProductCard({ product, href }: ProductCardProps) {
                     </p>
 
                     {hasDiscount && (
-                        <p className="text-[8px] text-[#bfbfbf] line-through md:text-xs">
+                        <del className="text-xs text-[#bfbfbf]">
                             {formatPrice(product.regularPrice)} ₸
-                        </p>
+                        </del>
                     )}
                 </div>
 
                 {/*TITLE SEGMENT*/}
-                <h3 className="line-clamp-2 min-h-10 text-sm leading-tight text-[#414141] md:min-h-13.5 md:text-base">
+                <h3 className="line-clamp-3 min-h-10 text-sm leading-tight text-[#414141] md:min-h-13.5 md:text-base">
                     <Link
                         className="hover:underline"
                         href={href}
@@ -77,16 +84,18 @@ export function ProductCard({ product, href }: ProductCardProps) {
                     </Link>
                 </h3>
 
-                {/*RATING SEGMENT*/}
-                <div className="flex items-center gap-x-2">
-                    <StarRating rating={product.ratingRate} />
-                    <span className="text-gray-400">
-                        ({product.ratingCount})
-                    </span>
-                </div>
+                <footer className="mt-auto flex flex-col gap-2">
+                    {/*RATING SEGMENT*/}
+                    <div className="flex items-center gap-2">
+                        <StarRating rating={product.ratingRate} />
+                        <span className="text-gray-400">
+                            ({product.ratingCount})
+                        </span>
+                    </div>
 
-                {/*ACTIONS SEGMENT*/}
-                <CartButton product={product} />
+                    {/*ACTIONS SEGMENT*/}
+                    <CartButton product={product} />
+                </footer>
             </div>
         </article>
     );

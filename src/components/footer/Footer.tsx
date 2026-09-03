@@ -26,10 +26,7 @@ export function Footer({ className }: { className?: string }) {
             >
                 <Logo className={styles.logo} />
                 <FooterSocials
-                    className={cn(
-                        'gap-2 justify-self-end md:gap-5',
-                        styles.social,
-                    )}
+                    className={cn('justify-self-end', styles.social)}
                 />
                 <FooterPhone
                     className={cn(styles.phone, 'justify-self-end text-sm')}

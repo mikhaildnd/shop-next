@@ -8,7 +8,7 @@ const hoverClass = 'transition-opacity duration-300 hover:opacity-80';
 
 export function FooterSocials({ className }: { className?: string }) {
     return (
-        <div className={cn('flex flex-wrap', className)}>
+        <div className={cn('flex flex-wrap gap-2', className)}>
             {socialLinks.map((item) => (
                 <Link
                     key={item.href}
