@@ -10,7 +10,7 @@ export default async function SignInPage() {
     const session = await getSession();
 
     if (session) {
-        redirect(routes.profilePage());
+        redirect(routes.homePage());
     }
 
     return (
