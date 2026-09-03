@@ -69,6 +69,7 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
     useEffect(() => {
         if (favorites.mutationError) {
             toast.add({
+                id: 'favorites-mutation-error',
                 description: 'Произошла ошибка. Попробуйте ещё раз',
                 type: 'error',
             });
@@ -162,6 +163,7 @@ function ServerFavoritesProvider({
     useEffect(() => {
         if (favorites.mutationError) {
             toast.add({
+                id: 'favorites-mutation-error',
                 description: 'Произошла ошибка. Попробуйте ещё раз',
                 type: 'error',
             });

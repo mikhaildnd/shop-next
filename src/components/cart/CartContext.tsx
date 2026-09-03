@@ -1,9 +1,10 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { createContext, useContext } from 'react';
 
-import { NotificationToast } from '@/components/NotificationToast';
+import { toast } from '@/components/ui/toast';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
@@ -21,7 +22,7 @@ interface CartContextValue {
     decrementCartEntry: (productId: string) => void | Promise<void>;
     removeCartEntry: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
-    mutationError: boolean;
+    mutationError: Error | null;
     initialCartItems: CartItemDto[];
 }
 
@@ -74,16 +75,20 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         initialCartItems: [],
     };
 
-    return (
-        <>
-            <CartContext.Provider value={contextValue}>
-                {children}
-            </CartContext.Provider>
+    useEffect(() => {
+        if (cart.mutationError) {
+            toast.add({
+                id: 'cart-mutation-error',
+                description: 'Произошла ошибка. Попробуйте ещё раз',
+                type: 'error',
+            });
+        }
+    }, [cart.mutationError]);
 
-            {cart.mutationError && (
-                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
-            )}
-        </>
+    return (
+        <CartContext.Provider value={contextValue}>
+            {children}
+        </CartContext.Provider>
     );
 }
 
@@ -108,34 +113,79 @@ function ServerCartProvider({
         initialCartItems: cart.initialCartItems,
     };
 
-    const notification =
-        cart.mergeStatus === 'merging' && cart.mergeAttempt > 0
-            ? {
-                  message: 'Синхронизация корзины...',
-                  loading: true,
-              }
-            : cart.mergeStatus === 'error'
-              ? {
-                    message: 'Не удалось синхронизировать корзину.',
-                    action: {
-                        label: 'Повторить',
+    const mergeToastId = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (cart.mergeStatus === 'merging') {
+            if (cart.mergeAttempt === 0) {
+                return;
+            }
+            if (mergeToastId.current) {
+                toast.update(mergeToastId.current, {
+                    description: 'Синхронизация корзины...',
+                    type: 'loading',
+                    timeout: 0,
+                    actionProps: undefined,
+                });
+            } else {
+                mergeToastId.current = toast.add({
+                    description: 'Синхронизация корзины...',
+                    type: 'loading',
+                    timeout: 0,
+                });
+            }
+
+            return;
+        }
+
+        if (cart.mergeStatus === 'error') {
+            if (!mergeToastId.current) {
+                mergeToastId.current = toast.add({
+                    description: 'Не удалось синхронизировать корзину',
+                    type: 'error',
+                    timeout: 0,
+                    actionProps: {
+                        children: 'Повторить',
                         onClick: cart.retryMerge,
                     },
-                }
-              : cart.mutationError
-                ? {
-                      message: 'Произошла ошибка. Попробуйте ещё раз.',
-                  }
-                : null;
+                });
+
+                return;
+            }
+
+            toast.update(mergeToastId.current, {
+                description: 'Не удалось синхронизировать корзину',
+                type: 'error',
+                timeout: 0,
+                actionProps: {
+                    children: 'Повторить',
+                    onClick: cart.retryMerge,
+                },
+            });
+
+            return;
+        }
+
+        if (mergeToastId.current) {
+            toast.close(mergeToastId.current);
+            mergeToastId.current = null;
+        }
+    }, [cart.mergeAttempt, cart.mergeStatus, cart.retryMerge]);
+
+    useEffect(() => {
+        if (cart.mutationError) {
+            toast.add({
+                id: 'cart-mutation-error',
+                description: 'Произошла ошибка. Попробуйте ещё раз',
+                type: 'error',
+            });
+        }
+    }, [cart.mutationError]);
 
     return (
-        <>
-            <CartContext.Provider value={contextValue}>
-                {children}
-            </CartContext.Provider>
-
-            {notification && <NotificationToast {...notification} />}
-        </>
+        <CartContext.Provider value={contextValue}>
+            {children}
+        </CartContext.Provider>
     );
 }
 
