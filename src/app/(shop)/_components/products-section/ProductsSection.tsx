@@ -49,7 +49,7 @@ export function ProductsSection({
             {hasProducts ? (
                 <div
                     className={cn(
-                        '-mr-(--section-padding) lg:mr-0',
+                        '-mx-(--section-padding) lg:mx-0',
                         CONTENT_HEIGHT,
                     )}
                 >

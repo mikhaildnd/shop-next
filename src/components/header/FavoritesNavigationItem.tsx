@@ -27,10 +27,7 @@ export function FavoritesNavigationItem({
             <div className="relative">
                 <Heart
                     aria-label="Избранное"
-                    className={cn(
-                        'size-5.5 stroke-[1.5px] transition-[fill] duration-150',
-                        favoriteCount > 0 ? 'fill-black' : 'fill-transparent',
-                    )}
+                    className="size-5.5 stroke-[1.5px] transition-[fill] duration-150"
                 />
 
                 {favoriteCount > 0 && (

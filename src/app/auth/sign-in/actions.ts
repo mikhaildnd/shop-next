@@ -119,7 +119,7 @@ export async function signIn(
         throw error;
     }
 
-    redirect(routes.profilePage());
+    redirect(routes.homePage());
 }
 
 interface SendVerificationOtpState {

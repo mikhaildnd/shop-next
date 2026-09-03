@@ -25,10 +25,7 @@ export function CartNavigationItem({ className }: CartNavigationItemProps) {
             <div className="relative">
                 <ShoppingCart
                     aria-label="Корзина"
-                    className={cn(
-                        'size-5.5 stroke-[1.5px] transition-[fill] duration-150',
-                        cartCount > 0 ? 'fill-black' : 'fill-transparent',
-                    )}
+                    className="size-5.5 stroke-[1.5px] transition-[fill] duration-150"
                 />
 
                 {cartCount > 0 && (

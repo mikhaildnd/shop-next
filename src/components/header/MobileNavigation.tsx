@@ -1,4 +1,4 @@
-import { House as IconHome } from 'lucide-react';
+import { House as IconHome, Menu as IconMenu } from 'lucide-react';
 
 import { CartNavigationItem } from '@/components/header/CartNavigationItem';
 import { FavoritesNavigationItem } from '@/components/header/FavoritesNavigationItem';
@@ -7,8 +7,6 @@ import { MobileProfile } from '@/components/header/profile/MobileProfile';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { cn } from '@/lib/cn';
 import { routes } from '@/routes';
-
-import IconMenuMob from '../../../public/icons-header/icon-menu-mob.svg';
 
 interface MobileNavigationProps {
     user: ProfileUser | null;
@@ -35,7 +33,7 @@ export function MobileNavigation({ user, className }: MobileNavigationProps) {
                 <li>
                     <NavigationItem
                         href={routes.catalogPage()}
-                        Icon={IconMenuMob}
+                        Icon={IconMenu}
                         text="Каталог"
                     />
                 </li>

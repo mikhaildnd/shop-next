@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
     addFavoriteAction,
@@ -23,7 +23,7 @@ interface UseServerFavoritesReturn {
     toggleFavorite: (productId: string) => void;
     mergeStatus: MergeStatus;
     retryMerge: () => void;
-    mutationError: boolean;
+    mutationError: Error | null;
     mergeAttempt: number;
 }
 
@@ -43,10 +43,12 @@ export function useServerFavorites({
         ),
     );
 
+    const pendingMutationsRef = useRef(new Set<string>());
+
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
 
-    const [mutationError, setMutationError] = useState(false);
+    const [mutationError, setMutationError] = useState<Error | null>(null);
 
     const isFavorite = useCallback(
         (productId: string) => favoriteStates[productId] ?? false,
@@ -55,34 +57,37 @@ export function useServerFavorites({
 
     const addFavorite = useCallback(
         async (productId: string) => {
-            setMutationError(false);
+            if (pendingMutationsRef.current.has(productId)) return;
+
+            setMutationError(null);
 
             const previousIsFavorite = favoriteStates[productId] ?? false;
+            if (previousIsFavorite) return;
 
-            if (previousIsFavorite) {
-                return;
-            }
+            pendingMutationsRef.current.add(productId);
 
             setFavoriteStates((current) => ({
                 ...current,
                 [productId]: true,
             }));
-
             setFavoriteCount((current) => current + 1);
 
             try {
                 await addFavoriteAction(productId);
-            } catch {
-                setMutationError(true);
+            } catch (error) {
+                setMutationError(
+                    error instanceof Error ? error : new Error('Unknown error'),
+                );
 
                 setFavoriteStates((current) => ({
                     ...current,
                     [productId]: previousIsFavorite,
                 }));
-
                 setFavoriteCount((current) =>
                     previousIsFavorite ? current : current - 1,
                 );
+            } finally {
+                pendingMutationsRef.current.delete(productId);
             }
         },
         [favoriteStates],
@@ -90,34 +95,37 @@ export function useServerFavorites({
 
     const removeFavorite = useCallback(
         async (productId: string) => {
-            setMutationError(false);
+            if (pendingMutationsRef.current.has(productId)) return;
+
+            setMutationError(null);
 
             const previousIsFavorite = favoriteStates[productId] ?? false;
+            if (!previousIsFavorite) return;
 
-            if (!previousIsFavorite) {
-                return;
-            }
+            pendingMutationsRef.current.add(productId);
 
             setFavoriteStates((current) => ({
                 ...current,
                 [productId]: false,
             }));
-
             setFavoriteCount((current) => current - 1);
 
             try {
                 await removeFavoriteAction(productId);
-            } catch {
-                setMutationError(true);
+            } catch (error) {
+                setMutationError(
+                    error instanceof Error ? error : new Error('Unknown error'),
+                );
 
                 setFavoriteStates((current) => ({
                     ...current,
                     [productId]: previousIsFavorite,
                 }));
-
                 setFavoriteCount((current) =>
                     previousIsFavorite ? current + 1 : current,
                 );
+            } finally {
+                pendingMutationsRef.current.delete(productId);
             }
         },
         [favoriteStates],
