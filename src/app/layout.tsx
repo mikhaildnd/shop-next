@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { Rubik } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { Toaster } from '@/components/ui/toast';
+
 const fontMain = Rubik({
     variable: '--font-sans',
     subsets: ['latin', 'cyrillic'],
@@ -27,6 +29,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
             <body className="flex min-h-screen flex-col antialiased">
                 {children}
+
+                <Toaster />
             </body>
         </html>
     );

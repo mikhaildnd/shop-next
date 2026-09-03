@@ -1,9 +1,10 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { createContext, useContext } from 'react';
 
-import { NotificationToast } from '@/components/NotificationToast';
+import { toast } from '@/components/ui/toast';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import { useServerFavorites } from '@/hooks/useServerFavorites';
 
@@ -12,7 +13,7 @@ interface FavoritesContextValue {
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void | Promise<void>;
-    mutationError: boolean;
+    mutationError: Error | null;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -65,16 +66,19 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
         mutationError: favorites.mutationError,
     };
 
-    return (
-        <>
-            <FavoritesContext.Provider value={contextValue}>
-                {children}
-            </FavoritesContext.Provider>
+    useEffect(() => {
+        if (favorites.mutationError) {
+            toast.add({
+                description: 'Произошла ошибка. Попробуйте ещё раз',
+                type: 'error',
+            });
+        }
+    }, [favorites.mutationError]);
 
-            {favorites.mutationError && (
-                <NotificationToast message="Произошла ошибка. Попробуйте ещё раз." />
-            )}
-        </>
+    return (
+        <FavoritesContext.Provider value={contextValue}>
+            {children}
+        </FavoritesContext.Provider>
     );
 }
 
@@ -96,34 +100,78 @@ function ServerFavoritesProvider({
         mutationError: favorites.mutationError,
     };
 
-    const notification =
-        favorites.mergeStatus === 'merging' && favorites.mergeAttempt > 0
-            ? {
-                  message: 'Синхронизация избранного...',
-                  loading: true,
-              }
-            : favorites.mergeStatus === 'error'
-              ? {
-                    message: 'Не удалось синхронизировать избранное.',
-                    action: {
-                        label: 'Повторить',
+    const mergeToastId = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (favorites.mergeStatus === 'merging') {
+            if (favorites.mergeAttempt === 0) {
+                return;
+            }
+            if (mergeToastId.current) {
+                toast.update(mergeToastId.current, {
+                    description: 'Синхронизация избранного...',
+                    type: 'loading',
+                    timeout: 0,
+                    actionProps: undefined,
+                });
+            } else {
+                mergeToastId.current = toast.add({
+                    description: 'Синхронизация избранного...',
+                    type: 'loading',
+                    timeout: 0,
+                });
+            }
+
+            return;
+        }
+
+        if (favorites.mergeStatus === 'error') {
+            if (!mergeToastId.current) {
+                mergeToastId.current = toast.add({
+                    description: 'Не удалось синхронизировать избранное',
+                    type: 'error',
+                    timeout: 0,
+                    actionProps: {
+                        children: 'Повторить',
                         onClick: favorites.retryMerge,
                     },
-                }
-              : favorites.mutationError
-                ? {
-                      message: 'Произошла ошибка. Попробуйте ещё раз.',
-                  }
-                : null;
+                });
+
+                return;
+            }
+
+            toast.update(mergeToastId.current, {
+                description: 'Не удалось синхронизировать избранное',
+                type: 'error',
+                timeout: 0,
+                actionProps: {
+                    children: 'Повторить',
+                    onClick: favorites.retryMerge,
+                },
+            });
+
+            return;
+        }
+
+        if (mergeToastId.current) {
+            toast.close(mergeToastId.current);
+            mergeToastId.current = null;
+        }
+    }, [favorites.mergeAttempt, favorites.mergeStatus, favorites.retryMerge]);
+
+    useEffect(() => {
+        if (favorites.mutationError) {
+            toast.add({
+                description: 'Произошла ошибка. Попробуйте ещё раз',
+                type: 'error',
+            });
+        }
+    }, [favorites.mutationError]);
 
     return (
-        <>
-            <FavoritesContext.Provider value={contextValue}>
-                {children}
-            </FavoritesContext.Provider>
-
-            {notification && <NotificationToast {...notification} />}
-        </>
+        <FavoritesContext.Provider value={contextValue}>
+            {children}
+        </FavoritesContext.Provider>
     );
 }
 
