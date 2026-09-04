@@ -1,9 +1,23 @@
+import { Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { CartItemRemoveButton } from '@/app/(shop)/cart/_components/CartItemRemoveButton';
+import { Button } from '@/components/button/Button';
+import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
 import { FavoriteButton } from '@/components/favorite/FavoriteButton';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { formatPrice } from '@/lib/format-price';
 import { routes } from '@/routes';
 import type { CartItemDto } from '@/services/cart/cart.types';
@@ -21,6 +35,8 @@ export function CartItem({ item }: CartItemProps) {
         item.snapshot.effectivePrice !== product.effectivePrice;
 
     const mainImage = product.images[0];
+
+    const { removeCartEntry } = useCartContext();
 
     return (
         <article className="flex gap-4 py-4">
@@ -73,7 +89,41 @@ export function CartItem({ item }: CartItemProps) {
                         variant="neutral"
                     />
 
-                    <CartItemRemoveButton productId={product.id} />
+                    <AlertDialog>
+                        <AlertDialogTrigger render={<CartItemRemoveButton />} />
+                        <AlertDialogContent size="sm">
+                            <AlertDialogHeader>
+                                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                    <Trash2Icon />
+                                </AlertDialogMedia>
+                                <AlertDialogTitle>
+                                    Удалить товар?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Товар будет удалён из корзины.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel
+                                    render={
+                                        <Button
+                                            size="sm"
+                                            variant="neutral"
+                                        >
+                                            Отмена
+                                        </Button>
+                                    }
+                                />
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => removeCartEntry(product.id)}
+                                >
+                                    Удалить
+                                </Button>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
 
                     <FavoriteButton productId={product.id} />
                 </div>
