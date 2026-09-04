@@ -9,9 +9,10 @@ import { useCartContext } from '@/components/cart/CartContext';
 import { PageMessage } from '@/components/PageMessage';
 import { routes } from '@/routes';
 import type { ProductDto } from '@/services/product/product.types';
+import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 
 export function CartContent() {
-    const { cartEntries, initialCartItems } = useCartContext();
+    const { cartEntries, initialCartItems, isHydrated } = useCartContext();
 
     const [products, setProducts] = useState<ProductDto[]>(
         initialCartItems.map(({ product }) => product),
@@ -63,6 +64,16 @@ export function CartContent() {
             })),
         [cartEntries, productsById],
     );
+
+    if (!isHydrated) {
+        return (
+            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
+                {Array.from({ length: 3 }, (_, index) => (
+                    <CartItemSkeleton key={index} />
+                ))}
+            </div>
+        );
+    }
 
     if (cartEntries.length === 0) {
         return (

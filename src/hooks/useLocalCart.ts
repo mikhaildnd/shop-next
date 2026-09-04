@@ -26,6 +26,7 @@ export interface UseLocalCartResult {
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
     mutationError: Error | null;
+    isHydrated: boolean;
 }
 
 export function useLocalCart(): UseLocalCartResult {
@@ -33,6 +34,12 @@ export function useLocalCart(): UseLocalCartResult {
         subscribeToCart,
         getCartEntries,
         getServerCartEntries,
+    );
+
+    const isHydrated = useSyncExternalStore(
+        subscribeToCart,
+        () => true,
+        () => false,
     );
 
     const [mutationError, setMutationError] = useState<Error | null>(null);
@@ -139,5 +146,6 @@ export function useLocalCart(): UseLocalCartResult {
         cartCount,
         getCartEntryQuantity,
         mutationError,
+        isHydrated,
     };
 }
