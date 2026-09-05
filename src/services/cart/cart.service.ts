@@ -3,6 +3,7 @@ import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
 import { productInclude } from '@/services/product/product.constants';
 import { mapProductToDto } from '@/services/product/product.mapper';
+import { CartStockError } from '@/services/cart/cart.error';
 
 export async function getCart(userId: string): Promise<CartDto> {
     const cart = await prisma.cart.findUnique({
@@ -91,10 +92,37 @@ export async function incrementCartItem(
         return;
     }
 
-    await prisma.cartItem.updateMany({
+    const cartItem = await prisma.cartItem.findUnique({
         where: {
-            cartId: cart.id,
-            productId,
+            cartId_productId: {
+                cartId: cart.id,
+                productId,
+            },
+        },
+        select: {
+            quantity: true,
+            product: {
+                select: {
+                    stock: true,
+                },
+            },
+        },
+    });
+
+    if (!cartItem) {
+        return;
+    }
+
+    if (cartItem.quantity >= cartItem.product.stock) {
+        throw new CartStockError();
+    }
+
+    await prisma.cartItem.update({
+        where: {
+            cartId_productId: {
+                cartId: cart.id,
+                productId,
+            },
         },
         data: {
             quantity: {
