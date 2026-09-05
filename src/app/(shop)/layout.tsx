@@ -5,6 +5,7 @@ import { CartProvider } from '@/components/cart/CartContext';
 import { FavoritesProvider } from '@/components/favorite/FavoritesContext';
 import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
+import { MobileNavigation } from '@/components/header/MobileNavigation';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { getCart } from '@/services/cart/cart.service';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
@@ -41,6 +42,10 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
                 <Header user={profileUser} />
                 <main className="wrapper grow overflow-x-clip">{children}</main>
                 <Footer className="pb-(--bottom-nav-height) md:pb-0" />
+                <MobileNavigation
+                    className="md:hidden"
+                    user={profileUser}
+                />
             </FavoritesProvider>
         </CartProvider>
     );
