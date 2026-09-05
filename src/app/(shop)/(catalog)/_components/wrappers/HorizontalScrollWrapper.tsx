@@ -15,7 +15,7 @@ export function HorizontalScrollWrapper({
         <div
             className={cn(className, '-mx-(--section-padding) overflow-x-auto')}
         >
-            <div className="px-(--section-padding)">{children}</div>
+            <div className="w-max px-(--section-padding)">{children}</div>
         </div>
     );
 }

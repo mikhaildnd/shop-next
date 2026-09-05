@@ -24,6 +24,7 @@ interface CartContextValue {
     clearCart: () => void | Promise<void>;
     mutationError: Error | null;
     initialCartItems: CartItemDto[];
+    isHydrated: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -73,6 +74,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         clearCart: cart.clearCart,
         mutationError: cart.mutationError,
         initialCartItems: [],
+        isHydrated: cart.isHydrated,
     };
 
     useEffect(() => {
@@ -111,6 +113,7 @@ function ServerCartProvider({
         clearCart: cart.clearCart,
         mutationError: cart.mutationError,
         initialCartItems: cart.initialCartItems,
+        isHydrated: true,
     };
 
     const mergeToastId = useRef<string | null>(null);

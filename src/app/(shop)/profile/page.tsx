@@ -1,3 +1,4 @@
+import { Trash2Icon } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 import { ProfileBadge } from '@/app/(shop)/profile/_components/ProfileBadge';
@@ -7,8 +8,20 @@ import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePasswor
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
 import { deleteAccount } from '@/app/(shop)/profile/actions';
 import { getSession } from '@/auth/session';
+import { Button } from '@/components/button/Button';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { SubmitButton } from '@/components/button/SubmitButton';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { routes } from '@/routes';
 import { getUserById } from '@/services/user/user.service';
 
@@ -64,15 +77,53 @@ export default async function ProfilePage() {
                     variant="destructive"
                 >
                     <div className="flex flex-col items-start gap-3">
-                        <form action={deleteAccount}>
-                            <SubmitButton
-                                size="sm"
-                                variant="destructive"
-                                pendingText="Удаление аккаунта"
-                            >
-                                Удалить аккаунт
-                            </SubmitButton>
-                        </form>
+                        <AlertDialog>
+                            <AlertDialogTrigger
+                                render={
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                    >
+                                        Удалить аккаунт
+                                    </Button>
+                                }
+                            />
+                            <AlertDialogContent size="default">
+                                <AlertDialogHeader>
+                                    <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                        <Trash2Icon />
+                                    </AlertDialogMedia>
+                                    <AlertDialogTitle>
+                                        Удалить аккаунт?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Восстановить аккаунт будет невозможно
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel
+                                        render={
+                                            <Button
+                                                size="sm"
+                                                variant="neutral"
+                                            >
+                                                Отмена
+                                            </Button>
+                                        }
+                                    />
+                                    <form action={deleteAccount}>
+                                        <SubmitButton
+                                            className="w-full"
+                                            size="sm"
+                                            variant="destructive"
+                                            pendingText="Удаление аккаунта"
+                                        >
+                                            Удалить аккаунт
+                                        </SubmitButton>
+                                    </form>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </ProfileSection>
             </div>

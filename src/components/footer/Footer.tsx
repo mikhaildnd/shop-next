@@ -14,7 +14,7 @@ export function Footer({ className }: { className?: string }) {
     return (
         <footer
             className={cn(
-                'wrapper bg-white text-(--text-color-dark) shadow-(--shadow-default)',
+                'wrapper bg-white text-(--text-color-dark) shadow-(--shadow-top)',
                 className,
             )}
         >
@@ -38,7 +38,7 @@ export function Footer({ className }: { className?: string }) {
                 <p>{`© ${currentYear} Next shop, Inc.`}</p>
                 <Link
                     href="/"
-                    className="text-xs text-(--color-primary) underline transition-colors hover:text-(--color-green)"
+                    className="text-xs link-style"
                 >
                     Политика обработки персональных данных
                 </Link>
