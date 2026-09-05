@@ -6,6 +6,8 @@
 
 :root {
   --bottom-nav-height: 64px;
+  --transition-duration-default: 300ms;
+
   --spacing: 0.25rem;
 
   --section-padding: 12px;
@@ -22,6 +24,8 @@
   --placeholder-text-color: #8f8f8f;
 
   --shadow-default: 2px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  --shadow-top: 0 -1px 5px 0 rgba(0, 0, 0, 0.05);
+  --shadow-bottom: 0 1px 5px 0 rgba(0, 0, 0, 0.05);
   --shadow-card-shop: 4px 8px 16px 0px rgba(255, 102, 51, 0.2);
 
   --background: oklch(1 0 0);
@@ -109,7 +113,6 @@
 @utility link-style {
   @apply text-(--color-primary)
   underline-offset-1
-  transition-colors
   hover:underline;
 }
 
