@@ -6,17 +6,20 @@ export const PRODUCTS_SLIDER_CONFIG = {
         slidesPerGroup: 2,
         spaceBetween: 8,
         slidesOffsetBefore: 12,
+        slidesOffsetAfter: 12,
     },
     [BREAKPOINTS.sm]: {
         slidesPerView: 3.2,
         slidesPerGroup: 3,
         spaceBetween: 12,
         slidesOffsetBefore: 12,
+        slidesOffsetAfter: 12,
     },
     [BREAKPOINTS.lg]: {
         slidesPerView: 4,
         slidesPerGroup: 4,
         spaceBetween: 16,
         slidesOffsetBefore: 0,
+        slidesOffsetAfter: 0,
     },
 };
