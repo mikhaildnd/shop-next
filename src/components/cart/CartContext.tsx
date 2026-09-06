@@ -1,14 +1,22 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
-import { createContext, useContext } from 'react';
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useEffectEvent,
+    useRef,
+    useState,
+} from 'react';
 
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { toast } from '@/components/ui/toast';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
+import type { CartDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
@@ -23,8 +31,9 @@ interface CartContextValue {
     removeCartEntry: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
     mutationError: Error | null;
-    initialCartItems: CartItemDto[];
     isHydrated: boolean;
+    products: ProductDto[];
+    isLoadingProducts: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -62,6 +71,47 @@ export function CartProvider({
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
     const cart = useLocalCart();
+    const [products, setProducts] = useState<ProductDto[]>([]);
+
+    const productIdsKey = [...cart.cartEntries]
+        .map((item) => item.productId)
+        .sort()
+        .join(',');
+
+    const getProducts = useEffectEvent(async () => {
+        return getProductsByIdsAction(
+            cart.cartEntries.map((item) => item.productId),
+        );
+    });
+
+    useEffect(() => {
+        if (!cart.isHydrated || productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled) {
+                setProducts(nextProducts);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [cart.isHydrated, productIdsKey]);
+
+    const isLoadingProducts =
+        cart.isHydrated &&
+        cart.cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
@@ -73,8 +123,9 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
         mutationError: cart.mutationError,
-        initialCartItems: [],
         isHydrated: cart.isHydrated,
+        products,
+        isLoadingProducts,
     };
 
     useEffect(() => {
@@ -102,6 +153,62 @@ function ServerCartProvider({
         initialCartState,
     });
 
+    const [products, setProducts] = useState<ProductDto[]>(
+        initialCartState.items.map(({ product }) => product),
+    );
+
+    const productIdsKey = [...cart.cartEntries]
+        .map((item) => item.productId)
+        .sort()
+        .join(',');
+
+    const getProducts = useEffectEvent(async () => {
+        const missingProductIds = cart.cartEntries
+            .map((entry) => entry.productId)
+            .filter(
+                (productId) =>
+                    !products.some((product) => product.id === productId),
+            );
+
+        if (missingProductIds.length === 0) {
+            return [];
+        }
+
+        return getProductsByIdsAction(missingProductIds);
+    });
+
+    useEffect(() => {
+        if (productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled && nextProducts.length > 0) {
+                setProducts((currentProducts) => [
+                    ...currentProducts,
+                    ...nextProducts,
+                ]);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [productIdsKey]);
+
+    const isLoadingProducts =
+        cart.cartEntries.length > 0 &&
+        cart.cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
+
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
         cartCount: cart.cartCount,
@@ -112,8 +219,9 @@ function ServerCartProvider({
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
         mutationError: cart.mutationError,
-        initialCartItems: cart.initialCartItems,
         isHydrated: true,
+        products,
+        isLoadingProducts,
     };
 
     const mergeToastId = useRef<string | null>(null);

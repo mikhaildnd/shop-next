@@ -1,19 +1,12 @@
 import { CartItem } from '@/app/(shop)/cart/_components/CartItem';
-import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
-import type { CartEntry } from '@/lib/cart/cart.types';
 import { cn } from '@/lib/cn';
-import type { ProductDto } from '@/services/product/product.types';
-
-type CartListItem = CartEntry & {
-    product?: ProductDto;
-};
+import type { CartItemDto } from '@/services/cart/cart.types';
 
 interface CartItemsProps {
-    availableItems: CartListItem[];
-    unavailableItems: CartListItem[];
+    availableItems: CartItemDto[];
+    unavailableItems: CartItemDto[];
     className?: string;
 }
-
 export function CartItems({
     availableItems,
     unavailableItems,
@@ -22,20 +15,12 @@ export function CartItems({
     return (
         <div className={cn('flex flex-col gap-6', className)}>
             <div className="flex flex-col divide-y divide-gray-200">
-                {availableItems.map((item) =>
-                    item.product ? (
-                        <CartItem
-                            key={item.productId}
-                            item={{
-                                product: item.product,
-                                quantity: item.quantity,
-                                snapshot: item.snapshot,
-                            }}
-                        />
-                    ) : (
-                        <CartItemSkeleton key={item.productId} />
-                    ),
-                )}
+                {availableItems.map((item) => (
+                    <CartItem
+                        key={item.product.id}
+                        item={item}
+                    />
+                ))}
             </div>
 
             {unavailableItems.length > 0 && (
@@ -47,12 +32,8 @@ export function CartItems({
                     <div className="flex flex-col divide-y divide-gray-200">
                         {unavailableItems.map((item) => (
                             <CartItem
-                                key={item.productId}
-                                item={{
-                                    product: item.product!,
-                                    quantity: item.quantity,
-                                    snapshot: item.snapshot,
-                                }}
+                                key={item.product.id}
+                                item={item}
                             />
                         ))}
                     </div>
