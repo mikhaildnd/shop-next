@@ -47,6 +47,19 @@ export async function addCartItem(
     snapshot: CartProductSnapshot,
 ): Promise<void> {
     await prisma.$transaction(async (tx) => {
+        const product = await tx.product.findUnique({
+            where: {
+                id: productId,
+            },
+            select: {
+                stock: true,
+            },
+        });
+
+        if (product?.stock === 0) {
+            throw new CartStockError();
+        }
+
         const cart = await tx.cart.upsert({
             where: {
                 userId,
