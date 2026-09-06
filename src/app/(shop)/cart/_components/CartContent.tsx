@@ -17,8 +17,7 @@ interface CartContentProps {
 }
 
 export function CartContent({ className }: CartContentProps) {
-    const { cartEntries, initialCartItems, isHydrated, cartCount } =
-        useCartContext();
+    const { cartEntries, initialCartItems, isHydrated } = useCartContext();
 
     const [products, setProducts] = useState<ProductDto[]>(
         initialCartItems.map(({ product }) => product),
@@ -71,16 +70,27 @@ export function CartContent({ className }: CartContentProps) {
         [cartEntries, productsById],
     );
 
+    const availableItems = items.filter(
+        (item) => !item.product || item.product.stock > 0,
+    );
+
+    const unavailableItems = items.filter((item) => item.product?.stock === 0);
+
     const isLoadingProducts = items.some((item) => !item.product);
 
-    const regularPriceTotal = items.reduce(
+    const regularPriceTotal = availableItems.reduce(
         (sum, item) => sum + (item.product?.regularPrice ?? 0) * item.quantity,
         0,
     );
 
-    const effectivePriceTotal = items.reduce(
+    const effectivePriceTotal = availableItems.reduce(
         (sum, item) =>
             sum + (item.product?.effectivePrice ?? 0) * item.quantity,
+        0,
+    );
+
+    const availableCartCount = availableItems.reduce(
+        (sum, item) => sum + item.quantity,
         0,
     );
 
@@ -91,6 +101,15 @@ export function CartContent({ className }: CartContentProps) {
             item.product &&
             item.snapshot.effectivePrice !== item.product.effectivePrice,
     );
+
+    const hasStockIssues = items.some(
+        (item) =>
+            item.product &&
+            item.product.stock > 0 &&
+            item.quantity > item.product.stock,
+    );
+
+    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
 
     if (!isHydrated) {
         return (
@@ -128,16 +147,18 @@ export function CartContent({ className }: CartContentProps) {
 
             <div className="grid items-start gap-6 lg:grid-cols-3">
                 <CartItems
-                    items={items}
+                    availableItems={availableItems}
+                    unavailableItems={unavailableItems}
                     className="lg:col-span-2"
                 />
 
                 {!isLoadingProducts && (
                     <CartSummary
-                        cartCount={cartCount}
+                        cartCount={availableCartCount}
                         regularPriceTotal={regularPriceTotal}
                         discountAmount={discountAmount}
                         effectivePriceTotal={effectivePriceTotal}
+                        isCheckoutDisabled={isCheckoutDisabled}
                     />
                 )}
             </div>

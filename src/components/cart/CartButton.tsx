@@ -16,7 +16,12 @@ export function CartButton({ product, className }: CartButtonProps) {
     const isInCart = getCartEntryQuantity(product.id) !== undefined;
 
     if (isInCart) {
-        return <CartItemQuantity productId={product.id} />;
+        return (
+            <CartItemQuantity
+                productId={product.id}
+                maxQuantity={product.stock}
+            />
+        );
     }
 
     return (

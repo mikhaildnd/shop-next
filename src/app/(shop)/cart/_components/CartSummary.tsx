@@ -19,6 +19,7 @@ interface CartSummaryProps {
     regularPriceTotal: number;
     discountAmount: number;
     effectivePriceTotal: number;
+    isCheckoutDisabled: boolean;
 }
 
 interface SummaryDetailsProps {
@@ -33,6 +34,7 @@ export function CartSummary({
     regularPriceTotal,
     discountAmount,
     effectivePriceTotal,
+    isCheckoutDisabled,
 }: CartSummaryProps) {
     const { direction } = useScrollDirection();
     const isNavigationHidden = direction === 'down';
@@ -47,7 +49,9 @@ export function CartSummary({
                     effectivePriceTotal={effectivePriceTotal}
                 />
 
-                <Button>Перейти к оформлению</Button>
+                <Button disabled={isCheckoutDisabled}>
+                    Перейти к оформлению
+                </Button>
             </div>
 
             <div className="lg:hidden">
@@ -78,7 +82,9 @@ export function CartSummary({
                             </span>
                         </DrawerTrigger>
 
-                        <Button>К оформлению</Button>
+                        <Button disabled={isCheckoutDisabled}>
+                            К оформлению
+                        </Button>
                     </div>
 
                     <DrawerContent>
@@ -94,7 +100,9 @@ export function CartSummary({
                                 effectivePriceTotal={effectivePriceTotal}
                             />
 
-                            <Button>Перейти к оформлению</Button>
+                            <Button disabled={isCheckoutDisabled}>
+                                Перейти к оформлению
+                            </Button>
                         </div>
                     </DrawerContent>
                 </Drawer>
