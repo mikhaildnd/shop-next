@@ -1,13 +1,11 @@
-'use client';
-
 import { FilterChip } from '@/app/(shop)/(catalog)/_components/product-filters/FilterChip';
 import { FilterSection } from '@/app/(shop)/(catalog)/_components/product-filters/FilterSection';
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
-import { useUpdateProductListing } from '@/app/(shop)/(catalog)/_hooks/useUpdateProductListing';
 import { DISCOUNT_FILTER_VALUES } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 
 interface ProductDiscountFilterProps {
     maxDiscount: number;
+    value: number | null;
+    onChange: (value: number) => void;
 }
 
 function getAvailableDiscounts(
@@ -19,22 +17,10 @@ function getAvailableDiscounts(
 
 export function ProductDiscountFilter({
     maxDiscount,
+    value,
+    onChange,
 }: ProductDiscountFilterProps) {
-    const updateProductListing = useUpdateProductListing();
-
-    const {
-        filters: { discount: currentDiscount },
-    } = useProductListing();
-
     const availableDiscounts = getAvailableDiscounts(maxDiscount);
-
-    const handleClick = (value: number) => {
-        updateProductListing({
-            filters: {
-                discount: currentDiscount === value ? null : value,
-            },
-        });
-    };
 
     if (!availableDiscounts.length) {
         return null;
@@ -43,19 +29,15 @@ export function ProductDiscountFilter({
     return (
         <FilterSection title="Скидка">
             <div className="flex flex-wrap items-start gap-2 text-gray-700">
-                {availableDiscounts.map((value) => {
-                    const active = currentDiscount === value;
-
-                    return (
-                        <FilterChip
-                            key={value}
-                            active={active}
-                            onClick={() => handleClick(value)}
-                        >
-                            от {value}%
-                        </FilterChip>
-                    );
-                })}
+                {availableDiscounts.map((discount) => (
+                    <FilterChip
+                        key={discount}
+                        active={value === discount}
+                        onClick={() => onChange(discount)}
+                    >
+                        от {discount}%
+                    </FilterChip>
+                ))}
             </div>
         </FilterSection>
     );

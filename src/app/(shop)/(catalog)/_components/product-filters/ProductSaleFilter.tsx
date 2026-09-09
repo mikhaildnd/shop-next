@@ -1,30 +1,22 @@
-'use client';
-
 import { FilterCheckbox } from '@/app/(shop)/(catalog)/_components/product-filters/FilterCheckbox';
 import { FilterSection } from '@/app/(shop)/(catalog)/_components/product-filters/FilterSection';
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
-import { useUpdateProductListing } from '@/app/(shop)/(catalog)/_hooks/useUpdateProductListing';
 
-export function ProductSaleFilter() {
-    const updateProductListing = useUpdateProductListing();
+interface ProductSaleFilterProps {
+    checked: boolean;
+    onChange: () => void;
+}
 
-    const { filters } = useProductListing();
-
-    const handleChange = () => {
-        updateProductListing({
-            filters: {
-                sale: !filters.sale,
-            },
-        });
-    };
-
+export function ProductSaleFilter({
+    checked,
+    onChange,
+}: ProductSaleFilterProps) {
     return (
         <FilterSection>
             <FilterCheckbox
                 id="sale"
-                checked={filters.sale}
+                checked={checked}
                 label="Только со скидкой"
-                onChange={handleChange}
+                onChange={onChange}
             />
         </FilterSection>
     );
