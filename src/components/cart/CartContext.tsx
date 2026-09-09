@@ -6,12 +6,12 @@ import {
     useContext,
     useEffect,
     useEffectEvent,
-    useRef,
     useState,
 } from 'react';
 
+import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
-import { toast } from '@/components/ui/toast';
+import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
@@ -30,7 +30,6 @@ interface CartContextValue {
     decrementCartEntry: (productId: string) => void | Promise<void>;
     removeCartEntry: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
-    mutationError: Error | null;
     isHydrated: boolean;
     products: ProductDto[];
     isLoadingProducts: boolean;
@@ -70,8 +69,9 @@ export function CartProvider({
 }
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
-    const cart = useLocalCart();
     const [products, setProducts] = useState<ProductDto[]>([]);
+
+    const cart = useLocalCart();
 
     const productIdsKey = [...cart.cartEntries]
         .map((item) => item.productId)
@@ -122,21 +122,10 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         decrementCartEntry: cart.decrementCartEntry,
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
-        mutationError: cart.mutationError,
         isHydrated: cart.isHydrated,
         products,
         isLoadingProducts,
     };
-
-    useEffect(() => {
-        if (cart.mutationError) {
-            toast.add({
-                id: 'cart-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [cart.mutationError]);
 
     return (
         <CartContext.Provider value={contextValue}>
@@ -151,6 +140,10 @@ function ServerCartProvider({
 }: ServerCartProviderProps) {
     const cart = useServerCart({
         initialCartState,
+    });
+
+    const merge = useCartMerge({
+        replaceCart: cart.replaceCart,
     });
 
     const [products, setProducts] = useState<ProductDto[]>(
@@ -218,85 +211,23 @@ function ServerCartProvider({
         decrementCartEntry: cart.decrementCartEntry,
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
-        mutationError: cart.mutationError,
         isHydrated: true,
         products,
         isLoadingProducts,
     };
 
-    const mergeToastId = useRef<string | null>(null);
-
-    useEffect(() => {
-        if (cart.mergeStatus === 'merging') {
-            if (cart.mergeAttempt === 0) {
-                return;
-            }
-            if (mergeToastId.current) {
-                toast.update(mergeToastId.current, {
-                    description: 'Синхронизация корзины...',
-                    type: 'loading',
-                    timeout: 0,
-                    actionProps: undefined,
-                });
-            } else {
-                mergeToastId.current = toast.add({
-                    description: 'Синхронизация корзины...',
-                    type: 'loading',
-                    timeout: 0,
-                });
-            }
-
-            return;
-        }
-
-        if (cart.mergeStatus === 'error') {
-            if (!mergeToastId.current) {
-                mergeToastId.current = toast.add({
-                    description: 'Не удалось синхронизировать корзину',
-                    type: 'error',
-                    timeout: 0,
-                    actionProps: {
-                        children: 'Повторить',
-                        onClick: cart.retryMerge,
-                    },
-                });
-
-                return;
-            }
-
-            toast.update(mergeToastId.current, {
-                description: 'Не удалось синхронизировать корзину',
-                type: 'error',
-                timeout: 0,
-                actionProps: {
-                    children: 'Повторить',
-                    onClick: cart.retryMerge,
-                },
-            });
-
-            return;
-        }
-
-        if (mergeToastId.current) {
-            toast.close(mergeToastId.current);
-            mergeToastId.current = null;
-        }
-    }, [cart.mergeAttempt, cart.mergeStatus, cart.retryMerge]);
-
-    useEffect(() => {
-        if (cart.mutationError) {
-            toast.add({
-                id: 'cart-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [cart.mutationError]);
-
     return (
-        <CartContext.Provider value={contextValue}>
-            {children}
-        </CartContext.Provider>
+        <>
+            <CartContext.Provider value={contextValue}>
+                {children}
+            </CartContext.Provider>
+
+            <CartMergeStatus
+                mergeStatus={merge.mergeStatus}
+                mergeAttempt={merge.mergeAttempt}
+                retryMerge={merge.retryMerge}
+            />
+        </>
     );
 }
 

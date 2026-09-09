@@ -7,3 +7,5 @@ export type CartEntry = {
     quantity: number;
     snapshot: CartProductSnapshot;
 };
+
+export type MergeStatus = 'idle' | 'merging' | 'error';

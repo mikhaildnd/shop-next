@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartContext } from '@/components/cart/CartContext';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 type CartItemQuantitySize = 'sm' | 'md';
@@ -54,6 +55,30 @@ export function CartItemQuantity({
 
     const isIncrementDisabled = quantity >= maxQuantity;
 
+    const handleDecrement = async () => {
+        try {
+            await decrementCartEntry(productId);
+        } catch {
+            toast.add({
+                id: 'cart-decrement-error',
+                description: 'Не удалось уменьшить количество товара в корзине',
+                type: 'error',
+            });
+        }
+    };
+
+    const handleIncrement = async () => {
+        try {
+            await incrementCartEntry(productId);
+        } catch {
+            toast.add({
+                id: 'cart-increment-error',
+                description: 'Не удалось увеличить количество товара в корзине',
+                type: 'error',
+            });
+        }
+    };
+
     return (
         <div
             className={cn(
@@ -70,7 +95,7 @@ export function CartItemQuantity({
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
-                onClick={() => decrementCartEntry(productId)}
+                onClick={handleDecrement}
             >
                 −
             </button>
@@ -87,7 +112,7 @@ export function CartItemQuantity({
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
-                onClick={() => incrementCartEntry(productId)}
+                onClick={handleIncrement}
             >
                 +
             </button>

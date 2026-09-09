@@ -1,6 +1,5 @@
 import { prisma } from '@/db';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import { CartStockError } from '@/services/cart/cart.error';
 import type { CartDto } from '@/services/cart/cart.types';
 import { productInclude } from '@/services/product/product.constants';
 import { mapProductToDto } from '@/services/product/product.mapper';
@@ -46,45 +45,30 @@ export async function addCartItem(
     productId: string,
     snapshot: CartProductSnapshot,
 ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-        const product = await tx.product.findUnique({
-            where: {
-                id: productId,
-            },
-            select: {
-                stock: true,
-            },
-        });
+    const cart = await prisma.cart.upsert({
+        where: {
+            userId,
+        },
+        create: {
+            userId,
+        },
+        update: {},
+    });
 
-        if (product?.stock === 0) {
-            throw new CartStockError();
-        }
-
-        const cart = await tx.cart.upsert({
-            where: {
-                userId,
-            },
-            create: {
-                userId,
-            },
-            update: {},
-        });
-
-        await tx.cartItem.upsert({
-            where: {
-                cartId_productId: {
-                    cartId: cart.id,
-                    productId,
-                },
-            },
-            create: {
+    await prisma.cartItem.upsert({
+        where: {
+            cartId_productId: {
                 cartId: cart.id,
                 productId,
-                quantity: 1,
-                snapshotEffectivePrice: snapshot.effectivePrice,
             },
-            update: {},
-        });
+        },
+        create: {
+            cartId: cart.id,
+            productId,
+            quantity: 1,
+            snapshotEffectivePrice: snapshot.effectivePrice,
+        },
+        update: {},
     });
 }
 
@@ -114,20 +98,11 @@ export async function incrementCartItem(
         },
         select: {
             quantity: true,
-            product: {
-                select: {
-                    stock: true,
-                },
-            },
         },
     });
 
     if (!cartItem) {
         return;
-    }
-
-    if (cartItem.quantity >= cartItem.product.stock) {
-        throw new CartStockError();
     }
 
     await prisma.cartItem.update({
@@ -149,62 +124,60 @@ export async function decrementCartItem(
     userId: string,
     productId: string,
 ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-        const cart = await tx.cart.findUnique({
-            where: {
-                userId,
+    const cart = await prisma.cart.findUnique({
+        where: {
+            userId,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    if (!cart) {
+        return;
+    }
+
+    const cartItem = await prisma.cartItem.findUnique({
+        where: {
+            cartId_productId: {
+                cartId: cart.id,
+                productId,
             },
-            select: {
-                id: true,
-            },
-        });
+        },
+        select: {
+            quantity: true,
+        },
+    });
 
-        if (!cart) {
-            return;
-        }
+    if (!cartItem) {
+        return;
+    }
 
-        const cartItem = await tx.cartItem.findUnique({
-            where: {
-                cartId_productId: {
-                    cartId: cart.id,
-                    productId,
-                },
-            },
-            select: {
-                quantity: true,
-            },
-        });
-
-        if (!cartItem) {
-            return;
-        }
-
-        if (cartItem.quantity === 1) {
-            await tx.cartItem.delete({
-                where: {
-                    cartId_productId: {
-                        cartId: cart.id,
-                        productId,
-                    },
-                },
-            });
-
-            return;
-        }
-
-        await tx.cartItem.update({
+    if (cartItem.quantity === 1) {
+        await prisma.cartItem.delete({
             where: {
                 cartId_productId: {
                     cartId: cart.id,
                     productId,
                 },
             },
-            data: {
-                quantity: {
-                    decrement: 1,
-                },
-            },
         });
+
+        return;
+    }
+
+    await prisma.cartItem.update({
+        where: {
+            cartId_productId: {
+                cartId: cart.id,
+                productId,
+            },
+        },
+        data: {
+            quantity: {
+                decrement: 1,
+            },
+        },
     });
 }
 

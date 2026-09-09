@@ -3,8 +3,9 @@
 import { Button } from '@/components/button/Button';
 import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
-import type { ProductDto } from '@/services/product/product.types';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartButtonProps {
     product: ProductDto;
@@ -16,6 +17,20 @@ export function CartButton({ product, className }: CartButtonProps) {
 
     const isOutOfStock = product.stock === 0;
     const isInCart = getCartEntryQuantity(product.id) !== undefined;
+
+    const handleAddCartEntry = async () => {
+        try {
+            await addCartEntry(product.id, {
+                effectivePrice: product.effectivePrice,
+            });
+        } catch {
+            toast.add({
+                id: 'cart-add-error',
+                description: 'Не удалось добавить товар в корзину',
+                type: 'error',
+            });
+        }
+    };
 
     return (
         <div className={cn('flex w-full', className)}>
@@ -29,14 +44,7 @@ export function CartButton({ product, className }: CartButtonProps) {
                 <Button
                     className="flex-1"
                     disabled={isOutOfStock}
-                    onClick={
-                        isOutOfStock
-                            ? undefined
-                            : () =>
-                                  addCartEntry(product.id, {
-                                      effectivePrice: product.effectivePrice,
-                                  })
-                    }
+                    onClick={isOutOfStock ? undefined : handleAddCartEntry}
                     variant="accent"
                 >
                     {isOutOfStock ? 'Нет в наличии' : 'В корзину'}
