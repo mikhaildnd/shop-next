@@ -3,6 +3,7 @@ import type { ProductFilters } from '@/services/product/filters/filter.types';
 import { getProductWhere } from '@/services/product/filters/get-product-where';
 
 type BuildProductQueryOptions = {
+    query?: string | null;
     filters?: ProductFilters;
     categorySlugs?: string[];
     collectionSlug?: string;
@@ -11,6 +12,7 @@ type BuildProductQueryOptions = {
 };
 
 export function buildProductWhere({
+    query,
     filters,
     categorySlugs,
     collectionSlug,
@@ -18,7 +20,7 @@ export function buildProductWhere({
     favoritesForUserId,
 }: BuildProductQueryOptions) {
     const where: Prisma.ProductWhereInput = filters
-        ? getProductWhere(filters)
+        ? getProductWhere({ query: query ?? null, filters })
         : {};
 
     if (categorySlugs?.length) {

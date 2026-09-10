@@ -29,7 +29,13 @@ export default async function FavoritesPage({
 }: FavoritesPageProps) {
     const query = await searchParams;
 
-    const listing = parseProductListing(query);
+    const filterDefaults = {
+        inStock: false,
+    };
+
+    const listing = parseProductListing(query, {
+        defaultFilterOverrides: filterDefaults,
+    });
 
     const pagination = getPaginationParams({
         searchParams: query,
@@ -97,6 +103,7 @@ export default async function FavoritesPage({
                         currentPage={result.currentPage}
                         totalPages={totalPages}
                         startPage={result.startPage}
+                        defaultFilterOverrides={filterDefaults}
                     />
                 )}
             </CatalogPageLayout>
@@ -111,6 +118,7 @@ export default async function FavoritesPage({
             <FavoritesListing
                 listing={listing}
                 pagination={pagination}
+                defaultFilterOverrides={filterDefaults}
             />
         </CatalogPageLayout>
     );

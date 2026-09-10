@@ -89,10 +89,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     }
 
     const { products, totalProductsCount, listingStats } = await getProducts({
+        ...listing,
         take: pagination.take,
         skip: pagination.skip,
-        filters: listing.filters,
-        sort: listing.sort,
     });
 
     const totalPages = Math.max(

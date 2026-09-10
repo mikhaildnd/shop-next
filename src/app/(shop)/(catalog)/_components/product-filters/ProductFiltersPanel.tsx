@@ -6,20 +6,21 @@ import { ProductPriceFilter } from '@/app/(shop)/(catalog)/_components/product-f
 import { ProductSaleFilter } from '@/app/(shop)/(catalog)/_components/product-filters/ProductSaleFilter';
 import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
 import { getProductFilterVisibility } from '@/app/(shop)/(catalog)/lib/product-listing/filters/get-product-filter-visibility';
+import type { ProductFilters } from '@/services/product/filters/filter.types';
 import type { ProductListingStats } from '@/services/product/product.types';
-import { useUpdateProductListing } from '@/app/(shop)/(catalog)/_hooks/useUpdateProductListing';
 
 interface ProductFiltersPanelProps {
     listingStats: ProductListingStats;
+    defaultFilterOverrides?: Partial<ProductFilters>;
 }
 
 export function ProductFiltersPanel({
     listingStats,
+    defaultFilterOverrides,
 }: ProductFiltersPanelProps) {
-    const listing = useProductListing();
-    const updateProductListing = useUpdateProductListing();
-
-    const { filters } = listing;
+    const { filters, updateListing } = useProductListing({
+        defaultFilterOverrides,
+    });
 
     const filterState = getProductFilterVisibility({
         listingStats,
@@ -35,7 +36,7 @@ export function ProductFiltersPanel({
                     priceFrom={filters.priceFrom}
                     priceTo={filters.priceTo}
                     onChange={(priceFrom, priceTo) =>
-                        updateProductListing({
+                        updateListing({
                             filters: {
                                 priceFrom,
                                 priceTo,
@@ -49,7 +50,7 @@ export function ProductFiltersPanel({
                 <ProductInStockFilter
                     checked={filters.inStock}
                     onChange={() =>
-                        updateProductListing({
+                        updateListing({
                             filters: {
                                 inStock: !filters.inStock,
                             },
@@ -62,7 +63,7 @@ export function ProductFiltersPanel({
                 <ProductSaleFilter
                     checked={filters.sale}
                     onChange={() =>
-                        updateProductListing({
+                        updateListing({
                             filters: {
                                 sale: !filters.sale,
                             },
@@ -76,7 +77,7 @@ export function ProductFiltersPanel({
                     maxDiscount={listingStats.maxDiscount}
                     value={filters.discount}
                     onChange={(value) =>
-                        updateProductListing({
+                        updateListing({
                             filters: {
                                 discount:
                                     filters.discount === value ? null : value,

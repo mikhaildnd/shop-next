@@ -16,6 +16,7 @@ import type { ProductSort } from '@/services/product/sort/sort.types';
 type GetProductsParams = {
     take?: number;
     skip?: number;
+    query?: string | null;
     filters?: ProductFilters;
     sort: ProductSort;
     categorySlugs?: string[];
@@ -27,6 +28,7 @@ type GetProductsParams = {
 export async function getProducts({
     take,
     skip = 0,
+    query,
     sort,
     filters,
     categorySlugs,
@@ -35,6 +37,7 @@ export async function getProducts({
     favoritesForUserId,
 }: GetProductsParams): Promise<ProductsResponse> {
     const listingWhere = buildProductWhere({
+        query,
         filters,
         categorySlugs,
         collectionSlug,
@@ -43,6 +46,7 @@ export async function getProducts({
     });
 
     const priceStatsWhere = buildProductWhere({
+        query,
         filters: filters
             ? {
                   // Price aggregates should ignore the current price filter.

@@ -10,6 +10,10 @@ import type { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 import type { ProductSort } from '@/services/product/sort/sort.types';
 
+export type ProductListingOptions = {
+    defaultFilterOverrides?: Partial<ProductFilters>;
+};
+
 export type ProductSearchParams = {
     [SEARCH_QUERY_PARAM]?: string;
     [PRODUCT_SORT_PARAM]?: string;
@@ -35,10 +39,10 @@ export type ProductSortListingIssue =
     (typeof PRODUCT_SORT_LISTING_ISSUES)[keyof typeof PRODUCT_SORT_LISTING_ISSUES];
 
 export type ProductListingIssue =
-    | ProductSortListingIssue
-    | ProductFilterListingIssue;
+    ProductSortListingIssue | ProductFilterListingIssue;
 
 export type ParsedProductListing = {
+    query: string | null;
     filters: ProductFilters;
     sort: ProductSort;
     issues: ProductListingIssue[];

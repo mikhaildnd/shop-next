@@ -4,7 +4,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { PRODUCT_SORT_ITEMS } from '@/app/(shop)/(catalog)/_components/product-filters/product-sort-dropdown/product-sort.constants';
-import { useUpdateProductListing } from '@/app/(shop)/(catalog)/_hooks/useUpdateProductListing';
+import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
 import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
 import type { ProductSort } from '@/services/product/sort/sort.types';
@@ -18,7 +18,7 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
 
     const rootRef = useRef<HTMLDivElement>(null);
 
-    const updateProductListing = useUpdateProductListing();
+    const { updateListing } = useProductListing();
 
     const selectedOption =
         PRODUCT_SORT_ITEMS.find((option) => option.value === value) ??
@@ -27,7 +27,7 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
     const handleSelect = (sort: ProductSort) => {
         if (sort === selectedOption.value) return;
 
-        updateProductListing({
+        updateListing({
             sort,
         });
 

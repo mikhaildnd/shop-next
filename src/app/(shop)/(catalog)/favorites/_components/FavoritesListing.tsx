@@ -12,10 +12,12 @@ import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
 import { PageMessage } from '@/components/PageMessage';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
 import { routes } from '@/routes';
+import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 interface FavoritesListingProps {
     listing: ParsedProductListing;
     pagination: PaginationParams;
+    defaultFilterOverrides?: Partial<ProductFilters>;
 }
 
 type FavoritesResult = Awaited<
@@ -25,6 +27,7 @@ type FavoritesResult = Awaited<
 export function FavoritesListing({
     listing,
     pagination,
+    defaultFilterOverrides,
 }: FavoritesListingProps) {
     const { favoriteIds } = useFavoritesContext();
 
@@ -116,6 +119,7 @@ export function FavoritesListing({
             currentPage={result.currentPage}
             totalPages={totalPages}
             startPage={result.startPage}
+            defaultFilterOverrides={defaultFilterOverrides}
         />
     );
 }

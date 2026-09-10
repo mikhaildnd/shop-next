@@ -1,5 +1,4 @@
 export type ProductFilters = {
-    query: string | null;
     sale: boolean;
     discount: number | null;
     priceFrom: number | null;

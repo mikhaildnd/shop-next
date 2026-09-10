@@ -1,14 +1,13 @@
-import { normalizeQueryParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/normalize/normalize-query-param';
 import { parseDiscountParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse/parse-discount-param';
 import { parseInStockParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse/parse-in-stock-param';
 import { parsePriceFromParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse/parse-price-from-param';
 import { parsePriceToParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse/parse-price-to-param';
 import { parseSaleParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse/parse-sale-param';
+import { getProductFilterDefaults } from '@/app/(shop)/(catalog)/lib/product-listing/get-product-filter-defaults';
 import type {
     ProductFilterListingIssue,
     ProductSearchParams,
 } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
 import { isDefined } from '@/lib/type-guards/is-defined';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 
@@ -19,13 +18,21 @@ type ParsedProductFilters = {
 
 export function parseProductFilters(
     searchParams: ProductSearchParams,
+    defaultFilterOverrides: Partial<ProductFilters> = {},
 ): ParsedProductFilters {
-    const query = normalizeQueryParam(searchParams[SEARCH_QUERY_PARAM]);
-    const sale = parseSaleParam(searchParams.sale);
-    const discount = parseDiscountParam(searchParams.discount);
-    const priceFrom = parsePriceFromParam(searchParams.priceFrom);
-    const priceTo = parsePriceToParam(searchParams.priceTo);
-    const inStock = parseInStockParam(searchParams.inStock);
+    const defaults = getProductFilterDefaults(defaultFilterOverrides);
+
+    const sale = parseSaleParam(searchParams.sale, defaults.sale);
+    const discount = parseDiscountParam(
+        searchParams.discount,
+        defaults.discount,
+    );
+    const priceFrom = parsePriceFromParam(
+        searchParams.priceFrom,
+        defaults.priceFrom,
+    );
+    const priceTo = parsePriceToParam(searchParams.priceTo, defaults.priceTo);
+    const inStock = parseInStockParam(searchParams.inStock, defaults.inStock);
 
     const collectedIssues = [
         sale.issue,
@@ -39,7 +46,6 @@ export function parseProductFilters(
 
     return {
         value: {
-            query,
             sale: sale.value,
             discount: discount.value,
             priceFrom: priceFrom.value,

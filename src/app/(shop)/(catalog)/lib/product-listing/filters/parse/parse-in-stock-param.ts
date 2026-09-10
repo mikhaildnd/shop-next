@@ -1,14 +1,14 @@
 import { PRODUCT_FILTER_LISTING_ISSUES } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductFilterParseResult } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import { DEFAULT_PRODUCT_FILTERS } from '@/services/product/filters/filter.constants';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 export function parseInStockParam(
     value: string | undefined,
+    defaultValue: ProductFilters['inStock'],
 ): ProductFilterParseResult<ProductFilters['inStock']> {
     if (value === undefined) {
         return {
-            value: DEFAULT_PRODUCT_FILTERS.inStock,
+            value: defaultValue,
         };
     }
 
@@ -25,7 +25,7 @@ export function parseInStockParam(
     }
 
     return {
-        value: DEFAULT_PRODUCT_FILTERS.inStock,
+        value: defaultValue,
         issue: PRODUCT_FILTER_LISTING_ISSUES.INVALID_IN_STOCK,
     };
 }
