@@ -103,7 +103,7 @@ export function ProductPriceFilter({
                     autoComplete="off"
                     className="w-full"
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={priceTo}
                     onChange={(e) => setPriceTo(e.target.value)}
                     onBlur={handlePriceToBlur}
