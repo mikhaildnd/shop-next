@@ -27,7 +27,10 @@ export function ProductDesktopFilters({
                 defaultFilterOverrides={defaultFilterOverrides}
             />
 
-            <ResetFiltersButton className="mx-auto mt-6 mb-4" />
+            <ResetFiltersButton
+                className="mx-auto mt-6 mb-4"
+                defaultFilterOverrides={defaultFilterOverrides}
+            />
         </aside>
     );
 }

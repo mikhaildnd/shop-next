@@ -53,8 +53,11 @@ export function ProductMobileFilters({
                         />
                     </main>
 
-                    <footer>
-                        <ResetFiltersButton className="w-full" />
+                    <footer className="border border-t-gray-100 px-4 py-3">
+                        <ResetFiltersButton
+                            className="w-full"
+                            defaultFilterOverrides={defaultFilterOverrides}
+                        />
                     </footer>
                 </div>
             )}

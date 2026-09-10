@@ -7,7 +7,7 @@ interface FilterSectionProps {
 
 export function FilterSection({ title, children }: FilterSectionProps) {
     return (
-        <section className="border-b border-gray-100 px-4 py-5 last:border-b-0">
+        <section>
             {title && (
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-700">

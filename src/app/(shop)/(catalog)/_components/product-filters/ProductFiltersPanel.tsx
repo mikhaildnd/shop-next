@@ -28,7 +28,7 @@ export function ProductFiltersPanel({
     });
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col divide-y divide-gray-100 [&>*]:px-4 [&>*]:py-5">
             {filterState.price && (
                 <ProductPriceFilter
                     minPrice={listingStats.minPrice}
