@@ -95,7 +95,7 @@ export default async function CollectionPage({
     const { products, totalProductsCount, listingStats } = await getProducts({
         take: pagination.take,
         skip: pagination.skip,
-        collectionSlug: collection?.slug,
+        collectionSlug: collection.slug,
         filters: listing.filters,
         sort: listing.sort,
     });

@@ -12,7 +12,7 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import { getFavoriteProducts } from '@/services/favorite/favorite.service';
+import { getProducts } from '@/services/product/product.service';
 
 import { FavoritesListing } from './_components/FavoritesListing';
 
@@ -71,10 +71,11 @@ export default async function FavoritesPage({
     const session = await getSession();
 
     if (session) {
-        const result = await getFavoriteProducts({
-            userId: session.user.id,
-            listing,
-            pagination,
+        const result = await getProducts({
+            favoritesForUserId: session.user.id,
+            ...listing,
+            take: pagination.take,
+            skip: pagination.skip,
         });
 
         const totalPages = Math.ceil(
@@ -97,12 +98,12 @@ export default async function FavoritesPage({
                     </PageMessage>
                 ) : (
                     <ProductListing
-                        sort={result.sort}
+                        sort={listing.sort}
                         listingStats={result.listingStats}
                         products={result.products}
-                        currentPage={result.currentPage}
+                        currentPage={pagination.currentPage}
                         totalPages={totalPages}
-                        startPage={result.startPage}
+                        startPage={pagination.startPage}
                         defaultFilterOverrides={filterDefaults}
                     />
                 )}

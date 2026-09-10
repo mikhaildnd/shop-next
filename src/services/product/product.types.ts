@@ -44,10 +44,6 @@ export type ProductDto = {
     updatedAt: string;
 };
 
-export type ProductListingItemDto = ProductDto & {
-    isFavorite: boolean;
-};
-
 export type ProductListingStats = {
     minPrice: number;
     maxPrice: number;
