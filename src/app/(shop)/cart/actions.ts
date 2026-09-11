@@ -15,31 +15,38 @@ import { getProductsByIds } from '@/services/product/product.service';
 export async function addCartItemAction(
     productId: string,
     snapshot: CartProductSnapshot,
-) {
+): Promise<void> {
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // throw new Error('Test cart action error');
     const session = await requireSession();
 
     await addCartItem(session.user.id, productId, snapshot);
 }
 
-export async function incrementCartItemAction(productId: string) {
+export async function incrementCartItemAction(
+    productId: string,
+): Promise<void> {
     const session = await requireSession();
 
     await incrementCartItem(session.user.id, productId);
 }
 
-export async function decrementCartItemAction(productId: string) {
+export async function decrementCartItemAction(
+    productId: string,
+): Promise<void> {
     const session = await requireSession();
 
     await decrementCartItem(session.user.id, productId);
 }
 
-export async function removeCartItemAction(productId: string) {
+export async function removeCartItemAction(productId: string): Promise<void> {
     const session = await requireSession();
 
     await removeCartItem(session.user.id, productId);
 }
 
-export async function clearCartAction() {
+export async function clearCartAction(): Promise<void> {
     const session = await requireSession();
 
     await clearCart(session.user.id);

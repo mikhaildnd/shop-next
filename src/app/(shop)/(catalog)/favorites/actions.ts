@@ -1,18 +1,56 @@
 'use server';
 
+import type { ProductListingState } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { requireSession } from '@/auth/session';
+import type { PaginationParams } from '@/lib/pagination/pagination.types';
 import {
     addFavorite,
-    getFavoriteProductsByIds,
     mergeFavorites,
     removeFavorite,
 } from '@/services/favorite/favorite.service';
-import type { GetFavoriteProductsByIdsParams } from '@/services/favorite/favorite.types';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
-export async function getFavoriteProductsByIdsAction(
-    params: GetFavoriteProductsByIdsParams,
-) {
-    return getFavoriteProductsByIds(params);
+interface GetFavoriteProductsByIdsActionParams {
+    favoriteIds: string[];
+    listing: ProductListingState;
+    pagination: PaginationParams;
+}
+
+export async function getFavoriteProductsByIdsAction({
+    favoriteIds,
+    listing,
+    pagination,
+}: GetFavoriteProductsByIdsActionParams) {
+    const selection = {
+        query: listing.query,
+        filters: listing.filters,
+        selectionScope: {
+            id: {
+                in: favoriteIds,
+            },
+        },
+    };
+
+    const [productsResult, listingStats] = await Promise.all([
+        getProducts({
+            ...selection,
+            take: pagination.take,
+            skip: pagination.skip,
+            sort: listing.sort,
+        }),
+        getProductListingStats(selection),
+    ]);
+
+    return {
+        ...productsResult,
+        listingStats,
+        sort: listing.sort,
+        currentPage: pagination.currentPage,
+        startPage: pagination.startPage,
+    };
 }
 
 export async function mergeFavoritesAction(favoriteIds: string[]) {

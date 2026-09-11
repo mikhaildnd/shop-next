@@ -4,6 +4,7 @@ import { ProductDesktopFilters } from '@/app/(shop)/(catalog)/_components/produc
 import { ProductMobileFilters } from '@/app/(shop)/(catalog)/_components/product-filters/ProductMobileFilters';
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
 import { Pagination } from '@/components/Pagination';
+import type { ProductFilters } from '@/services/product/filters/filter.types';
 import type {
     ProductDto,
     ProductListingStats,
@@ -17,6 +18,7 @@ interface ProductListingProps {
     currentPage: number;
     totalPages: number;
     startPage: number;
+    defaultFilterOverrides?: Partial<ProductFilters>;
 }
 
 export function ProductListing({
@@ -26,6 +28,7 @@ export function ProductListing({
     currentPage,
     totalPages,
     startPage,
+    defaultFilterOverrides,
 }: ProductListingProps) {
     const hasPagination = totalPages > 1;
     const hasMore = currentPage < totalPages;
@@ -34,6 +37,7 @@ export function ProductListing({
         <div className="grid items-start lg:grid-cols-[280px_1fr] lg:gap-4">
             <ProductDesktopFilters
                 listingStats={listingStats}
+                defaultFilterOverrides={defaultFilterOverrides}
                 className="hidden lg:flex"
             />
 
@@ -44,6 +48,7 @@ export function ProductListing({
                     <ProductMobileFilters
                         className="lg:hidden"
                         listingStats={listingStats}
+                        defaultFilterOverrides={defaultFilterOverrides}
                     />
                 </div>
 

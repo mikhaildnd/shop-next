@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartContext } from '@/components/cart/CartContext';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 type CartItemQuantitySize = 'sm' | 'md';
@@ -23,19 +24,22 @@ const variantClasses: Record<CartItemQuantityVariant, string> = {
 };
 
 const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
-    neutral: 'bg-gray-50 text-gray-500 hover:bg-gray-100 active:bg-gray-200',
+    neutral:
+        'bg-gray-50 text-gray-500 hover:bg-gray-100 active:bg-gray-200 disabled:hover:bg-gray-50 disabled:active:bg-gray-50',
     primary:
-        'bg-(--color-primary)/15 text-(--color-primary) hover:bg-(--color-primary)/20 active:bg-(--color-primary)/30',
+        'bg-(--color-primary)/15 text-(--color-primary) hover:bg-(--color-primary)/20 active:bg-(--color-primary)/30 disabled:hover:bg-(--color-primary)/15 disabled:active:bg-(--color-primary)/15',
 };
 
 interface CartItemQuantityProps {
     productId: string;
+    maxQuantity: number;
     size?: CartItemQuantitySize;
     variant?: CartItemQuantityVariant;
     className?: string;
 }
 export function CartItemQuantity({
     productId,
+    maxQuantity,
     size = 'md',
     variant = 'primary',
     className,
@@ -49,6 +53,32 @@ export function CartItemQuantity({
         return null;
     }
 
+    const isIncrementDisabled = quantity >= maxQuantity;
+
+    const handleDecrement = async () => {
+        try {
+            await decrementCartEntry(productId);
+        } catch {
+            toast.add({
+                id: 'cart-decrement-error',
+                description: 'Не удалось уменьшить количество товара в корзине',
+                type: 'error',
+            });
+        }
+    };
+
+    const handleIncrement = async () => {
+        try {
+            await incrementCartEntry(productId);
+        } catch {
+            toast.add({
+                id: 'cart-increment-error',
+                description: 'Не удалось увеличить количество товара в корзине',
+                type: 'error',
+            });
+        }
+    };
+
     return (
         <div
             className={cn(
@@ -61,11 +91,11 @@ export function CartItemQuantity({
             <button
                 type="button"
                 className={cn(
-                    'flex h-full cursor-pointer items-center justify-between',
+                    'flex h-full items-center justify-between',
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
-                onClick={() => decrementCartEntry(productId)}
+                onClick={handleDecrement}
             >
                 −
             </button>
@@ -76,12 +106,13 @@ export function CartItemQuantity({
 
             <button
                 type="button"
+                disabled={isIncrementDisabled}
                 className={cn(
-                    'flex h-full cursor-pointer items-center justify-between',
+                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
-                onClick={() => incrementCartEntry(productId)}
+                onClick={handleIncrement}
             >
                 +
             </button>

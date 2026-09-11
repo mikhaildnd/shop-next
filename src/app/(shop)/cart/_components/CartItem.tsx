@@ -18,6 +18,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/cn';
 import { formatPrice } from '@/lib/format-price';
 import { routes } from '@/routes';
 import type { CartItemDto } from '@/services/cart/cart.types';
@@ -38,6 +39,10 @@ export function CartItem({ item }: CartItemProps) {
 
     const { removeCartEntry } = useCartContext();
 
+    const isOutOfStock = product.stock === 0;
+    const hasInsufficientStock =
+        product.stock > 0 && item.quantity > product.stock;
+
     return (
         <article className="flex gap-2 bg-white py-2 sm:gap-4 md:py-4">
             <Link
@@ -49,7 +54,10 @@ export function CartItem({ item }: CartItemProps) {
                         src={mainImage.url}
                         alt={mainImage.alt ?? product.title}
                         fill
-                        className="object-cover"
+                        className={cn(
+                            'object-cover',
+                            isOutOfStock && 'opacity-60 grayscale',
+                        )}
                         sizes="96px"
                     />
                 )}
@@ -58,85 +66,109 @@ export function CartItem({ item }: CartItemProps) {
             <div className="flex min-w-0 flex-col gap-2">
                 <Link
                     href={routes.productPage(product.slug)}
-                    className="line-clamp-3 text-[#414141] hover:text-(--color-primary) hover:underline"
+                    className={cn(
+                        'line-clamp-3 text-[#414141] hover:text-(--color-primary) hover:underline',
+                        isOutOfStock && 'opacity-60',
+                    )}
                 >
                     {product.title}
                 </Link>
 
-                <div className="flex items-center gap-2">
-                    <p className="font-bold text-[#414141]">
-                        {formatPrice(product.effectivePrice)} ₸
-                    </p>
+                {!isOutOfStock ? (
+                    <>
+                        <div className="flex items-center gap-2">
+                            <p className="font-bold text-[#414141]">
+                                {formatPrice(product.effectivePrice)} ₸
+                            </p>
 
-                    {hasDiscount && (
-                        <p className="text-sm text-[#bfbfbf] line-through">
-                            {formatPrice(product.regularPrice)} ₸
-                        </p>
-                    )}
-                </div>
+                            {hasDiscount && (
+                                <p className="text-sm text-[#bfbfbf] line-through">
+                                    {formatPrice(product.regularPrice)} ₸
+                                </p>
+                            )}
+                        </div>
 
-                {priceChanged && (
-                    <p className="text-sm text-amber-700">
-                        Старая цена: {formatPrice(item.snapshot.effectivePrice)}{' '}
-                        ₸
+                        {priceChanged && (
+                            <p className="text-sm text-amber-700">
+                                Старая цена:{' '}
+                                {formatPrice(item.snapshot.effectivePrice)} ₸
+                            </p>
+                        )}
+                    </>
+                ) : (
+                    <p className="text-sm text-[#414141] opacity-60">
+                        Товар закончился
                     </p>
                 )}
 
-                <div className="mt-auto flex items-center gap-2 sm:gap-4">
-                    <CartItemQuantity
-                        productId={product.id}
-                        size="sm"
-                        variant="neutral"
-                    />
+                <div className="mt-auto flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        {!isOutOfStock && (
+                            <CartItemQuantity
+                                productId={product.id}
+                                maxQuantity={product.stock}
+                                size="sm"
+                                variant="neutral"
+                            />
+                        )}
 
-                    <AlertDialog>
-                        <AlertDialogTrigger
-                            render={
-                                <CartItemRemoveButton
-                                    className="bg-gray-50"
-                                    shape="rounded"
-                                />
-                            }
+                        <AlertDialog>
+                            <AlertDialogTrigger
+                                render={
+                                    <CartItemRemoveButton
+                                        className="bg-gray-50"
+                                        shape="rounded"
+                                    />
+                                }
+                            />
+                            <AlertDialogContent size="sm">
+                                <AlertDialogHeader>
+                                    <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                        <Trash2Icon />
+                                    </AlertDialogMedia>
+                                    <AlertDialogTitle>
+                                        Удалить товар?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Товар будет удалён из корзины.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel
+                                        render={
+                                            <Button
+                                                size="sm"
+                                                variant="neutral"
+                                            >
+                                                Отмена
+                                            </Button>
+                                        }
+                                    />
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() =>
+                                            removeCartEntry(product.id)
+                                        }
+                                    >
+                                        Удалить
+                                    </Button>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
+                        <FavoriteButton
+                            productId={product.id}
+                            className="bg-gray-50"
+                            shape="rounded"
                         />
-                        <AlertDialogContent size="sm">
-                            <AlertDialogHeader>
-                                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                                    <Trash2Icon />
-                                </AlertDialogMedia>
-                                <AlertDialogTitle>
-                                    Удалить товар?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Товар будет удалён из корзины.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel
-                                    render={
-                                        <Button
-                                            size="sm"
-                                            variant="neutral"
-                                        >
-                                            Отмена
-                                        </Button>
-                                    }
-                                />
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => removeCartEntry(product.id)}
-                                >
-                                    Удалить
-                                </Button>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    </div>
 
-                    <FavoriteButton
-                        productId={product.id}
-                        className="bg-gray-50"
-                        shape="rounded"
-                    />
+                    {hasInsufficientStock && (
+                        <p className="text-sm text-amber-700">
+                            Доступно только {product.stock} шт.
+                        </p>
+                    )}
                 </div>
             </div>
         </article>

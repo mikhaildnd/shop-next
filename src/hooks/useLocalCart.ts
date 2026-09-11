@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
@@ -11,7 +11,6 @@ import {
     getServerCartEntries,
     incrementCartEntry as incrementCartEntryInStorage,
     removeCartEntry as removeCartEntryFromStorage,
-    removeMergedCartEntries as removeMergedCartEntriesFromStorage,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
 
@@ -22,10 +21,8 @@ export interface UseLocalCartResult {
     decrementCartEntry: (productId: string) => void;
     removeCartEntry: (productId: string) => void;
     clearCart: () => void;
-    removeMergedCartEntries: (items: CartEntry[]) => void;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    mutationError: Error | null;
     isHydrated: boolean;
 }
 
@@ -42,81 +39,27 @@ export function useLocalCart(): UseLocalCartResult {
         () => false,
     );
 
-    const [mutationError, setMutationError] = useState<Error | null>(null);
-
     const addCartEntry = useCallback(
         (productId: string, snapshot: CartProductSnapshot) => {
-            setMutationError(null);
-
-            try {
-                addCartEntryToStorage(productId, snapshot);
-            } catch (error) {
-                setMutationError(
-                    error instanceof Error ? error : new Error('Unknown error'),
-                );
-            }
+            addCartEntryToStorage(productId, snapshot);
         },
         [],
     );
 
     const removeCartEntry = useCallback((productId: string) => {
-        setMutationError(null);
-
-        try {
-            removeCartEntryFromStorage(productId);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        removeCartEntryFromStorage(productId);
     }, []);
 
     const incrementCartEntry = useCallback((productId: string) => {
-        setMutationError(null);
-
-        try {
-            incrementCartEntryInStorage(productId);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        incrementCartEntryInStorage(productId);
     }, []);
 
     const decrementCartEntry = useCallback((productId: string) => {
-        setMutationError(null);
-
-        try {
-            decrementCartEntryFromStorage(productId);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        decrementCartEntryFromStorage(productId);
     }, []);
 
     const clearCart = useCallback(() => {
-        setMutationError(null);
-
-        try {
-            clearCartStorage();
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
-    }, []);
-
-    const removeMergedCartEntries = useCallback((items: CartEntry[]) => {
-        setMutationError(null);
-
-        try {
-            removeMergedCartEntriesFromStorage(items);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        clearCartStorage();
     }, []);
 
     const getCartEntryQuantity = useCallback(
@@ -142,10 +85,8 @@ export function useLocalCart(): UseLocalCartResult {
         incrementCartEntry,
         decrementCartEntry,
         clearCart,
-        removeMergedCartEntries,
         cartCount,
         getCartEntryQuantity,
-        mutationError,
         isHydrated,
     };
 }

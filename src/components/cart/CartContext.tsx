@@ -1,14 +1,22 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
-import { createContext, useContext } from 'react';
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useEffectEvent,
+    useState,
+} from 'react';
 
-import { toast } from '@/components/ui/toast';
+import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
+import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
+import type { CartDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
@@ -22,9 +30,9 @@ interface CartContextValue {
     decrementCartEntry: (productId: string) => void | Promise<void>;
     removeCartEntry: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
-    mutationError: Error | null;
-    initialCartItems: CartItemDto[];
     isHydrated: boolean;
+    products: ProductDto[];
+    isLoadingProducts: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -61,7 +69,49 @@ export function CartProvider({
 }
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
+    const [products, setProducts] = useState<ProductDto[]>([]);
+
     const cart = useLocalCart();
+
+    const productIdsKey = [...cart.cartEntries]
+        .map((item) => item.productId)
+        .sort()
+        .join(',');
+
+    const getProducts = useEffectEvent(async () => {
+        return getProductsByIdsAction(
+            cart.cartEntries.map((item) => item.productId),
+        );
+    });
+
+    useEffect(() => {
+        if (!cart.isHydrated || productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled) {
+                setProducts(nextProducts);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [cart.isHydrated, productIdsKey]);
+
+    const isLoadingProducts =
+        cart.isHydrated &&
+        cart.cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
@@ -72,20 +122,10 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         decrementCartEntry: cart.decrementCartEntry,
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
-        mutationError: cart.mutationError,
-        initialCartItems: [],
         isHydrated: cart.isHydrated,
+        products,
+        isLoadingProducts,
     };
-
-    useEffect(() => {
-        if (cart.mutationError) {
-            toast.add({
-                id: 'cart-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [cart.mutationError]);
 
     return (
         <CartContext.Provider value={contextValue}>
@@ -102,6 +142,66 @@ function ServerCartProvider({
         initialCartState,
     });
 
+    const merge = useCartMerge({
+        replaceCart: cart.replaceCart,
+    });
+
+    const [products, setProducts] = useState<ProductDto[]>(
+        initialCartState.items.map(({ product }) => product),
+    );
+
+    const productIdsKey = [...cart.cartEntries]
+        .map((item) => item.productId)
+        .sort()
+        .join(',');
+
+    const getProducts = useEffectEvent(async () => {
+        const missingProductIds = cart.cartEntries
+            .map((entry) => entry.productId)
+            .filter(
+                (productId) =>
+                    !products.some((product) => product.id === productId),
+            );
+
+        if (missingProductIds.length === 0) {
+            return [];
+        }
+
+        return getProductsByIdsAction(missingProductIds);
+    });
+
+    useEffect(() => {
+        if (productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled && nextProducts.length > 0) {
+                setProducts((currentProducts) => [
+                    ...currentProducts,
+                    ...nextProducts,
+                ]);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [productIdsKey]);
+
+    const isLoadingProducts =
+        cart.cartEntries.length > 0 &&
+        cart.cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
+
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
         cartCount: cart.cartCount,
@@ -111,84 +211,23 @@ function ServerCartProvider({
         decrementCartEntry: cart.decrementCartEntry,
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
-        mutationError: cart.mutationError,
-        initialCartItems: cart.initialCartItems,
         isHydrated: true,
+        products,
+        isLoadingProducts,
     };
 
-    const mergeToastId = useRef<string | null>(null);
-
-    useEffect(() => {
-        if (cart.mergeStatus === 'merging') {
-            if (cart.mergeAttempt === 0) {
-                return;
-            }
-            if (mergeToastId.current) {
-                toast.update(mergeToastId.current, {
-                    description: 'Синхронизация корзины...',
-                    type: 'loading',
-                    timeout: 0,
-                    actionProps: undefined,
-                });
-            } else {
-                mergeToastId.current = toast.add({
-                    description: 'Синхронизация корзины...',
-                    type: 'loading',
-                    timeout: 0,
-                });
-            }
-
-            return;
-        }
-
-        if (cart.mergeStatus === 'error') {
-            if (!mergeToastId.current) {
-                mergeToastId.current = toast.add({
-                    description: 'Не удалось синхронизировать корзину',
-                    type: 'error',
-                    timeout: 0,
-                    actionProps: {
-                        children: 'Повторить',
-                        onClick: cart.retryMerge,
-                    },
-                });
-
-                return;
-            }
-
-            toast.update(mergeToastId.current, {
-                description: 'Не удалось синхронизировать корзину',
-                type: 'error',
-                timeout: 0,
-                actionProps: {
-                    children: 'Повторить',
-                    onClick: cart.retryMerge,
-                },
-            });
-
-            return;
-        }
-
-        if (mergeToastId.current) {
-            toast.close(mergeToastId.current);
-            mergeToastId.current = null;
-        }
-    }, [cart.mergeAttempt, cart.mergeStatus, cart.retryMerge]);
-
-    useEffect(() => {
-        if (cart.mutationError) {
-            toast.add({
-                id: 'cart-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [cart.mutationError]);
-
     return (
-        <CartContext.Provider value={contextValue}>
-            {children}
-        </CartContext.Provider>
+        <>
+            <CartContext.Provider value={contextValue}>
+                {children}
+            </CartContext.Provider>
+
+            <CartMergeStatus
+                mergeStatus={merge.mergeStatus}
+                mergeAttempt={merge.mergeAttempt}
+                retryMerge={merge.retryMerge}
+            />
+        </>
     );
 }
 

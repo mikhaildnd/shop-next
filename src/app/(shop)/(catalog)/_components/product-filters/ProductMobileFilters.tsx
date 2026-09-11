@@ -7,15 +7,18 @@ import { ProductFiltersButton } from '@/app/(shop)/(catalog)/_components/product
 import { ProductFiltersPanel } from '@/app/(shop)/(catalog)/_components/product-filters/ProductFiltersPanel';
 import { ResetFiltersButton } from '@/app/(shop)/(catalog)/_components/product-filters/ResetFiltersButton';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import type { ProductFilters } from '@/services/product/filters/filter.types';
 import type { ProductListingStats } from '@/services/product/product.types';
 
 interface ProductMobileFiltersProps {
     listingStats: ProductListingStats;
+    defaultFilterOverrides?: Partial<ProductFilters>;
     className?: string;
 }
 
 export function ProductMobileFilters({
     listingStats,
+    defaultFilterOverrides,
     className,
 }: ProductMobileFiltersProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -44,11 +47,17 @@ export function ProductMobileFilters({
                     </header>
 
                     <main className="flex grow flex-col overflow-y-auto">
-                        <ProductFiltersPanel listingStats={listingStats} />
+                        <ProductFiltersPanel
+                            listingStats={listingStats}
+                            defaultFilterOverrides={defaultFilterOverrides}
+                        />
                     </main>
 
-                    <footer>
-                        <ResetFiltersButton className="w-full" />
+                    <footer className="border border-t-gray-100 px-4 py-3">
+                        <ResetFiltersButton
+                            className="w-full"
+                            defaultFilterOverrides={defaultFilterOverrides}
+                        />
                     </footer>
                 </div>
             )}

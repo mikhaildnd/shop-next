@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 
 import { FilterSection } from '@/app/(shop)/(catalog)/_components/product-filters/FilterSection';
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
-import { useUpdateProductListing } from '@/app/(shop)/(catalog)/_hooks/useUpdateProductListing';
 import { Input } from '@/components/form/Input';
 
 interface ProductPriceFilterProps {
     minPrice: number;
     maxPrice: number;
+    priceFrom: number | null;
+    priceTo: number | null;
+    onChange: (priceFrom: number | null, priceTo: number | null) => void;
 }
 
 function parsePrice(value: string): number | null {
@@ -27,13 +28,10 @@ function parsePrice(value: string): number | null {
 export function ProductPriceFilter({
     minPrice,
     maxPrice,
+    priceFrom: currentPriceFrom,
+    priceTo: currentPriceTo,
+    onChange,
 }: ProductPriceFilterProps) {
-    const {
-        filters: { priceFrom: currentPriceFrom, priceTo: currentPriceTo },
-    } = useProductListing();
-
-    const updateProductListing = useUpdateProductListing();
-
     const [priceFrom, setPriceFrom] = useState(
         String(currentPriceFrom ?? minPrice),
     );
@@ -59,12 +57,7 @@ export function ProductPriceFilter({
             return;
         }
 
-        updateProductListing({
-            filters: {
-                priceFrom: priceFromFilter,
-                priceTo: priceToFilter,
-            },
-        });
+        onChange(priceFromFilter, priceToFilter);
     };
 
     const handlePriceFromBlur = () => {
@@ -110,7 +103,7 @@ export function ProductPriceFilter({
                     autoComplete="off"
                     className="w-full"
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={priceTo}
                     onChange={(e) => setPriceTo(e.target.value)}
                     onBlur={handlePriceToBlur}

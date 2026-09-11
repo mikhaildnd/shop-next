@@ -12,7 +12,10 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import { getFavoriteProducts } from '@/services/favorite/favorite.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 import { FavoritesListing } from './_components/FavoritesListing';
 
@@ -29,7 +32,13 @@ export default async function FavoritesPage({
 }: FavoritesPageProps) {
     const query = await searchParams;
 
-    const listing = parseProductListing(query);
+    const filterDefaults = {
+        inStock: false,
+    };
+
+    const listing = parseProductListing(query, {
+        defaultFilterOverrides: filterDefaults,
+    });
 
     const pagination = getPaginationParams({
         searchParams: query,
@@ -65,22 +74,39 @@ export default async function FavoritesPage({
     const session = await getSession();
 
     if (session) {
-        const result = await getFavoriteProducts({
-            userId: session.user.id,
-            listing,
-            pagination,
-        });
+        const selection = {
+            query: listing.query,
+            filters: listing.filters,
+            selectionScope: {
+                favorites: {
+                    some: {
+                        userId: session.user.id,
+                    },
+                },
+            },
+        };
 
-        const totalPages = Math.ceil(
-            result.totalProductsCount / PRODUCTS_PER_PAGE,
-        );
+        const [productsResult, listingStats] = await Promise.all([
+            getProducts({
+                ...selection,
+                take: pagination.take,
+                skip: pagination.skip,
+                sort: listing.sort,
+            }),
+
+            getProductListingStats(selection),
+        ]);
+
+        const { products, totalProductsCount } = productsResult;
+
+        const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
         return (
             <CatalogPageLayout
                 title="Избранное"
                 breadcrumbs={breadcrumbs}
             >
-                {result.totalProductsCount === 0 ? (
+                {totalProductsCount === 0 ? (
                     <PageMessage
                         title="В избранном пока ничего нет"
                         description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
@@ -91,12 +117,13 @@ export default async function FavoritesPage({
                     </PageMessage>
                 ) : (
                     <ProductListing
-                        sort={result.sort}
-                        listingStats={result.listingStats}
-                        products={result.products}
-                        currentPage={result.currentPage}
+                        sort={listing.sort}
+                        listingStats={listingStats}
+                        products={products}
+                        currentPage={pagination.currentPage}
                         totalPages={totalPages}
-                        startPage={result.startPage}
+                        startPage={pagination.startPage}
+                        defaultFilterOverrides={filterDefaults}
                     />
                 )}
             </CatalogPageLayout>
@@ -111,6 +138,7 @@ export default async function FavoritesPage({
             <FavoritesListing
                 listing={listing}
                 pagination={pagination}
+                defaultFilterOverrides={filterDefaults}
             />
         </CatalogPageLayout>
     );

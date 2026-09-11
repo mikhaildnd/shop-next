@@ -6,16 +6,18 @@ import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListin
 import { ProductListingSkeleton } from '@/app/(shop)/(catalog)/_components/ProductListingSkeleton';
 import { getFavoriteProductsByIdsAction } from '@/app/(shop)/(catalog)/favorites/actions';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
-import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import type { ProductListingState } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
 import { PageMessage } from '@/components/PageMessage';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
 import { routes } from '@/routes';
+import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 interface FavoritesListingProps {
-    listing: ParsedProductListing;
+    listing: ProductListingState;
     pagination: PaginationParams;
+    defaultFilterOverrides?: Partial<ProductFilters>;
 }
 
 type FavoritesResult = Awaited<
@@ -25,6 +27,7 @@ type FavoritesResult = Awaited<
 export function FavoritesListing({
     listing,
     pagination,
+    defaultFilterOverrides,
 }: FavoritesListingProps) {
     const { favoriteIds } = useFavoritesContext();
 
@@ -116,6 +119,7 @@ export function FavoritesListing({
             currentPage={result.currentPage}
             totalPages={totalPages}
             startPage={result.startPage}
+            defaultFilterOverrides={defaultFilterOverrides}
         />
     );
 }

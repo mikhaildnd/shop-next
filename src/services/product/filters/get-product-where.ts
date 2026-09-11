@@ -1,14 +1,20 @@
 import type { Prisma } from '@/generated/prisma/client';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 
-export function getProductWhere(
-    filters: ProductFilters,
-): Prisma.ProductWhereInput {
+type GetProductWhereOptions = {
+    query?: string | null;
+    filters: ProductFilters;
+};
+
+export function getProductWhere({
+    query,
+    filters,
+}: GetProductWhereOptions): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = {};
 
-    if (filters.query) {
+    if (query) {
         where.title = {
-            contains: filters.query,
+            contains: query,
             mode: 'insensitive',
         };
     }
