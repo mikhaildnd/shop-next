@@ -41,10 +41,13 @@ export type ProductSortListingIssue =
 export type ProductListingIssue =
     ProductSortListingIssue | ProductFilterListingIssue;
 
-export type ParsedProductListing = {
+export type ProductListingState = {
     query: string | null;
     filters: ProductFilters;
     sort: ProductSort;
+};
+
+export type ParsedProductListing = ProductListingState & {
     issues: ProductListingIssue[];
 };
 

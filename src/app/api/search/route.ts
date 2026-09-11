@@ -31,7 +31,9 @@ export async function GET(request: Request) {
 
     const [productsResult, categories] = await Promise.all([
         getProducts({
-            ...listing,
+            query: listing.query,
+            filters: listing.filters,
+            sort: listing.sort,
             take: SEARCH_PRODUCTS_LIMIT,
         }),
 

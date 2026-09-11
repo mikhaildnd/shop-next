@@ -1,6 +1,6 @@
 'use server';
 
-import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import type { ProductListingState } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { requireSession } from '@/auth/session';
 import type { PaginationParams } from '@/lib/pagination/pagination.types';
 import {
@@ -15,7 +15,7 @@ import {
 
 interface GetFavoriteProductsByIdsActionParams {
     favoriteIds: string[];
-    listing: ParsedProductListing;
+    listing: ProductListingState;
     pagination: PaginationParams;
 }
 

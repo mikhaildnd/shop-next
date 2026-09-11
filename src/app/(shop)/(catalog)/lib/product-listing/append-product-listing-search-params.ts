@@ -3,13 +3,13 @@ import {
     PRODUCT_FILTER_PARAMS,
     PRODUCT_SORT_PARAM,
 } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
-import type { ParsedProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import type { ProductListingState } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 import { DEFAULT_PRODUCT_SORT } from '@/services/product/sort/sort.constants';
 
 type AppendProductListingSearchParamsOptions = {
     params: URLSearchParams;
-    listing: ParsedProductListing;
+    listing: ProductListingState;
     defaultFilterOverrides?: Partial<ProductFilters>;
 };
 
