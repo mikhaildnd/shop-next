@@ -22,7 +22,10 @@ import {
     getCategoryBySlug,
 } from '@/services/category/category.service';
 import type { CategoryDto } from '@/services/category/category.types';
-import { getProducts } from '@/services/product/product.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 interface CategoryPageProps {
     params: Promise<{
@@ -107,11 +110,9 @@ export default async function CategoryPage({
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        take: pagination.take,
-        skip: pagination.skip,
+    const selection = {
+        query: listing.query,
         filters: listing.filters,
-        sort: listing.sort,
         selectionScope: {
             category: {
                 slug: {
@@ -119,7 +120,20 @@ export default async function CategoryPage({
                 },
             },
         },
-    });
+    };
+
+    const [productsResult, listingStats] = await Promise.all([
+        getProducts({
+            ...selection,
+            take: pagination.take,
+            skip: pagination.skip,
+            sort: listing.sort,
+        }),
+
+        getProductListingStats(selection),
+    ]);
+
+    const { products, totalProductsCount } = productsResult;
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 

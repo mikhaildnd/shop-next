@@ -12,7 +12,10 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import { getProducts } from '@/services/product/product.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 import { FavoritesListing } from './_components/FavoritesListing';
 
@@ -71,10 +74,9 @@ export default async function FavoritesPage({
     const session = await getSession();
 
     if (session) {
-        const result = await getProducts({
-            ...listing,
-            take: pagination.take,
-            skip: pagination.skip,
+        const selection = {
+            query: listing.query,
+            filters: listing.filters,
             selectionScope: {
                 favorites: {
                     some: {
@@ -82,18 +84,29 @@ export default async function FavoritesPage({
                     },
                 },
             },
-        });
+        };
 
-        const totalPages = Math.ceil(
-            result.totalProductsCount / PRODUCTS_PER_PAGE,
-        );
+        const [productsResult, listingStats] = await Promise.all([
+            getProducts({
+                ...selection,
+                take: pagination.take,
+                skip: pagination.skip,
+                sort: listing.sort,
+            }),
+
+            getProductListingStats(selection),
+        ]);
+
+        const { products, totalProductsCount } = productsResult;
+
+        const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
         return (
             <CatalogPageLayout
                 title="Избранное"
                 breadcrumbs={breadcrumbs}
             >
-                {result.totalProductsCount === 0 ? (
+                {totalProductsCount === 0 ? (
                     <PageMessage
                         title="В избранном пока ничего нет"
                         description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
@@ -105,8 +118,8 @@ export default async function FavoritesPage({
                 ) : (
                     <ProductListing
                         sort={listing.sort}
-                        listingStats={result.listingStats}
-                        products={result.products}
+                        listingStats={listingStats}
+                        products={products}
                         currentPage={pagination.currentPage}
                         totalPages={totalPages}
                         startPage={pagination.startPage}

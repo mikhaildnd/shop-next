@@ -54,7 +54,6 @@ export type ProductListingStats = {
 export type ProductsResponse = {
     products: ProductDto[];
     totalProductsCount: number;
-    listingStats: ProductListingStats;
 };
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{

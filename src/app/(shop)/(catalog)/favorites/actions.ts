@@ -8,7 +8,10 @@ import {
     mergeFavorites,
     removeFavorite,
 } from '@/services/favorite/favorite.service';
-import { getProducts } from '@/services/product/product.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 interface GetFavoriteProductsByIdsActionParams {
     favoriteIds: string[];
@@ -21,19 +24,29 @@ export async function getFavoriteProductsByIdsAction({
     listing,
     pagination,
 }: GetFavoriteProductsByIdsActionParams) {
-    const result = await getProducts({
-        ...listing,
-        take: pagination.take,
-        skip: pagination.skip,
+    const selection = {
+        query: listing.query,
+        filters: listing.filters,
         selectionScope: {
             id: {
                 in: favoriteIds,
             },
         },
-    });
+    };
+
+    const [productsResult, listingStats] = await Promise.all([
+        getProducts({
+            ...selection,
+            take: pagination.take,
+            skip: pagination.skip,
+            sort: listing.sort,
+        }),
+        getProductListingStats(selection),
+    ]);
 
     return {
-        ...result,
+        ...productsResult,
+        listingStats,
         sort: listing.sort,
         currentPage: pagination.currentPage,
         startPage: pagination.startPage,

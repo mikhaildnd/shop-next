@@ -15,7 +15,10 @@ import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import { getProducts } from '@/services/product/product.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -92,11 +95,9 @@ export default async function CollectionPage({
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        take: pagination.take,
-        skip: pagination.skip,
+    const selection = {
+        query: listing.query,
         filters: listing.filters,
-        sort: listing.sort,
         selectionScope: {
             collections: {
                 some: {
@@ -106,7 +107,20 @@ export default async function CollectionPage({
                 },
             },
         },
-    });
+    };
+
+    const [productsResult, listingStats] = await Promise.all([
+        getProducts({
+            ...selection,
+            take: pagination.take,
+            skip: pagination.skip,
+            sort: listing.sort,
+        }),
+
+        getProductListingStats(selection),
+    ]);
+
+    const { products, totalProductsCount } = productsResult;
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 

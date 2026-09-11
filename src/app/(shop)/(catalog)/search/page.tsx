@@ -13,7 +13,10 @@ import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
 import { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
 import { routes } from '@/routes';
-import { getProducts } from '@/services/product/product.service';
+import {
+    getProductListingStats,
+    getProducts,
+} from '@/services/product/product.service';
 
 interface SearchPageProps {
     searchParams: Promise<ProductListingSearchParams>;
@@ -88,11 +91,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         );
     }
 
-    const { products, totalProductsCount, listingStats } = await getProducts({
-        ...listing,
-        take: pagination.take,
-        skip: pagination.skip,
-    });
+    const selection = {
+        query: listing.query,
+        filters: listing.filters,
+    };
+
+    const [productsResult, listingStats] = await Promise.all([
+        getProducts({
+            ...selection,
+            take: pagination.take,
+            skip: pagination.skip,
+            sort: listing.sort,
+        }),
+
+        getProductListingStats(selection),
+    ]);
+
+    const { products, totalProductsCount } = productsResult;
 
     const totalPages = Math.max(
         1,
