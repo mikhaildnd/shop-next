@@ -22,10 +22,14 @@ export async function getFavoriteProductsByIdsAction({
     pagination,
 }: GetFavoriteProductsByIdsActionParams) {
     const result = await getProducts({
-        favoriteIds,
         ...listing,
         take: pagination.take,
         skip: pagination.skip,
+        selectionScope: {
+            id: {
+                in: favoriteIds,
+            },
+        },
     });
 
     return {

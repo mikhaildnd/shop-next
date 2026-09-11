@@ -72,10 +72,16 @@ export default async function FavoritesPage({
 
     if (session) {
         const result = await getProducts({
-            favoritesForUserId: session.user.id,
             ...listing,
             take: pagination.take,
             skip: pagination.skip,
+            selectionScope: {
+                favorites: {
+                    some: {
+                        userId: session.user.id,
+                    },
+                },
+            },
         });
 
         const totalPages = Math.ceil(

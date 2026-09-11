@@ -95,9 +95,17 @@ export default async function CollectionPage({
     const { products, totalProductsCount, listingStats } = await getProducts({
         take: pagination.take,
         skip: pagination.skip,
-        collectionSlug: collection.slug,
         filters: listing.filters,
         sort: listing.sort,
+        selectionScope: {
+            collections: {
+                some: {
+                    collection: {
+                        slug: collection.slug,
+                    },
+                },
+            },
+        },
     });
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);

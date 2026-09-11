@@ -2,7 +2,7 @@ import type { Prisma } from '@/generated/prisma/client';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 type GetProductWhereOptions = {
-    query: string | null;
+    query?: string | null;
     filters: ProductFilters;
 };
 

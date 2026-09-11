@@ -5,7 +5,9 @@ type ProductsOrderByResult =
     | Prisma.ProductOrderByWithRelationInput
     | Prisma.ProductOrderByWithRelationInput[];
 
-export function getProductOrderBy(sort: ProductSort): ProductsOrderByResult {
+export function getProductOrderBy(
+    sort: ProductSort = 'newest',
+): ProductsOrderByResult {
     switch (sort) {
         case 'price-asc':
             return { effectivePrice: 'asc' };

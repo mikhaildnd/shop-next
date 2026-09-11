@@ -1,8 +1,6 @@
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
-import { DEFAULT_PRODUCT_FILTERS } from '@/services/product/filters/filter.constants';
 import { getProducts } from '@/services/product/product.service';
-import { DEFAULT_PRODUCT_SORT } from '@/services/product/sort/sort.constants';
 
 interface CollectionProductsSectionProps {
     collectionSlug: string;
@@ -17,10 +15,16 @@ export async function CollectionProductsSection({
         getCollectionBySlug(collectionSlug),
 
         getProducts({
-            collectionSlug,
             take,
-            filters: DEFAULT_PRODUCT_FILTERS,
-            sort: DEFAULT_PRODUCT_SORT,
+            selectionScope: {
+                collections: {
+                    some: {
+                        collection: {
+                            slug: collectionSlug,
+                        },
+                    },
+                },
+            },
         }),
     ]);
 

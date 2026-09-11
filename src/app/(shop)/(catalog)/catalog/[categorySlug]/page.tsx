@@ -110,9 +110,15 @@ export default async function CategoryPage({
     const { products, totalProductsCount, listingStats } = await getProducts({
         take: pagination.take,
         skip: pagination.skip,
-        categorySlugs,
         filters: listing.filters,
         sort: listing.sort,
+        selectionScope: {
+            category: {
+                slug: {
+                    in: categorySlugs,
+                },
+            },
+        },
     });
 
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);

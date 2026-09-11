@@ -1,8 +1,10 @@
 import { cache } from 'react';
 
 import { prisma } from '@/db';
-import { buildProductWhere } from '@/services/product/build-product-where';
+import type { Prisma } from '@/generated/prisma/client';
+import { DEFAULT_PRODUCT_FILTERS } from '@/services/product/filters/filter.constants';
 import type { ProductFilters } from '@/services/product/filters/filter.types';
+import { getProductWhere } from '@/services/product/filters/get-product-where';
 import { productInclude } from '@/services/product/product.constants';
 import { mapProductToDto } from '@/services/product/product.mapper';
 import type {
@@ -18,11 +20,8 @@ type GetProductsParams = {
     skip?: number;
     query?: string | null;
     filters?: ProductFilters;
-    sort: ProductSort;
-    categorySlugs?: string[];
-    collectionSlug?: string;
-    favoriteIds?: string[];
-    favoritesForUserId?: string;
+    sort?: ProductSort;
+    selectionScope?: Prisma.ProductWhereInput;
 };
 
 export async function getProducts({
@@ -31,40 +30,45 @@ export async function getProducts({
     query,
     sort,
     filters,
-    categorySlugs,
-    collectionSlug,
-    favoriteIds,
-    favoritesForUserId,
+    selectionScope,
 }: GetProductsParams): Promise<ProductsResponse> {
-    const listingWhere = buildProductWhere({
+    const listingFilters = {
+        ...DEFAULT_PRODUCT_FILTERS,
+        ...filters,
+    };
+
+    const listingWhere = getProductWhere({
         query,
-        filters,
-        categorySlugs,
-        collectionSlug,
-        favoriteIds,
-        favoritesForUserId,
+        filters: listingFilters,
     });
 
-    const priceStatsWhere = buildProductWhere({
+    const where = selectionScope
+        ? {
+              AND: [listingWhere, selectionScope],
+          }
+        : listingWhere;
+
+    const statsFilters: ProductFilters = {
+        ...listingFilters,
+        priceFrom: null,
+        priceTo: null,
+    };
+
+    const statsListingWhere = getProductWhere({
         query,
-        filters: filters
-            ? {
-                  // Price aggregates should ignore the current price filter.
-                  ...filters,
-                  priceFrom: null,
-                  priceTo: null,
-              }
-            : undefined,
-        categorySlugs,
-        collectionSlug,
-        favoriteIds,
-        favoritesForUserId,
+        filters: statsFilters,
     });
+
+    const statsWhere = selectionScope
+        ? {
+              AND: [statsListingWhere, selectionScope],
+          }
+        : statsListingWhere;
 
     const [products, totalProductsCount, priceAggregates, saleProduct] =
         await Promise.all([
             prisma.product.findMany({
-                where: listingWhere,
+                where,
                 include: productInclude,
                 skip,
                 take,
@@ -73,11 +77,11 @@ export async function getProducts({
             }),
 
             prisma.product.count({
-                where: listingWhere,
+                where,
             }),
 
             prisma.product.aggregate({
-                where: priceStatsWhere,
+                where: statsWhere,
                 _min: {
                     effectivePrice: true,
                 },
@@ -89,7 +93,7 @@ export async function getProducts({
 
             prisma.product.findFirst({
                 where: {
-                    ...listingWhere,
+                    ...where,
                     salePrice: {
                         not: null,
                     },
