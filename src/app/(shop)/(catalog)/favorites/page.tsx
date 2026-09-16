@@ -1,23 +1,12 @@
 import type { Metadata } from 'next';
 
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
-import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
-import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
-import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
+import { AuthenticatedFavoritesContent } from '@/app/(shop)/(catalog)/favorites/_components/AuthenticatedFavoritesContent';
+import { GuestFavoritesContent } from '@/app/(shop)/(catalog)/favorites/_components/GuestFavoritesContent';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
-import { ButtonLink } from '@/components/button/ButtonLink';
-import { PageMessage } from '@/components/PageMessage';
-import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import {
-    getProductListingStats,
-    getProducts,
-} from '@/services/product/product.service';
-
-import { FavoritesListing } from './_components/FavoritesListing';
 
 interface FavoritesPageProps {
     searchParams: Promise<ProductListingSearchParams>;
@@ -30,20 +19,8 @@ export const metadata: Metadata = {
 export default async function FavoritesPage({
     searchParams,
 }: FavoritesPageProps) {
-    const query = await searchParams;
-
-    const filterDefaults = {
-        inStock: false,
-    };
-
-    const listing = parseProductListing(query, {
-        defaultFilterOverrides: filterDefaults,
-    });
-
-    const pagination = getPaginationParams({
-        searchParams: query,
-        limit: PRODUCTS_PER_PAGE,
-    });
+    const params = await searchParams;
+    const session = await getSession();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -55,91 +32,19 @@ export default async function FavoritesPage({
         },
     ];
 
-    const hasIssues = listing.issues.length > 0 || pagination.issues.length > 0;
-
-    if (hasIssues) {
-        return (
-            <CatalogPageLayout
-                title="Избранное"
-                breadcrumbs={breadcrumbs}
-            >
-                <PageIssues
-                    listingIssues={listing.issues}
-                    paginationIssues={pagination.issues}
-                />
-            </CatalogPageLayout>
-        );
-    }
-
-    const session = await getSession();
-
-    if (session) {
-        const selection = {
-            query: listing.query,
-            filters: listing.filters,
-            selectionScope: {
-                favorites: {
-                    some: {
-                        userId: session.user.id,
-                    },
-                },
-            },
-        };
-
-        const [productsResult, listingStats] = await Promise.all([
-            getProducts({
-                ...selection,
-                take: pagination.take,
-                skip: pagination.skip,
-                sort: listing.sort,
-            }),
-
-            getProductListingStats(selection),
-        ]);
-
-        const { products, totalProductsCount } = productsResult;
-
-        const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
-
-        return (
-            <CatalogPageLayout
-                title="Избранное"
-                breadcrumbs={breadcrumbs}
-            >
-                {totalProductsCount === 0 ? (
-                    <PageMessage
-                        title="В избранном пока ничего нет"
-                        description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
-                    >
-                        <ButtonLink href={routes.catalogPage()}>
-                            В каталог
-                        </ButtonLink>
-                    </PageMessage>
-                ) : (
-                    <ProductListing
-                        sort={listing.sort}
-                        listingStats={listingStats}
-                        products={products}
-                        currentPage={pagination.currentPage}
-                        totalPages={totalPages}
-                        startPage={pagination.startPage}
-                        defaultFilterOverrides={filterDefaults}
-                    />
-                )}
-            </CatalogPageLayout>
-        );
-    }
-
     return (
         <CatalogPageLayout
             title="Избранное"
             breadcrumbs={breadcrumbs}
         >
-            <FavoritesListing
-                listing={listing}
-                pagination={pagination}
-                defaultFilterOverrides={filterDefaults}
-            />
+            {session ? (
+                <AuthenticatedFavoritesContent
+                    params={params}
+                    userId={session.user.id}
+                />
+            ) : (
+                <GuestFavoritesContent params={params} />
+            )}
         </CatalogPageLayout>
     );
 }

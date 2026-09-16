@@ -2,23 +2,12 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
-import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
-import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
-import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
+import { CollectionPageContent } from '@/app/(shop)/(catalog)/collection/_components/CollectionPageContent';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
-import { ButtonLink } from '@/components/button/ButtonLink';
-import { PageMessage } from '@/components/PageMessage';
-import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
 import type { CollectionDto } from '@/services/collection/collection.types';
-import {
-    getProductListingStats,
-    getProducts,
-} from '@/services/product/product.service';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -56,13 +45,6 @@ export default async function CollectionPage({
         searchParams,
     ]);
 
-    const listing = parseProductListing(query);
-
-    const pagination = getPaginationParams({
-        searchParams: query,
-        limit: PRODUCTS_PER_PAGE,
-    });
-
     const collection: CollectionDto | null = await getCollectionBySlug(slug);
 
     if (!collection) {
@@ -79,89 +61,14 @@ export default async function CollectionPage({
         },
     ];
 
-    const hasIssues = listing.issues.length > 0 || pagination.issues.length > 0;
-
-    if (hasIssues) {
-        return (
-            <CatalogPageLayout
-                title={collection.title}
-                breadcrumbs={breadcrumbs}
-            >
-                <PageIssues
-                    listingIssues={listing.issues}
-                    paginationIssues={pagination.issues}
-                />
-            </CatalogPageLayout>
-        );
-    }
-
-    const selection = {
-        query: listing.query,
-        filters: listing.filters,
-        selectionScope: {
-            collections: {
-                some: {
-                    collection: {
-                        slug: collection.slug,
-                    },
-                },
-            },
-        },
-    };
-
-    const [productsResult, listingStats] = await Promise.all([
-        getProducts({
-            ...selection,
-            take: pagination.take,
-            skip: pagination.skip,
-            sort: listing.sort,
-        }),
-
-        getProductListingStats(selection),
-    ]);
-
-    const { products, totalProductsCount } = productsResult;
-
-    const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
-
-    if (pagination.currentPage > totalPages && totalProductsCount > 0) {
-        return (
-            <CatalogPageLayout
-                title={collection.title}
-                breadcrumbs={breadcrumbs}
-            >
-                <InvalidPageState />
-            </CatalogPageLayout>
-        );
-    }
-
-    if (totalProductsCount === 0) {
-        return (
-            <CatalogPageLayout
-                title={collection.title}
-                breadcrumbs={breadcrumbs}
-            >
-                <PageMessage title="Товары не найдены">
-                    <ButtonLink href={routes.catalogPage()}>
-                        В каталог
-                    </ButtonLink>
-                </PageMessage>
-            </CatalogPageLayout>
-        );
-    }
-
     return (
         <CatalogPageLayout
             title={collection.title}
             breadcrumbs={breadcrumbs}
         >
-            <ProductListing
-                sort={listing.sort}
-                listingStats={listingStats}
-                products={products}
-                currentPage={pagination.currentPage}
-                totalPages={totalPages}
-                startPage={pagination.startPage}
+            <CollectionPageContent
+                params={query}
+                collectionSlug={collection.slug}
             />
         </CatalogPageLayout>
     );
