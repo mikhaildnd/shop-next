@@ -85,26 +85,58 @@ export async function getProductListingStats({
         ...filters,
     };
 
-    const statsFilters: ProductFilters = {
+    const priceStatsFilters: ProductFilters = {
         ...listingFilters,
         priceFrom: null,
         priceTo: null,
     };
 
-    const statsListingWhere = getProductWhere({
+    const saleStatsFilters: ProductFilters = {
+        ...listingFilters,
+        sale: false,
+    };
+
+    const inStockStatsFilters: ProductFilters = {
+        ...listingFilters,
+        inStock: false,
+    };
+
+    const priceStatsWhere = getProductWhere({
         query,
-        filters: statsFilters,
+        filters: priceStatsFilters,
     });
 
-    const where = selectionScope
-        ? {
-              AND: [statsListingWhere, selectionScope],
-          }
-        : statsListingWhere;
+    const saleStatsWhere = getProductWhere({
+        query,
+        filters: saleStatsFilters,
+    });
 
-    const [priceAggregates, saleProduct] = await Promise.all([
+    const inStockStatsWhere = getProductWhere({
+        query,
+        filters: inStockStatsFilters,
+    });
+
+    const priceWhere = selectionScope
+        ? {
+              AND: [priceStatsWhere, selectionScope],
+          }
+        : priceStatsWhere;
+
+    const saleWhere = selectionScope
+        ? {
+              AND: [saleStatsWhere, selectionScope],
+          }
+        : saleStatsWhere;
+
+    const inStockWhere = selectionScope
+        ? {
+              AND: [inStockStatsWhere, selectionScope],
+          }
+        : inStockStatsWhere;
+
+    const [priceAggregates, saleProduct, inStockProduct] = await Promise.all([
         prisma.product.aggregate({
-            where,
+            where: priceWhere,
             _min: {
                 effectivePrice: true,
             },
@@ -116,9 +148,21 @@ export async function getProductListingStats({
 
         prisma.product.findFirst({
             where: {
-                ...where,
+                ...saleWhere,
                 salePrice: {
                     not: null,
+                },
+            },
+            select: {
+                id: true,
+            },
+        }),
+
+        prisma.product.findFirst({
+            where: {
+                ...inStockWhere,
+                stock: {
+                    gt: 0,
                 },
             },
             select: {
@@ -132,6 +176,7 @@ export async function getProductListingStats({
         maxPrice: Number(priceAggregates._max.effectivePrice ?? 0),
         maxDiscount: Number(priceAggregates._max.discountPercent ?? 0),
         hasSaleProducts: saleProduct !== null,
+        hasInStockProducts: inStockProduct !== null,
     };
 }
 

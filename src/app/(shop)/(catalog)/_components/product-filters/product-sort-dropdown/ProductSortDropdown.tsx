@@ -4,31 +4,27 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { PRODUCT_SORT_ITEMS } from '@/app/(shop)/(catalog)/_components/product-filters/product-sort-dropdown/product-sort.constants';
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
+import { useProductListingContext } from '@/app/(shop)/(catalog)/_components/ProductListingContext';
 import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
 import type { ProductSort } from '@/services/product/sort/sort.types';
 
-interface ProductSortDropdownProps {
-    value: ProductSort;
-}
-
-export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
+export function ProductSortDropdown() {
     const [isOpen, setIsOpen] = useState(false);
 
     const rootRef = useRef<HTMLDivElement>(null);
 
-    const { updateListing } = useProductListing();
+    const { listing, updateListing } = useProductListingContext();
 
     const selectedOption =
-        PRODUCT_SORT_ITEMS.find((option) => option.value === value) ??
+        PRODUCT_SORT_ITEMS.find((option) => option.value === listing.sort) ??
         PRODUCT_SORT_ITEMS[0];
 
-    const handleSelect = (sort: ProductSort) => {
-        if (sort === selectedOption.value) return;
+    const handleSelect = (nextSort: ProductSort) => {
+        if (nextSort === listing.sort) return;
 
         updateListing({
-            sort,
+            sort: nextSort,
         });
 
         setIsOpen(false);
@@ -51,7 +47,8 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
                 onClick={() => setIsOpen((open) => !open)}
                 aria-expanded={isOpen}
             >
-                <span>{selectedOption?.label}</span>
+                <span>{selectedOption.label}</span>
+
                 <ChevronDown
                     className={cn(
                         'size-5 transition-transform',
@@ -59,6 +56,7 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
                     )}
                 />
             </button>
+
             {isOpen && (
                 <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white whitespace-nowrap shadow-lg">
                     {PRODUCT_SORT_ITEMS.map((option) => (
@@ -67,7 +65,7 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
                                 className={cn(
                                     'flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors outline-none',
                                     'hover:bg-(--color-primary)/10 focus-visible:bg-(--color-primary)/10',
-                                    option.value === value &&
+                                    option.value === listing.sort &&
                                         'bg-(--color-primary)/20 font-semibold',
                                 )}
                                 type="button"
@@ -75,7 +73,7 @@ export function ProductSortDropdown({ value }: ProductSortDropdownProps) {
                             >
                                 <span>{option.label}</span>
 
-                                {option.value === value && (
+                                {option.value === listing.sort && (
                                     <Check className="size-5 text-(--color-primary)" />
                                 )}
                             </button>

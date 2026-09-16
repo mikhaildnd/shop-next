@@ -1,18 +1,12 @@
 import { ProductFiltersPanel } from '@/app/(shop)/(catalog)/_components/product-filters/ProductFiltersPanel';
 import { ResetFiltersButton } from '@/app/(shop)/(catalog)/_components/product-filters/ResetFiltersButton';
 import { cn } from '@/lib/cn';
-import type { ProductFilters } from '@/services/product/filters/filter.types';
-import type { ProductListingStats } from '@/services/product/product.types';
 
 interface ProductDesktopFiltersProps {
-    listingStats: ProductListingStats;
-    defaultFilterOverrides?: Partial<ProductFilters>;
     className?: string;
 }
 
 export function ProductDesktopFilters({
-    listingStats,
-    defaultFilterOverrides,
     className,
 }: ProductDesktopFiltersProps) {
     return (
@@ -22,15 +16,9 @@ export function ProductDesktopFilters({
                 className,
             )}
         >
-            <ProductFiltersPanel
-                listingStats={listingStats}
-                defaultFilterOverrides={defaultFilterOverrides}
-            />
+            <ProductFiltersPanel />
 
-            <ResetFiltersButton
-                className="mx-auto mt-6 mb-4"
-                defaultFilterOverrides={defaultFilterOverrides}
-            />
+            <ResetFiltersButton className="mx-auto mt-6 mb-4" />
         </aside>
     );
 }

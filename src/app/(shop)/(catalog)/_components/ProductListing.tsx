@@ -4,52 +4,33 @@ import { ProductDesktopFilters } from '@/app/(shop)/(catalog)/_components/produc
 import { ProductMobileFilters } from '@/app/(shop)/(catalog)/_components/product-filters/ProductMobileFilters';
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
 import { Pagination } from '@/components/Pagination';
-import type { ProductFilters } from '@/services/product/filters/filter.types';
-import type {
-    ProductDto,
-    ProductListingStats,
-} from '@/services/product/product.types';
-import type { ProductSort } from '@/services/product/sort/sort.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface ProductListingProps {
-    sort: ProductSort;
-    listingStats: ProductListingStats;
     products: ProductDto[];
     currentPage: number;
     totalPages: number;
     startPage: number;
-    defaultFilterOverrides?: Partial<ProductFilters>;
 }
 
 export function ProductListing({
-    sort,
-    listingStats,
     products,
     currentPage,
     totalPages,
     startPage,
-    defaultFilterOverrides,
 }: ProductListingProps) {
     const hasPagination = totalPages > 1;
     const hasMore = currentPage < totalPages;
 
     return (
         <div className="grid items-start lg:grid-cols-[280px_1fr] lg:gap-4">
-            <ProductDesktopFilters
-                listingStats={listingStats}
-                defaultFilterOverrides={defaultFilterOverrides}
-                className="hidden lg:flex"
-            />
+            <ProductDesktopFilters className="hidden lg:flex" />
 
             <div className="flex flex-col">
                 <div className="mb-4 flex items-center justify-between">
-                    <ProductSortDropdown value={sort} />
+                    <ProductSortDropdown />
 
-                    <ProductMobileFilters
-                        className="lg:hidden"
-                        listingStats={listingStats}
-                        defaultFilterOverrides={defaultFilterOverrides}
-                    />
+                    <ProductMobileFilters className="lg:hidden" />
                 </div>
 
                 <div className="flex flex-col gap-y-6 lg:gap-y-12">

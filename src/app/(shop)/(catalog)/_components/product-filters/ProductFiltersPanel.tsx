@@ -4,23 +4,12 @@ import { ProductDiscountFilter } from '@/app/(shop)/(catalog)/_components/produc
 import { ProductInStockFilter } from '@/app/(shop)/(catalog)/_components/product-filters/ProductInStockFilter';
 import { ProductPriceFilter } from '@/app/(shop)/(catalog)/_components/product-filters/ProductPriceFilter';
 import { ProductSaleFilter } from '@/app/(shop)/(catalog)/_components/product-filters/ProductSaleFilter';
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
+import { useProductListingContext } from '@/app/(shop)/(catalog)/_components/ProductListingContext';
 import { getProductFilterVisibility } from '@/app/(shop)/(catalog)/lib/product-listing/filters/get-product-filter-visibility';
-import type { ProductFilters } from '@/services/product/filters/filter.types';
-import type { ProductListingStats } from '@/services/product/product.types';
 
-interface ProductFiltersPanelProps {
-    listingStats: ProductListingStats;
-    defaultFilterOverrides?: Partial<ProductFilters>;
-}
-
-export function ProductFiltersPanel({
-    listingStats,
-    defaultFilterOverrides,
-}: ProductFiltersPanelProps) {
-    const { filters, updateListing } = useProductListing({
-        defaultFilterOverrides,
-    });
+export function ProductFiltersPanel() {
+    const { listing, listingStats, updateListing } = useProductListingContext();
+    const { filters } = listing;
 
     const filterState = getProductFilterVisibility({
         listingStats,

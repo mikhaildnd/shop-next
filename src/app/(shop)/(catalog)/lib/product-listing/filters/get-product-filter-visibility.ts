@@ -21,6 +21,6 @@ export function getProductFilterVisibility({
         price: true,
         discount: filters.discount !== null || listingStats.maxDiscount > 0,
         sale: filters.sale || listingStats.hasSaleProducts,
-        inStock: true,
+        inStock: filters.inStock || listingStats.hasInStockProducts,
     };
 }

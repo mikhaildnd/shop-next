@@ -1,8 +1,8 @@
 import { normalizeQueryParam } from '@/app/(shop)/(catalog)/lib/product-listing/filters/normalize/normalize-query-param';
 import { parseProductFilters } from '@/app/(shop)/(catalog)/lib/product-listing/filters/parse-product-filters';
 import type {
-    ParsedProductListing,
     ProductListingOptions,
+    ProductListingParseResult,
     ProductSearchParams,
 } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { parseSortParam } from '@/app/(shop)/(catalog)/lib/product-listing/sort/parse/parse-sort-param';
@@ -13,12 +13,9 @@ import { DEFAULT_PRODUCT_SORT } from '@/services/product/sort/sort.constants';
 export function parseProductListing(
     searchParams: ProductSearchParams = {},
     options: ProductListingOptions = {},
-): ParsedProductListing {
+): ProductListingParseResult {
     const query = normalizeQueryParam(searchParams[SEARCH_QUERY_PARAM]);
-    const filters = parseProductFilters(
-        searchParams,
-        options.defaultFilterOverrides,
-    );
+    const filters = parseProductFilters(searchParams, options.filterDefaults);
     const sort = parseSortParam(searchParams.sort);
 
     const collectedIssues = [...filters.issues, sort.issue];

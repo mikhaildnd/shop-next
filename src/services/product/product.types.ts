@@ -49,6 +49,7 @@ export type ProductListingStats = {
     maxPrice: number;
     maxDiscount: number;
     hasSaleProducts: boolean;
+    hasInStockProducts: boolean;
 };
 
 export type ProductsResponse = {

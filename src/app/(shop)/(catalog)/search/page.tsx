@@ -1,22 +1,8 @@
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
-import { CollectionProductsSection } from '@/app/(shop)/(catalog)/_components/CollectionProductsSection';
-import { PageIssues } from '@/app/(shop)/(catalog)/_components/page-issues/PageIssues';
-import { InvalidPageState } from '@/app/(shop)/(catalog)/_components/page-states/InvalidPageState';
-import { ProductListing } from '@/app/(shop)/(catalog)/_components/ProductListing';
-import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
-import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { SearchPageContent } from '@/app/(shop)/(catalog)/search/_components/SearchPageContent';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
-import { ButtonLink } from '@/components/button/ButtonLink';
-import { PageMessage } from '@/components/PageMessage';
-import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
-import { normalizeSearchQuery } from '@/lib/search/normalize-search-query';
-import { SEARCH_QUERY_PARAM } from '@/lib/search/search.constants';
 import { routes } from '@/routes';
-import {
-    getProductListingStats,
-    getProducts,
-} from '@/services/product/product.service';
 
 interface SearchPageProps {
     searchParams: Promise<ProductListingSearchParams>;
@@ -24,7 +10,6 @@ interface SearchPageProps {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
     const params = await searchParams;
-    const state = normalizeSearchQuery(params[SEARCH_QUERY_PARAM]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -36,130 +21,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         },
     ];
 
-    if (state.status === 'empty') {
-        return (
-            <CatalogPageLayout
-                title="Результаты поиска"
-                breadcrumbs={breadcrumbs}
-            >
-                <PageMessage
-                    title="Не указана строка поиска"
-                    description="Введите название товара или категории"
-                />
-
-                <CollectionProductsSection collectionSlug="promotion" />
-            </CatalogPageLayout>
-        );
-    }
-
-    if (state.status === 'too-short') {
-        return (
-            <CatalogPageLayout
-                title="Результаты поиска"
-                breadcrumbs={breadcrumbs}
-            >
-                <PageMessage
-                    title="Слишком короткий запрос"
-                    description="Минимум 2 символа"
-                />
-
-                <CollectionProductsSection collectionSlug="promotion" />
-            </CatalogPageLayout>
-        );
-    }
-
-    const listing = parseProductListing(params);
-
-    const pagination = getPaginationParams({
-        searchParams: params,
-        limit: PRODUCTS_PER_PAGE,
-    });
-
-    if (listing.issues.length > 0 || pagination.issues.length > 0) {
-        return (
-            <CatalogPageLayout
-                title="Результаты поиска"
-                breadcrumbs={breadcrumbs}
-            >
-                <PageIssues
-                    listingIssues={listing.issues}
-                    paginationIssues={pagination.issues}
-                />
-
-                <CollectionProductsSection collectionSlug="promotion" />
-            </CatalogPageLayout>
-        );
-    }
-
-    const selection = {
-        query: listing.query,
-        filters: listing.filters,
-    };
-
-    const [productsResult, listingStats] = await Promise.all([
-        getProducts({
-            ...selection,
-            take: pagination.take,
-            skip: pagination.skip,
-            sort: listing.sort,
-        }),
-
-        getProductListingStats(selection),
-    ]);
-
-    const { products, totalProductsCount } = productsResult;
-
-    const totalPages = Math.max(
-        1,
-        Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE),
-    );
-
-    if (pagination.currentPage > totalPages && totalProductsCount > 0) {
-        return (
-            <CatalogPageLayout
-                title="Результаты поиска"
-                breadcrumbs={breadcrumbs}
-            >
-                <InvalidPageState />
-
-                <CollectionProductsSection collectionSlug="promotion" />
-            </CatalogPageLayout>
-        );
-    }
-
-    if (totalProductsCount === 0) {
-        return (
-            <CatalogPageLayout
-                title="Результаты поиска"
-                breadcrumbs={breadcrumbs}
-            >
-                <PageMessage
-                    title="Товары не найдены"
-                    description={`По запросу "${state.query}" ничего не найдено`}
-                >
-                    <ButtonLink href={routes.catalogPage()}>
-                        В каталог
-                    </ButtonLink>
-                </PageMessage>
-
-                <CollectionProductsSection collectionSlug="promotion" />
-            </CatalogPageLayout>
-        );
-    }
-
     return (
         <CatalogPageLayout
             title="Результаты поиска"
             breadcrumbs={breadcrumbs}
         >
-            <ProductListing
-                sort={listing.sort}
-                listingStats={listingStats}
-                products={products}
-                currentPage={pagination.currentPage}
-                totalPages={totalPages}
-                startPage={pagination.startPage}
-            />
+            <SearchPageContent params={params} />
         </CatalogPageLayout>
     );
 }
