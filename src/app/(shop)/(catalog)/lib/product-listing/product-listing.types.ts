@@ -11,7 +11,7 @@ import type { ProductFilters } from '@/services/product/filters/filter.types';
 import type { ProductSort } from '@/services/product/sort/sort.types';
 
 export type ProductListingOptions = {
-    defaultFilterOverrides?: Partial<ProductFilters>;
+    filterDefaults?: Partial<ProductFilters>;
 };
 
 export type ProductSearchParams = {
@@ -47,7 +47,7 @@ export type ProductListingState = {
     sort: ProductSort;
 };
 
-export type ParsedProductListing = ProductListingState & {
+export type ProductListingParseResult = ProductListingState & {
     issues: ProductListingIssue[];
 };
 
@@ -57,3 +57,5 @@ export type ProductListingUpdates = {
 };
 
 export type DiscountFilterValue = (typeof DISCOUNT_FILTER_VALUES)[number];
+
+export type ProductListingPageState = 'invalid-page' | 'empty' | 'listing';

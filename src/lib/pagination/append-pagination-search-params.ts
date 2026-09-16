@@ -3,6 +3,7 @@ import {
     PAGINATION_VIEWS,
 } from '@/lib/pagination/pagination.constants';
 import type { PaginationState } from '@/lib/pagination/pagination.types';
+import { removePaginationSearchParams } from '@/lib/pagination/remove-pagination-search-params';
 
 type AppendPaginationSearchParamsOptions = {
     params: URLSearchParams;
@@ -13,9 +14,7 @@ export function appendPaginationSearchParams({
     params,
     pagination,
 }: AppendPaginationSearchParamsOptions) {
-    params.delete(PAGINATION_PARAMS.PAGE_QUERY_PARAM);
-    params.delete(PAGINATION_PARAMS.VIEW_QUERY_PARAM);
-    params.delete(PAGINATION_PARAMS.FROM_QUERY_PARAM);
+    removePaginationSearchParams(params);
 
     if (pagination.currentPage > 1) {
         params.set(
