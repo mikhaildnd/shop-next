@@ -52,7 +52,6 @@ export function useServerCart({
 
     const [cartEntries, setCartEntries] = useState(initialCartEntries);
 
-    const cartEntriesRef = useRef(initialCartEntries);
     const confirmedCartEntriesRef = useRef(initialCartEntries);
     const pendingMutationsRef = useRef<CartMutation[]>([]);
     const mutationQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -64,7 +63,6 @@ export function useServerCart({
             confirmedCartEntriesRef.current,
         );
 
-        cartEntriesRef.current = nextCartEntries;
         setCartEntries(nextCartEntries);
     }, []);
 
