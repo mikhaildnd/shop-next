@@ -1,5 +1,5 @@
 import { PRODUCT_LISTING_ISSUE_GROUPS } from '@/app/(shop)/(catalog)/_components/page-issues/page-issues.constants';
-import { ResetProductListingButton } from '@/app/(shop)/(catalog)/_components/page-issues/ResetProductListingButton';
+import { ResetListingUrlButton } from '@/app/(shop)/(catalog)/_components/page-issues/ResetListingUrlButton';
 import type { ProductListingIssue } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
 import { PageMessage } from '@/components/PageMessage';
 
@@ -15,7 +15,7 @@ export function ProductListingIssues({ issues }: ProductListingIssuesProps) {
                     title={group.message.title}
                     description={group.message.description}
                 >
-                    <ResetProductListingButton />
+                    <ResetListingUrlButton />
                 </PageMessage>
             );
         }

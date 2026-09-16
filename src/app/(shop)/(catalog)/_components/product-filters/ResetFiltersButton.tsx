@@ -1,18 +1,14 @@
 'use client';
 
-import { useProductListing } from '@/app/(shop)/(catalog)/_hooks/useProductListing';
+import { useProductListingContext } from '@/app/(shop)/(catalog)/_components/ProductListingContext';
 import { Button } from '@/components/button/Button';
-import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 interface ResetFiltersButtonProps {
-    defaultFilterOverrides?: Partial<ProductFilters>;
     className?: string;
 }
-export function ResetFiltersButton({
-    defaultFilterOverrides,
-    className,
-}: ResetFiltersButtonProps) {
-    const { resetFilters } = useProductListing({ defaultFilterOverrides });
+
+export function ResetFiltersButton({ className }: ResetFiltersButtonProps) {
+    const { resetFilters } = useProductListingContext();
 
     return (
         <Button
