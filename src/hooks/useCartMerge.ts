@@ -11,6 +11,7 @@ import {
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface UseCartMergeOptions {
+    enqueueAction: (action: () => Promise<void>) => Promise<void>;
     replaceCart: (cart: CartDto) => void;
 }
 
@@ -21,6 +22,7 @@ export interface UseCartMergeResult {
 }
 
 export function useCartMerge({
+    enqueueAction,
     replaceCart,
 }: UseCartMergeOptions): UseCartMergeResult {
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
@@ -58,10 +60,12 @@ export function useCartMerge({
             setMergeStatus('merging');
 
             try {
-                const cart = await mergeCartAction(entriesToMerge);
+                await enqueueAction(async () => {
+                    const cart = await mergeCartAction(entriesToMerge);
 
-                replaceCart(cart);
-                removeMergedCartEntries(entriesToMerge);
+                    replaceCart(cart);
+                    removeMergedCartEntries(entriesToMerge);
+                });
 
                 setMergeStatus('idle');
                 setMergeAttempt((attempt) => attempt + 1);
@@ -78,7 +82,7 @@ export function useCartMerge({
         }
 
         void startMerge();
-    }, [mergeAttempt, replaceCart]);
+    }, [enqueueAction, mergeAttempt, replaceCart]);
 
     return {
         mergeStatus,
