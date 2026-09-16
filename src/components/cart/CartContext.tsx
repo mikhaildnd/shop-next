@@ -143,64 +143,9 @@ function ServerCartProvider({
     });
 
     const merge = useCartMerge({
+        enqueueAction: cart.enqueueAction,
         replaceCart: cart.replaceCart,
     });
-
-    const [products, setProducts] = useState<ProductDto[]>(
-        initialCartState.items.map(({ product }) => product),
-    );
-
-    const productIdsKey = [...cart.cartEntries]
-        .map((item) => item.productId)
-        .sort()
-        .join(',');
-
-    const getProducts = useEffectEvent(async () => {
-        const missingProductIds = cart.cartEntries
-            .map((entry) => entry.productId)
-            .filter(
-                (productId) =>
-                    !products.some((product) => product.id === productId),
-            );
-
-        if (missingProductIds.length === 0) {
-            return [];
-        }
-
-        return getProductsByIdsAction(missingProductIds);
-    });
-
-    useEffect(() => {
-        if (productIdsKey.length === 0) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function loadProducts() {
-            const nextProducts = await getProducts();
-
-            if (!cancelled && nextProducts.length > 0) {
-                setProducts((currentProducts) => [
-                    ...currentProducts,
-                    ...nextProducts,
-                ]);
-            }
-        }
-
-        void loadProducts();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [productIdsKey]);
-
-    const isLoadingProducts =
-        cart.cartEntries.length > 0 &&
-        cart.cartEntries.some(
-            (entry) =>
-                !products.some((product) => product.id === entry.productId),
-        );
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
@@ -212,8 +157,8 @@ function ServerCartProvider({
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
         isHydrated: true,
-        products,
-        isLoadingProducts,
+        products: [],
+        isLoadingProducts: false,
     };
 
     return (
