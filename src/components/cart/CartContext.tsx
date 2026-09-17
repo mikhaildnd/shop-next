@@ -5,14 +5,21 @@ import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
+import { useCartProducts } from '@/hooks/useCartProducts';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
+    products: ProductDto[];
+    isLoadingProducts: boolean;
+    isRetryingProducts: boolean;
+    productsError: Error | null;
+    retryProducts: () => void;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
     addCartEntry: (
@@ -61,9 +68,18 @@ export function CartProvider({
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
     const cart = useLocalCart();
+    const productsState = useCartProducts({
+        cartEntries: cart.cartEntries,
+        isHydrated: cart.isHydrated,
+    });
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
+        products: productsState.products,
+        isLoadingProducts: productsState.isLoadingProducts,
+        isRetryingProducts: productsState.isRetryingProducts,
+        productsError: productsState.productsError,
+        retryProducts: productsState.retryProducts,
         cartCount: cart.cartCount,
         getCartEntryQuantity: cart.getCartEntryQuantity,
         addCartEntry: cart.addCartEntry,
@@ -92,6 +108,11 @@ function ServerCartProvider({
         actionQueue,
     });
 
+    const productsState = useCartProducts({
+        cartEntries: cart.cartEntries,
+        initialProducts: initialCartState.items.map(({ product }) => product),
+    });
+
     const merge = useCartMerge({
         actionQueue,
         replaceCart: cart.replaceCart,
@@ -99,6 +120,11 @@ function ServerCartProvider({
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
+        products: productsState.products,
+        isLoadingProducts: productsState.isLoadingProducts,
+        isRetryingProducts: productsState.isRetryingProducts,
+        productsError: productsState.productsError,
+        retryProducts: productsState.retryProducts,
         cartCount: cart.cartCount,
         getCartEntryQuantity: cart.getCartEntryQuantity,
         addCartEntry: cart.addCartEntry,
