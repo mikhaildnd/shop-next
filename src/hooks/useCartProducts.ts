@@ -15,6 +15,8 @@ interface UseCartProductsOptions {
 export interface UseCartProductsResult {
     products: ProductDto[];
     isLoadingProducts: boolean;
+    productsError: Error | null;
+    retryProducts: () => void;
 }
 
 export function useCartProducts({
@@ -23,6 +25,8 @@ export function useCartProducts({
     isHydrated = true,
 }: UseCartProductsOptions): UseCartProductsResult {
     const [products, setProducts] = useState<ProductDto[]>(initialProducts);
+    const [productsError, setProductsError] = useState<Error | null>(null);
+    const [retryAttempt, setRetryAttempt] = useState(0);
 
     const productIdsKey = useMemo(
         () =>
@@ -50,23 +54,37 @@ export function useCartProducts({
         let cancelled = false;
 
         async function loadProducts() {
-            const nextProducts = await getProductsByIdsAction(missingProductIds);
+            setProductsError(null);
 
-            if (cancelled) {
-                return;
-            }
-
-            setProducts((currentProducts) => {
-                const productById = new Map(
-                    currentProducts.map((product) => [product.id, product]),
+            try {
+                const nextProducts = await getProductsByIdsAction(
+                    missingProductIds,
                 );
 
-                for (const product of nextProducts) {
-                    productById.set(product.id, product);
+                if (cancelled) {
+                    return;
                 }
 
-                return [...productById.values()];
-            });
+                setProducts((currentProducts) => {
+                    const productById = new Map(
+                        currentProducts.map((product) => [product.id, product]),
+                    );
+
+                    for (const product of nextProducts) {
+                        productById.set(product.id, product);
+                    }
+
+                    return [...productById.values()];
+                });
+            } catch (error) {
+                if (!cancelled) {
+                    setProductsError(
+                        error instanceof Error
+                            ? error
+                            : new Error('Не удалось загрузить товары'),
+                    );
+                }
+            }
         }
 
         void loadProducts();
@@ -74,7 +92,7 @@ export function useCartProducts({
         return () => {
             cancelled = true;
         };
-    }, [cartEntries, isHydrated, productIdsKey, products]);
+    }, [cartEntries, isHydrated, productIdsKey, products, retryAttempt]);
 
     const isLoadingProducts =
         isHydrated &&
@@ -82,8 +100,14 @@ export function useCartProducts({
             (entry) => !products.some((product) => product.id === entry.productId),
         );
 
+    function retryProducts() {
+        setRetryAttempt((attempt) => attempt + 1);
+    }
+
     return {
         products,
         isLoadingProducts,
+        productsError,
+        retryProducts,
     };
 }
