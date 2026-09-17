@@ -11,7 +11,7 @@ import {
 
 interface UseFavoritesMergeOptions {
     actionQueue: ActionQueue;
-    onMerge: (favoriteIds: string[]) => void;
+    replaceFavorites: (favoriteIds: string[]) => void;
 }
 
 export interface UseFavoritesMergeResult {
@@ -24,7 +24,7 @@ type MergeStatus = 'idle' | 'merging' | 'error';
 
 export function useFavoritesMerge({
     actionQueue,
-    onMerge,
+    replaceFavorites,
 }: UseFavoritesMergeOptions): UseFavoritesMergeResult {
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
@@ -58,11 +58,11 @@ export function useFavoritesMerge({
             setMergeStatus('merging');
 
             try {
-                await actionQueue.enqueue(() =>
-                    mergeFavoritesAction(favoriteIdsToMerge).then(() => undefined),
+                const mergedFavoriteIds = await actionQueue.enqueue(() =>
+                    mergeFavoritesAction(favoriteIdsToMerge),
                 );
 
-                onMerge(favoriteIdsToMerge);
+                replaceFavorites(mergedFavoriteIds);
                 clearFavorites();
                 setMergeStatus('idle');
             } catch {
@@ -73,7 +73,7 @@ export function useFavoritesMerge({
         }
 
         void merge();
-    }, [actionQueue, mergeAttempt, onMerge]);
+    }, [actionQueue, mergeAttempt, replaceFavorites]);
 
     return {
         mergeStatus,
