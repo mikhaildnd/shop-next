@@ -1,23 +1,59 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useEffectEvent,useMemo, useState } from 'react';
 
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { useCartContext } from '@/components/cart/CartContext';
 import { PageMessage } from '@/components/PageMessage';
+import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import { routes } from '@/routes';
 import type { CartItemDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
-interface CartContentProps {
-    className?: string;
-}
+export function GuestCartContent() {
+    const { cartEntries, isHydrated } = useCartContext();
+    const [products, setProducts] = useState<ProductDto[]>([]);
 
-export function CartContent({ className }: CartContentProps) {
-    const { cartEntries, products, isLoadingProducts, isHydrated } =
-        useCartContext();
+    const productIdsKey = useMemo(
+        () =>
+            [...cartEntries]
+                .map((entry) => entry.productId)
+                .sort()
+                .join(','),
+        [cartEntries],
+    );
+
+    const getProducts = useEffectEvent(async () => {
+        return getProductsByIdsAction(
+            cartEntries.map((entry) => entry.productId),
+        );
+    });
+
+    useEffect(() => {
+        if (!isHydrated || productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled) {
+                setProducts(nextProducts);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isHydrated, productIdsKey]);
 
     const productsById = useMemo(
         () => new Map(products.map((product) => [product.id, product])),
@@ -44,41 +80,23 @@ export function CartContent({ className }: CartContentProps) {
         [cartEntries, productsById],
     );
 
-    const availableItems = items.filter((item) => item.product.stock > 0);
+    const {
+        availableItems,
+        unavailableItems,
+        regularPriceTotal,
+        effectivePriceTotal,
+        availableCartCount,
+        discountAmount,
+        hasPriceChanges,
+        isCheckoutDisabled,
+    } = getCartSummary(items);
 
-    const unavailableItems = items.filter((item) => item.product.stock === 0);
-
-    const regularPriceTotal = availableItems.reduce(
-        (sum, item) => sum + item.product.regularPrice * item.quantity,
-        0,
-    );
-
-    const effectivePriceTotal = availableItems.reduce(
-        (sum, item) => sum + item.product.effectivePrice * item.quantity,
-        0,
-    );
-
-    const availableCartCount = availableItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0,
-    );
-
-    const discountAmount = regularPriceTotal - effectivePriceTotal;
-
-    const hasPriceChanges = items.some(
-        (item) =>
-            item.product &&
-            item.snapshot.effectivePrice !== item.product.effectivePrice,
-    );
-
-    const hasStockIssues = items.some(
-        (item) =>
-            item.product &&
-            item.product.stock > 0 &&
-            item.quantity > item.product.stock,
-    );
-
-    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
+    const isLoadingProducts =
+        isHydrated &&
+        cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
 
     if (!isHydrated) {
         return (
@@ -112,7 +130,7 @@ export function CartContent({ className }: CartContentProps) {
     }
 
     return (
-        <div className={className}>
+        <div>
             {hasPriceChanges && (
                 <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-md">
                     <p className="font-semibold">
