@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createContext, useContext } from 'react';
 
 import { toast } from '@/components/ui/toast';
+import { useFavoritesMerge } from '@/hooks/useFavoritesMerge';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import { useServerFavorites } from '@/hooks/useServerFavorites';
 import { createActionQueue } from '@/lib/async/action-queue';
@@ -97,8 +98,13 @@ function ServerFavoritesProvider({
         actionQueue,
     });
 
+    const merge = useFavoritesMerge({
+        actionQueue,
+        onMerge: favorites.applyMergedFavoriteIds,
+    });
+
     const contextValue: FavoritesContextValue = {
-        favoriteIds: new Set(initialFavoriteIds),
+        favoriteIds: favorites.favoriteIds,
         favoriteCount: favorites.favoriteCount,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
@@ -108,8 +114,8 @@ function ServerFavoritesProvider({
     const mergeToastId = useRef<string | null>(null);
 
     useEffect(() => {
-        if (favorites.mergeStatus === 'merging') {
-            if (favorites.mergeAttempt === 0) {
+        if (merge.mergeStatus === 'merging') {
+            if (merge.mergeAttempt === 0) {
                 return;
             }
             if (mergeToastId.current) {
@@ -130,7 +136,7 @@ function ServerFavoritesProvider({
             return;
         }
 
-        if (favorites.mergeStatus === 'error') {
+        if (merge.mergeStatus === 'error') {
             if (!mergeToastId.current) {
                 mergeToastId.current = toast.add({
                     description: 'Не удалось синхронизировать избранное',
@@ -138,7 +144,7 @@ function ServerFavoritesProvider({
                     timeout: 0,
                     actionProps: {
                         children: 'Повторить',
-                        onClick: favorites.retryMerge,
+                        onClick: merge.retryMerge,
                     },
                 });
 
@@ -151,7 +157,7 @@ function ServerFavoritesProvider({
                 timeout: 0,
                 actionProps: {
                     children: 'Повторить',
-                    onClick: favorites.retryMerge,
+                    onClick: merge.retryMerge,
                 },
             });
 
@@ -162,7 +168,7 @@ function ServerFavoritesProvider({
             toast.close(mergeToastId.current);
             mergeToastId.current = null;
         }
-    }, [favorites.mergeAttempt, favorites.mergeStatus, favorites.retryMerge]);
+    }, [merge.mergeAttempt, merge.mergeStatus, merge.retryMerge]);
 
     useEffect(() => {
         if (favorites.mutationError) {
