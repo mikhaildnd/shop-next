@@ -36,62 +36,60 @@ export function useServerFavorites({
     initialFavoriteCount,
     actionQueue,
 }: UseServerFavoritesOptions): UseServerFavoritesReturn {
-    const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
+    const initialFavoriteIdsSet = new Set(initialFavoriteIds);
+    const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIdsSet);
 
-    const initialFavoriteStates = Object.fromEntries(
-        initialFavoriteIds.map((productId) => [productId, true]),
-    );
-
-    const [favoriteStates, setFavoriteStates] =
-        useState<Record<string, boolean>>(initialFavoriteStates);
-
-    const favoriteStatesRef = useRef(favoriteStates);
-    const confirmedFavoriteStatesRef = useRef(initialFavoriteStates);
+    const favoriteIdsRef = useRef(favoriteIds);
+    const confirmedFavoriteIdsRef = useRef(initialFavoriteIdsSet);
     const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
     const nextMutationIdRef = useRef(0);
 
     const [mutationError, setMutationError] = useState<Error | null>(null);
 
-    const updateVisibleFavoriteStates = useCallback(() => {
-        const nextFavoriteStates = pendingMutationsRef.current.reduce(
-            (states, mutation) => ({
-                ...states,
-                [mutation.productId]: mutation.isFavorite,
-            }),
-            confirmedFavoriteStatesRef.current,
-        );
+    const updateVisibleFavoriteIds = useCallback(() => {
+        const nextFavoriteIds = new Set(confirmedFavoriteIdsRef.current);
 
-        favoriteStatesRef.current = nextFavoriteStates;
-        setFavoriteStates(nextFavoriteStates);
-        setFavoriteCount(
-            Object.values(nextFavoriteStates).filter(Boolean).length,
-        );
+        for (const mutation of pendingMutationsRef.current) {
+            if (mutation.isFavorite) {
+                nextFavoriteIds.add(mutation.productId);
+            } else {
+                nextFavoriteIds.delete(mutation.productId);
+            }
+        }
+
+        favoriteIdsRef.current = nextFavoriteIds;
+        setFavoriteIds(nextFavoriteIds);
     }, []);
 
     const replaceFavorites = useCallback(
         (favoriteIds: string[]) => {
-            confirmedFavoriteStatesRef.current = Object.fromEntries(
-                favoriteIds.map((productId) => [productId, true]),
-            );
-
-            updateVisibleFavoriteStates();
+            confirmedFavoriteIdsRef.current = new Set(favoriteIds);
+            updateVisibleFavoriteIds();
         },
-        [updateVisibleFavoriteStates],
+        [updateVisibleFavoriteIds],
     );
 
     const enqueueMutation = useCallback(
         (mutation: FavoriteMutation, action: FavoriteAction): Promise<void> => {
             pendingMutationsRef.current.push(mutation);
-            updateVisibleFavoriteStates();
+            updateVisibleFavoriteIds();
 
             const execute = async () => {
                 try {
                     await action();
 
-                    confirmedFavoriteStatesRef.current = {
-                        ...confirmedFavoriteStatesRef.current,
-                        [mutation.productId]: mutation.isFavorite,
-                    };
+                    if (mutation.isFavorite) {
+                        confirmedFavoriteIdsRef.current = new Set(
+                            confirmedFavoriteIdsRef.current,
+                        );
+                        confirmedFavoriteIdsRef.current.add(mutation.productId);
+                    } else {
+                        const nextFavoriteIds = new Set(
+                            confirmedFavoriteIdsRef.current,
+                        );
+                        nextFavoriteIds.delete(mutation.productId);
+                        confirmedFavoriteIdsRef.current = nextFavoriteIds;
+                    }
                 } catch (error) {
                     setMutationError(
                         error instanceof Error
@@ -106,19 +104,18 @@ export function useServerFavorites({
                                 pendingMutation.id !== mutation.id,
                         );
 
-                    updateVisibleFavoriteStates();
+                    updateVisibleFavoriteIds();
                 }
             };
 
             return actionQueue.enqueue(execute);
         },
-        [actionQueue, updateVisibleFavoriteStates],
+        [actionQueue, updateVisibleFavoriteIds],
     );
 
     const toggleFavorite = useCallback(
         (productId: string) => {
-            const currentIsFavorite =
-                favoriteStatesRef.current[productId] ?? false;
+            const currentIsFavorite = favoriteIdsRef.current.has(productId);
             const nextIsFavorite = !currentIsFavorite;
 
             setMutationError(null);
@@ -139,18 +136,12 @@ export function useServerFavorites({
     );
 
     const isFavorite = useCallback(
-        (productId: string) => favoriteStates[productId] ?? false,
-        [favoriteStates],
-    );
-
-    const favoriteIds = new Set(
-        Object.entries(favoriteStates)
-            .filter(([, isFavorite]) => isFavorite)
-            .map(([productId]) => productId),
+        (productId: string) => favoriteIds.has(productId),
+        [favoriteIds],
     );
 
     return {
-        favoriteCount,
+        favoriteCount: favoriteIds.size,
         favoriteIds,
         isFavorite,
         toggleFavorite,
