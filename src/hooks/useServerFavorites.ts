@@ -19,7 +19,7 @@ interface UseServerFavoritesReturn {
     favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void;
-    applyMergedFavoriteIds: (favoriteIds: string[]) => void;
+    replaceFavorites: (favoriteIds: string[]) => void;
     mutationError: Error | null;
 }
 
@@ -68,16 +68,11 @@ export function useServerFavorites({
         );
     }, []);
 
-    const applyMergedFavoriteIds = useCallback(
+    const replaceFavorites = useCallback(
         (favoriteIds: string[]) => {
-            const mergedFavoriteStates = Object.fromEntries(
+            confirmedFavoriteStatesRef.current = Object.fromEntries(
                 favoriteIds.map((productId) => [productId, true]),
             );
-
-            confirmedFavoriteStatesRef.current = {
-                ...confirmedFavoriteStatesRef.current,
-                ...mergedFavoriteStates,
-            };
 
             updateVisibleFavoriteStates();
         },
@@ -159,7 +154,7 @@ export function useServerFavorites({
         favoriteIds,
         isFavorite,
         toggleFavorite,
-        applyMergedFavoriteIds,
+        replaceFavorites,
         mutationError,
     };
 }
