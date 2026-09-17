@@ -1,22 +1,15 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import {
-    createContext,
-    useContext,
-    useEffect,
-    useEffectEvent,
-    useState,
-} from 'react';
+import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
-import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
+import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
-import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
@@ -31,8 +24,6 @@ interface CartContextValue {
     removeCartEntry: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
     isHydrated: boolean;
-    products: ProductDto[];
-    isLoadingProducts: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -69,49 +60,7 @@ export function CartProvider({
 }
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
-    const [products, setProducts] = useState<ProductDto[]>([]);
-
     const cart = useLocalCart();
-
-    const productIdsKey = [...cart.cartEntries]
-        .map((item) => item.productId)
-        .sort()
-        .join(',');
-
-    const getProducts = useEffectEvent(async () => {
-        return getProductsByIdsAction(
-            cart.cartEntries.map((item) => item.productId),
-        );
-    });
-
-    useEffect(() => {
-        if (!cart.isHydrated || productIdsKey.length === 0) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function loadProducts() {
-            const nextProducts = await getProducts();
-
-            if (!cancelled) {
-                setProducts(nextProducts);
-            }
-        }
-
-        void loadProducts();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [cart.isHydrated, productIdsKey]);
-
-    const isLoadingProducts =
-        cart.isHydrated &&
-        cart.cartEntries.some(
-            (entry) =>
-                !products.some((product) => product.id === entry.productId),
-        );
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
@@ -123,8 +72,6 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
         isHydrated: cart.isHydrated,
-        products,
-        isLoadingProducts,
     };
 
     return (
@@ -138,69 +85,17 @@ function ServerCartProvider({
     initialCartState,
     children,
 }: ServerCartProviderProps) {
+    const [actionQueue] = useState(createActionQueue);
+
     const cart = useServerCart({
         initialCartState,
+        actionQueue,
     });
 
     const merge = useCartMerge({
+        actionQueue,
         replaceCart: cart.replaceCart,
     });
-
-    const [products, setProducts] = useState<ProductDto[]>(
-        initialCartState.items.map(({ product }) => product),
-    );
-
-    const productIdsKey = [...cart.cartEntries]
-        .map((item) => item.productId)
-        .sort()
-        .join(',');
-
-    const getProducts = useEffectEvent(async () => {
-        const missingProductIds = cart.cartEntries
-            .map((entry) => entry.productId)
-            .filter(
-                (productId) =>
-                    !products.some((product) => product.id === productId),
-            );
-
-        if (missingProductIds.length === 0) {
-            return [];
-        }
-
-        return getProductsByIdsAction(missingProductIds);
-    });
-
-    useEffect(() => {
-        if (productIdsKey.length === 0) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function loadProducts() {
-            const nextProducts = await getProducts();
-
-            if (!cancelled && nextProducts.length > 0) {
-                setProducts((currentProducts) => [
-                    ...currentProducts,
-                    ...nextProducts,
-                ]);
-            }
-        }
-
-        void loadProducts();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [productIdsKey]);
-
-    const isLoadingProducts =
-        cart.cartEntries.length > 0 &&
-        cart.cartEntries.some(
-            (entry) =>
-                !products.some((product) => product.id === entry.productId),
-        );
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
@@ -212,8 +107,6 @@ function ServerCartProvider({
         removeCartEntry: cart.removeCartEntry,
         clearCart: cart.clearCart,
         isHydrated: true,
-        products,
-        isLoadingProducts,
     };
 
     return (
