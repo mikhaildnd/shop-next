@@ -1,14 +1,10 @@
 import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrappers/HorizontalScrollWrapper';
-import { AuthenticatedCartContent } from '@/app/(shop)/cart/_components/AuthenticatedCartContent';
-import { GuestCartContent } from '@/app/(shop)/cart/_components/GuestCartContent';
-import { getSession } from '@/auth/session';
+import { CartContent } from '@/app/(shop)/cart/_components/CartContent';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { routes } from '@/routes';
 
-export default async function CartPage() {
-    const session = await getSession();
-
+export default function CartPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             label: 'Главная',
@@ -30,11 +26,7 @@ export default async function CartPage() {
 
             <h1 className="mb-2 catalog-heading xl:mb-3">Корзина</h1>
 
-            {session ? (
-                <AuthenticatedCartContent userId={session.user.id} />
-            ) : (
-                <GuestCartContent />
-            )}
+            <CartContent />
         </div>
     );
 }
