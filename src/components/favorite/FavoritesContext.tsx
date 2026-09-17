@@ -15,7 +15,6 @@ interface FavoritesContextValue {
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void | Promise<void>;
-    mutationError: Error | null;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -59,18 +58,7 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
         favoriteCount: favorites.favoriteIds.size,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
-        mutationError: favorites.mutationError,
     };
-
-    useEffect(() => {
-        if (favorites.mutationError) {
-            toast.add({
-                id: 'favorites-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [favorites.mutationError]);
 
     return (
         <FavoritesContext.Provider value={contextValue}>
@@ -100,7 +88,6 @@ function ServerFavoritesProvider({
         favoriteCount: favorites.favoriteCount,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
-        mutationError: favorites.mutationError,
     };
 
     const mergeToastId = useRef<string | null>(null);
@@ -161,16 +148,6 @@ function ServerFavoritesProvider({
             mergeToastId.current = null;
         }
     }, [merge.mergeAttempt, merge.mergeStatus, merge.retryMerge]);
-
-    useEffect(() => {
-        if (favorites.mutationError) {
-            toast.add({
-                id: 'favorites-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [favorites.mutationError]);
 
     return (
         <FavoritesContext.Provider value={contextValue}>
