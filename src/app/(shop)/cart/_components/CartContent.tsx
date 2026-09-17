@@ -6,6 +6,7 @@ import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
 import { useCartContext } from '@/components/cart/CartContext';
+import { Button } from '@/components/button/Button';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
@@ -17,6 +18,8 @@ export function CartContent() {
         cartEntries,
         products,
         isLoadingProducts,
+        productsError,
+        retryProducts,
         isHydrated,
     } = useCartContext();
 
@@ -73,6 +76,17 @@ export function CartContent() {
                 description="Добавьте товары в корзину, чтобы оформить заказ"
             >
                 <ButtonLink href={routes.catalogPage()}>В каталог</ButtonLink>
+            </PageMessage>
+        );
+    }
+
+    if (productsError) {
+        return (
+            <PageMessage
+                title="Не удалось загрузить товары"
+                description="Попробуйте загрузить товары ещё раз"
+            >
+                <Button onClick={retryProducts}>Повторить</Button>
             </PageMessage>
         );
     }
