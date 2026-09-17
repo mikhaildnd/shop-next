@@ -5,6 +5,7 @@ import { Heart } from 'lucide-react';
 import type { IconButtonProps } from '@/components/button/icon-button/icon-button.types';
 import { IconButton } from '@/components/button/icon-button/IconButton';
 import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 interface FavoriteButtonProps extends Omit<
@@ -25,12 +26,24 @@ export function FavoriteButton({
 
     const favorite = isFavorite(productId);
 
+    async function handleToggleFavorite() {
+        try {
+            await toggleFavorite(productId);
+        } catch {
+            toast.add({
+                id: 'favorites-mutation-error',
+                description: 'Произошла ошибка. Попробуйте ещё раз',
+                type: 'error',
+            });
+        }
+    }
+
     return (
         <IconButton
             {...props}
             useGroup
             aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
-            onClick={() => toggleFavorite(productId)}
+            onClick={handleToggleFavorite}
             className={className}
         >
             <Heart
