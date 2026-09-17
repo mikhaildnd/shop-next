@@ -17,6 +17,7 @@ interface CartContextValue {
     cartEntries: CartEntry[];
     products: ProductDto[];
     isLoadingProducts: boolean;
+    isRetryingProducts: boolean;
     productsError: Error | null;
     retryProducts: () => void;
     cartCount: number;
@@ -76,6 +77,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         cartEntries: cart.cartEntries,
         products: productsState.products,
         isLoadingProducts: productsState.isLoadingProducts,
+        isRetryingProducts: productsState.isRetryingProducts,
         productsError: productsState.productsError,
         retryProducts: productsState.retryProducts,
         cartCount: cart.cartCount,
@@ -120,6 +122,7 @@ function ServerCartProvider({
         cartEntries: cart.cartEntries,
         products: productsState.products,
         isLoadingProducts: productsState.isLoadingProducts,
+        isRetryingProducts: productsState.isRetryingProducts,
         productsError: productsState.productsError,
         retryProducts: productsState.retryProducts,
         cartCount: cart.cartCount,
