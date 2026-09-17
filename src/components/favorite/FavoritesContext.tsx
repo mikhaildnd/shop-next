@@ -23,7 +23,6 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 interface FavoritesProviderProps {
     isAuthenticated: boolean;
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
     children: ReactNode;
 }
 
@@ -33,22 +32,17 @@ interface LocalFavoritesProviderProps {
 
 interface ServerFavoritesProviderProps {
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
     children: ReactNode;
 }
 
 export function FavoritesProvider({
     isAuthenticated,
     initialFavoriteIds,
-    initialFavoriteCount,
     children,
 }: FavoritesProviderProps) {
     if (isAuthenticated) {
         return (
-            <ServerFavoritesProvider
-                initialFavoriteIds={initialFavoriteIds}
-                initialFavoriteCount={initialFavoriteCount}
-            >
+            <ServerFavoritesProvider initialFavoriteIds={initialFavoriteIds}>
                 {children}
             </ServerFavoritesProvider>
         );
@@ -87,14 +81,12 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
 
 function ServerFavoritesProvider({
     initialFavoriteIds,
-    initialFavoriteCount,
     children,
 }: ServerFavoritesProviderProps) {
     const [actionQueue] = useState(createActionQueue);
 
     const favorites = useServerFavorites({
         initialFavoriteIds,
-        initialFavoriteCount,
         actionQueue,
     });
 
