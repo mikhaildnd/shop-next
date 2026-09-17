@@ -9,8 +9,8 @@ import {
     incrementCartItemAction,
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { ActionQueue } from '@/lib/async/action-queue';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface UseServerCartOptions {

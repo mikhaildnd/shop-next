@@ -38,9 +38,10 @@ export function getCartSummary(items: CartItemDto[]): CartSummaryData {
     );
 
     const hasStockIssues = items.some(
-        (item) =>
-            item.product.stock > 0 && item.quantity > item.product.stock,
+        (item) => item.product.stock > 0 && item.quantity > item.product.stock,
     );
+
+    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
 
     return {
         availableItems,
@@ -51,6 +52,6 @@ export function getCartSummary(items: CartItemDto[]): CartSummaryData {
         discountAmount,
         hasPriceChanges,
         hasStockIssues,
-        isCheckoutDisabled: availableItems.length === 0 || hasStockIssues,
+        isCheckoutDisabled,
     };
 }

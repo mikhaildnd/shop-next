@@ -7,8 +7,8 @@ import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import { createActionQueue } from '@/lib/async/action-queue';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface CartContextValue {

@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState, useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent,useMemo, useState } from 'react';
 
-import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { useCartContext } from '@/components/cart/CartContext';
 import { PageMessage } from '@/components/PageMessage';

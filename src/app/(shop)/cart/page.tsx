@@ -1,9 +1,9 @@
 import { HorizontalScrollWrapper } from '@/app/(shop)/(catalog)/_components/wrappers/HorizontalScrollWrapper';
 import { AuthenticatedCartContent } from '@/app/(shop)/cart/_components/AuthenticatedCartContent';
 import { GuestCartContent } from '@/app/(shop)/cart/_components/GuestCartContent';
+import { getSession } from '@/auth/session';
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
-import { getSession } from '@/auth/session';
 import { routes } from '@/routes';
 
 export default async function CartPage() {
