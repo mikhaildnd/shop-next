@@ -100,7 +100,7 @@ function ServerFavoritesProvider({
 
     const merge = useFavoritesMerge({
         actionQueue,
-        onMerge: favorites.applyMergedFavoriteIds,
+        replaceFavorites: favorites.replaceFavorites,
     });
 
     const contextValue: FavoritesContextValue = {
