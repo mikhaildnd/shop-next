@@ -17,9 +17,8 @@ interface UseServerFavoritesReturn {
     favoriteCount: number;
     favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
-    toggleFavorite: (productId: string) => void;
+    toggleFavorite: (productId: string) => Promise<void>;
     replaceFavorites: (favoriteIds: string[]) => void;
-    mutationError: Error | null;
 }
 
 type FavoriteMutation = {
@@ -41,8 +40,6 @@ export function useServerFavorites({
     const confirmedFavoriteIdsRef = useRef(initialFavoriteIdsSet);
     const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
     const nextMutationIdRef = useRef(0);
-
-    const [mutationError, setMutationError] = useState<Error | null>(null);
 
     const updateVisibleFavoriteIds = useCallback(() => {
         const nextFavoriteIds = new Set(confirmedFavoriteIdsRef.current);
@@ -88,13 +85,6 @@ export function useServerFavorites({
                         nextFavoriteIds.delete(mutation.productId);
                         confirmedFavoriteIdsRef.current = nextFavoriteIds;
                     }
-                } catch (error) {
-                    setMutationError(
-                        error instanceof Error
-                            ? error
-                            : new Error('Unknown error'),
-                    );
-                    throw error;
                 } finally {
                     pendingMutationsRef.current =
                         pendingMutationsRef.current.filter(
@@ -112,13 +102,11 @@ export function useServerFavorites({
     );
 
     const toggleFavorite = useCallback(
-        (productId: string) => {
+        (productId: string): Promise<void> => {
             const currentIsFavorite = favoriteIdsRef.current.has(productId);
             const nextIsFavorite = !currentIsFavorite;
 
-            setMutationError(null);
-
-            void enqueueMutation(
+            return enqueueMutation(
                 {
                     id: nextMutationIdRef.current++,
                     productId,
@@ -144,6 +132,5 @@ export function useServerFavorites({
         isFavorite,
         toggleFavorite,
         replaceFavorites,
-        mutationError,
     };
 }
