@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useEffectEvent } from 'react';
 
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
@@ -11,10 +12,48 @@ import { PageMessage } from '@/components/PageMessage';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import { routes } from '@/routes';
 import type { CartItemDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 export function GuestCartContent() {
-    const { cartEntries, products, isLoadingProducts, isHydrated } =
-        useCartContext();
+    const { cartEntries, isHydrated } = useCartContext();
+    const [products, setProducts] = useState<ProductDto[]>([]);
+
+    const productIdsKey = useMemo(
+        () =>
+            [...cartEntries]
+                .map((entry) => entry.productId)
+                .sort()
+                .join(','),
+        [cartEntries],
+    );
+
+    const getProducts = useEffectEvent(async () => {
+        return getProductsByIdsAction(
+            cartEntries.map((entry) => entry.productId),
+        );
+    });
+
+    useEffect(() => {
+        if (!isHydrated || productIdsKey.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            const nextProducts = await getProducts();
+
+            if (!cancelled) {
+                setProducts(nextProducts);
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isHydrated, productIdsKey]);
 
     const productsById = useMemo(
         () => new Map(products.map((product) => [product.id, product])),
@@ -51,6 +90,13 @@ export function GuestCartContent() {
         hasPriceChanges,
         isCheckoutDisabled,
     } = getCartSummary(items);
+
+    const isLoadingProducts =
+        isHydrated &&
+        cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
 
     if (!isHydrated) {
         return (
