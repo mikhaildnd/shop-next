@@ -10,10 +10,12 @@ import {
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { ActionQueue } from '@/lib/async/action-queue';
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface UseServerCartOptions {
     initialCartState: CartDto;
+    actionQueue: ActionQueue;
 }
 
 export interface UseServerCartResult {
@@ -28,7 +30,6 @@ export interface UseServerCartResult {
     clearCart: () => Promise<void>;
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
-    enqueueAction: (action: CartAction) => Promise<void>;
     replaceCart: (cart: CartDto) => void;
 }
 
@@ -41,6 +42,7 @@ type CartAction = () => Promise<void>;
 
 export function useServerCart({
     initialCartState,
+    actionQueue,
 }: UseServerCartOptions): UseServerCartResult {
     const initialCartEntries = initialCartState.items.map(
         ({ product, quantity, snapshot }) => ({
@@ -54,7 +56,6 @@ export function useServerCart({
 
     const confirmedCartEntriesRef = useRef(initialCartEntries);
     const pendingMutationsRef = useRef<CartMutation[]>([]);
-    const mutationQueueRef = useRef<Promise<void>>(Promise.resolve());
     const nextMutationIdRef = useRef(0);
 
     const updateVisibleCartEntries = useCallback(() => {
@@ -64,14 +65,6 @@ export function useServerCart({
         );
 
         setCartEntries(nextCartEntries);
-    }, []);
-
-    const enqueueAction = useCallback((action: CartAction): Promise<void> => {
-        const queuedAction = mutationQueueRef.current.then(action, action);
-
-        mutationQueueRef.current = queuedAction.catch(() => undefined);
-
-        return queuedAction;
     }, []);
 
     const replaceCart = useCallback(
@@ -111,9 +104,9 @@ export function useServerCart({
                 }
             };
 
-            return enqueueAction(execute);
+            return actionQueue.enqueue(execute);
         },
-        [enqueueAction, updateVisibleCartEntries],
+        [actionQueue, updateVisibleCartEntries],
     );
 
     const createMutation = useCallback(
@@ -195,11 +188,7 @@ export function useServerCart({
     );
 
     const clearCart = useCallback(
-        (): Promise<void> =>
-            enqueueMutation(
-                createMutation(() => []),
-                clearCartAction,
-            ),
+        (): Promise<void> => enqueueMutation(createMutation(() => []), clearCartAction),
         [createMutation, enqueueMutation],
     );
 
@@ -217,7 +206,6 @@ export function useServerCart({
         clearCart,
         cartCount,
         getCartEntryQuantity,
-        enqueueAction,
         replaceCart,
     };
 }

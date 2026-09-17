@@ -1,13 +1,14 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useRef } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface CartContextValue {
@@ -84,12 +85,21 @@ function ServerCartProvider({
     initialCartState,
     children,
 }: ServerCartProviderProps) {
+    const actionQueueRef = useRef<ReturnType<typeof createActionQueue> | null>(
+        null,
+    );
+
+    if (!actionQueueRef.current) {
+        actionQueueRef.current = createActionQueue();
+    }
+
     const cart = useServerCart({
         initialCartState,
+        actionQueue: actionQueueRef.current,
     });
 
     const merge = useCartMerge({
-        enqueueAction: cart.enqueueAction,
+        actionQueue: actionQueueRef.current,
         replaceCart: cart.replaceCart,
     });
 

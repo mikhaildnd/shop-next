@@ -4,14 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { mergeCartAction } from '@/app/(shop)/cart/actions';
 import type { CartEntry, MergeStatus } from '@/lib/cart/cart.types';
-import {
-    getCartEntries,
-    removeMergedCartEntries,
-} from '@/lib/cart/cart-storage';
+import { getCartEntries, removeMergedCartEntries } from '@/lib/cart/cart-storage';
+import type { ActionQueue } from '@/lib/async/action-queue';
 import type { CartDto } from '@/services/cart/cart.types';
 
 interface UseCartMergeOptions {
-    enqueueAction: (action: () => Promise<void>) => Promise<void>;
+    actionQueue: ActionQueue;
     replaceCart: (cart: CartDto) => void;
 }
 
@@ -22,7 +20,7 @@ export interface UseCartMergeResult {
 }
 
 export function useCartMerge({
-    enqueueAction,
+    actionQueue,
     replaceCart,
 }: UseCartMergeOptions): UseCartMergeResult {
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
@@ -60,7 +58,7 @@ export function useCartMerge({
             setMergeStatus('merging');
 
             try {
-                await enqueueAction(async () => {
+                await actionQueue.enqueue(async () => {
                     const cart = await mergeCartAction(entriesToMerge);
 
                     replaceCart(cart);
@@ -82,7 +80,7 @@ export function useCartMerge({
         }
 
         void startMerge();
-    }, [enqueueAction, mergeAttempt, replaceCart]);
+    }, [actionQueue, mergeAttempt, replaceCart]);
 
     return {
         mergeStatus,
