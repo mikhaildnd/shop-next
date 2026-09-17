@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useContext, useRef } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
@@ -85,21 +85,15 @@ function ServerCartProvider({
     initialCartState,
     children,
 }: ServerCartProviderProps) {
-    const actionQueueRef = useRef<ReturnType<typeof createActionQueue> | null>(
-        null,
-    );
-
-    if (!actionQueueRef.current) {
-        actionQueueRef.current = createActionQueue();
-    }
+    const [actionQueue] = useState(createActionQueue);
 
     const cart = useServerCart({
         initialCartState,
-        actionQueue: actionQueueRef.current,
+        actionQueue,
     });
 
     const merge = useCartMerge({
-        actionQueue: actionQueueRef.current,
+        actionQueue,
         replaceCart: cart.replaceCart,
     });
 
