@@ -1,17 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
     addFavoriteAction,
-    mergeFavoritesAction,
     removeFavoriteAction,
 } from '@/app/(shop)/(catalog)/favorites/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
-import {
-    clearFavorites,
-    getFavoriteIds,
-} from '@/lib/favorite/favorite-storage';
 
 interface UseServerFavoritesOptions {
     initialFavoriteIds: string[];
@@ -21,15 +16,12 @@ interface UseServerFavoritesOptions {
 
 interface UseServerFavoritesReturn {
     favoriteCount: number;
+    favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void;
-    mergeStatus: MergeStatus;
-    retryMerge: () => void;
+    applyMergedFavoriteIds: (favoriteIds: string[]) => void;
     mutationError: Error | null;
-    mergeAttempt: number;
 }
-
-type MergeStatus = 'idle' | 'merging' | 'error';
 
 type FavoriteMutation = {
     id: number;
@@ -58,9 +50,6 @@ export function useServerFavorites({
     const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
     const nextMutationIdRef = useRef(0);
 
-    const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
-    const [mergeAttempt, setMergeAttempt] = useState(0);
-
     const [mutationError, setMutationError] = useState<Error | null>(null);
 
     const updateVisibleFavoriteStates = useCallback(() => {
@@ -78,6 +67,22 @@ export function useServerFavorites({
             Object.values(nextFavoriteStates).filter(Boolean).length,
         );
     }, []);
+
+    const applyMergedFavoriteIds = useCallback(
+        (favoriteIds: string[]) => {
+            const mergedFavoriteStates = Object.fromEntries(
+                favoriteIds.map((productId) => [productId, true]),
+            );
+
+            confirmedFavoriteStatesRef.current = {
+                ...confirmedFavoriteStatesRef.current,
+                ...mergedFavoriteStates,
+            };
+
+            updateVisibleFavoriteStates();
+        },
+        [updateVisibleFavoriteStates],
+    );
 
     const enqueueMutation = useCallback(
         (mutation: FavoriteMutation, action: FavoriteAction): Promise<void> => {
@@ -143,68 +148,18 @@ export function useServerFavorites({
         [favoriteStates],
     );
 
-    const retryMerge = useCallback(() => {
-        setMergeStatus('idle');
-        setMergeAttempt((attempt) => attempt + 1);
-    }, []);
-
-    useEffect(() => {
-        const favoriteIds = getFavoriteIds();
-
-        if (favoriteIds.length === 0) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function merge() {
-            setMergeStatus('merging');
-
-            let mergedFavoriteCount = 0;
-
-            try {
-                await actionQueue.enqueue(async () => {
-                    mergedFavoriteCount = await mergeFavoritesAction(favoriteIds);
-                });
-
-                if (cancelled) {
-                    return;
-                }
-
-                const mergedFavoriteStates = Object.fromEntries(
-                    favoriteIds.map((productId) => [productId, true]),
-                );
-
-                confirmedFavoriteStatesRef.current = {
-                    ...confirmedFavoriteStatesRef.current,
-                    ...mergedFavoriteStates,
-                };
-
-                updateVisibleFavoriteStates();
-                setFavoriteCount(mergedFavoriteCount);
-                clearFavorites();
-                setMergeStatus('idle');
-            } catch {
-                if (!cancelled) {
-                    setMergeStatus('error');
-                }
-            }
-        }
-
-        void merge();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [actionQueue, mergeAttempt, updateVisibleFavoriteStates]);
+    const favoriteIds = new Set(
+        Object.entries(favoriteStates)
+            .filter(([, isFavorite]) => isFavorite)
+            .map(([productId]) => productId),
+    );
 
     return {
         favoriteCount,
+        favoriteIds,
         isFavorite,
         toggleFavorite,
-        mergeStatus,
-        retryMerge,
+        applyMergedFavoriteIds,
         mutationError,
-        mergeAttempt,
     };
 }
