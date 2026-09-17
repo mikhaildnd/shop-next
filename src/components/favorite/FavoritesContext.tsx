@@ -1,12 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createContext, useContext } from 'react';
 
 import { toast } from '@/components/ui/toast';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import { useServerFavorites } from '@/hooks/useServerFavorites';
+import { createActionQueue } from '@/lib/async/action-queue';
 
 interface FavoritesContextValue {
     favoriteIds: Set<string>;
@@ -88,9 +89,12 @@ function ServerFavoritesProvider({
     initialFavoriteCount,
     children,
 }: ServerFavoritesProviderProps) {
+    const [actionQueue] = useState(createActionQueue);
+
     const favorites = useServerFavorites({
         initialFavoriteIds,
         initialFavoriteCount,
+        actionQueue,
     });
 
     const contextValue: FavoritesContextValue = {
