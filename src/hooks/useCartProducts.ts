@@ -15,6 +15,7 @@ interface UseCartProductsOptions {
 export interface UseCartProductsResult {
     products: ProductDto[];
     isLoadingProducts: boolean;
+    isRetryingProducts: boolean;
     productsError: Error | null;
     retryProducts: () => void;
 }
@@ -27,6 +28,7 @@ export function useCartProducts({
     const [products, setProducts] = useState<ProductDto[]>(initialProducts);
     const [productsError, setProductsError] = useState<Error | null>(null);
     const [retryAttempt, setRetryAttempt] = useState(0);
+    const [isRetryingProducts, setIsRetryingProducts] = useState(false);
 
     const productIdsKey = useMemo(
         () =>
@@ -54,8 +56,6 @@ export function useCartProducts({
         let cancelled = false;
 
         async function loadProducts() {
-            setProductsError(null);
-
             try {
                 const nextProducts = await getProductsByIdsAction(
                     missingProductIds,
@@ -76,13 +76,21 @@ export function useCartProducts({
 
                     return [...productById.values()];
                 });
+
+                setProductsError(null);
             } catch (error) {
                 if (!cancelled) {
                     setProductsError(
                         error instanceof Error
                             ? error
-                            : new Error('Не удалось загрузить товары'),
+                            : new Error(
+                                  'Неизвестная ошибка: не удалось загрузить товары',
+                              ),
                     );
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsRetryingProducts(false);
                 }
             }
         }
@@ -101,12 +109,14 @@ export function useCartProducts({
         );
 
     function retryProducts() {
+        setIsRetryingProducts(true);
         setRetryAttempt((attempt) => attempt + 1);
     }
 
     return {
         products,
         isLoadingProducts,
+        isRetryingProducts,
         productsError,
         retryProducts,
     };
