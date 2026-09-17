@@ -1,19 +1,20 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createContext, useContext } from 'react';
 
 import { toast } from '@/components/ui/toast';
+import { useFavoritesMerge } from '@/hooks/useFavoritesMerge';
 import { useLocalFavorites } from '@/hooks/useLocalFavorites';
 import { useServerFavorites } from '@/hooks/useServerFavorites';
+import { createActionQueue } from '@/lib/async/action-queue';
 
 interface FavoritesContextValue {
     favoriteIds: Set<string>;
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void | Promise<void>;
-    mutationError: Error | null;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -21,7 +22,6 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 interface FavoritesProviderProps {
     isAuthenticated: boolean;
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
     children: ReactNode;
 }
 
@@ -31,22 +31,17 @@ interface LocalFavoritesProviderProps {
 
 interface ServerFavoritesProviderProps {
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
     children: ReactNode;
 }
 
 export function FavoritesProvider({
     isAuthenticated,
     initialFavoriteIds,
-    initialFavoriteCount,
     children,
 }: FavoritesProviderProps) {
     if (isAuthenticated) {
         return (
-            <ServerFavoritesProvider
-                initialFavoriteIds={initialFavoriteIds}
-                initialFavoriteCount={initialFavoriteCount}
-            >
+            <ServerFavoritesProvider initialFavoriteIds={initialFavoriteIds}>
                 {children}
             </ServerFavoritesProvider>
         );
@@ -63,18 +58,7 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
         favoriteCount: favorites.favoriteIds.size,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
-        mutationError: favorites.mutationError,
     };
-
-    useEffect(() => {
-        if (favorites.mutationError) {
-            toast.add({
-                id: 'favorites-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [favorites.mutationError]);
 
     return (
         <FavoritesContext.Provider value={contextValue}>
@@ -85,27 +69,32 @@ function LocalFavoritesProvider({ children }: LocalFavoritesProviderProps) {
 
 function ServerFavoritesProvider({
     initialFavoriteIds,
-    initialFavoriteCount,
     children,
 }: ServerFavoritesProviderProps) {
+    const [actionQueue] = useState(createActionQueue);
+
     const favorites = useServerFavorites({
         initialFavoriteIds,
-        initialFavoriteCount,
+        actionQueue,
+    });
+
+    const merge = useFavoritesMerge({
+        actionQueue,
+        replaceFavorites: favorites.replaceFavorites,
     });
 
     const contextValue: FavoritesContextValue = {
-        favoriteIds: new Set(initialFavoriteIds),
+        favoriteIds: favorites.favoriteIds,
         favoriteCount: favorites.favoriteCount,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
-        mutationError: favorites.mutationError,
     };
 
     const mergeToastId = useRef<string | null>(null);
 
     useEffect(() => {
-        if (favorites.mergeStatus === 'merging') {
-            if (favorites.mergeAttempt === 0) {
+        if (merge.mergeStatus === 'merging') {
+            if (merge.mergeAttempt === 0) {
                 return;
             }
             if (mergeToastId.current) {
@@ -126,7 +115,7 @@ function ServerFavoritesProvider({
             return;
         }
 
-        if (favorites.mergeStatus === 'error') {
+        if (merge.mergeStatus === 'error') {
             if (!mergeToastId.current) {
                 mergeToastId.current = toast.add({
                     description: 'Не удалось синхронизировать избранное',
@@ -134,7 +123,7 @@ function ServerFavoritesProvider({
                     timeout: 0,
                     actionProps: {
                         children: 'Повторить',
-                        onClick: favorites.retryMerge,
+                        onClick: merge.retryMerge,
                     },
                 });
 
@@ -147,7 +136,7 @@ function ServerFavoritesProvider({
                 timeout: 0,
                 actionProps: {
                     children: 'Повторить',
-                    onClick: favorites.retryMerge,
+                    onClick: merge.retryMerge,
                 },
             });
 
@@ -158,17 +147,7 @@ function ServerFavoritesProvider({
             toast.close(mergeToastId.current);
             mergeToastId.current = null;
         }
-    }, [favorites.mergeAttempt, favorites.mergeStatus, favorites.retryMerge]);
-
-    useEffect(() => {
-        if (favorites.mutationError) {
-            toast.add({
-                id: 'favorites-mutation-error',
-                description: 'Произошла ошибка. Попробуйте ещё раз',
-                type: 'error',
-            });
-        }
-    }, [favorites.mutationError]);
+    }, [merge.mergeAttempt, merge.mergeStatus, merge.retryMerge]);
 
     return (
         <FavoritesContext.Provider value={contextValue}>
