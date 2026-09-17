@@ -53,6 +53,7 @@ export function useServerFavorites({
     const [favoriteStates, setFavoriteStates] =
         useState<Record<string, boolean>>(initialFavoriteStates);
 
+    const favoriteStatesRef = useRef(favoriteStates);
     const confirmedFavoriteStatesRef = useRef(initialFavoriteStates);
     const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
     const nextMutationIdRef = useRef(0);
@@ -71,6 +72,7 @@ export function useServerFavorites({
             confirmedFavoriteStatesRef.current,
         );
 
+        favoriteStatesRef.current = nextFavoriteStates;
         setFavoriteStates(nextFavoriteStates);
         setFavoriteCount(
             Object.values(nextFavoriteStates).filter(Boolean).length,
@@ -96,6 +98,7 @@ export function useServerFavorites({
                             ? error
                             : new Error('Unknown error'),
                     );
+                    throw error;
                 } finally {
                     pendingMutationsRef.current =
                         pendingMutationsRef.current.filter(
@@ -114,7 +117,8 @@ export function useServerFavorites({
 
     const toggleFavorite = useCallback(
         (productId: string) => {
-            const currentIsFavorite = favoriteStates[productId] ?? false;
+            const currentIsFavorite =
+                favoriteStatesRef.current[productId] ?? false;
             const nextIsFavorite = !currentIsFavorite;
 
             setMutationError(null);
@@ -131,7 +135,7 @@ export function useServerFavorites({
                         : removeFavoriteAction(productId),
             );
         },
-        [enqueueMutation, favoriteStates],
+        [enqueueMutation],
     );
 
     const isFavorite = useCallback(
@@ -157,7 +161,9 @@ export function useServerFavorites({
             setMergeStatus('merging');
 
             try {
-                const favoriteCount = await mergeFavoritesAction(favoriteIds);
+                const favoriteCount = await actionQueue.enqueue(() =>
+                    mergeFavoritesAction(favoriteIds),
+                );
 
                 if (cancelled) {
                     return;
@@ -172,11 +178,7 @@ export function useServerFavorites({
                     ...mergedFavoriteStates,
                 };
 
-                setFavoriteStates((current) => ({
-                    ...current,
-                    ...mergedFavoriteStates,
-                }));
-
+                updateVisibleFavoriteStates();
                 setFavoriteCount(favoriteCount);
                 clearFavorites();
                 setMergeStatus('idle');
@@ -192,7 +194,7 @@ export function useServerFavorites({
         return () => {
             cancelled = true;
         };
-    }, [mergeAttempt]);
+    }, [actionQueue, mergeAttempt, updateVisibleFavoriteStates]);
 
     return {
         favoriteCount,
