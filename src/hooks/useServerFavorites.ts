@@ -7,6 +7,7 @@ import {
     mergeFavoritesAction,
     removeFavoriteAction,
 } from '@/app/(shop)/(catalog)/favorites/actions';
+import type { ActionQueue } from '@/lib/async/action-queue';
 import {
     clearFavorites,
     getFavoriteIds,
@@ -15,6 +16,7 @@ import {
 interface UseServerFavoritesOptions {
     initialFavoriteIds: string[];
     initialFavoriteCount: number;
+    actionQueue: ActionQueue;
 }
 
 interface UseServerFavoritesReturn {
@@ -29,120 +31,112 @@ interface UseServerFavoritesReturn {
 
 type MergeStatus = 'idle' | 'merging' | 'error';
 
+type FavoriteMutation = {
+    id: number;
+    productId: string;
+    isFavorite: boolean;
+};
+
+type FavoriteAction = () => Promise<void>;
+
 export function useServerFavorites({
     initialFavoriteIds,
     initialFavoriteCount,
+    actionQueue,
 }: UseServerFavoritesOptions): UseServerFavoritesReturn {
     const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
 
-    const [favoriteStates, setFavoriteStates] = useState<
-        Record<string, boolean>
-    >(() =>
-        Object.fromEntries(
-            initialFavoriteIds.map((productId) => [productId, true]),
-        ),
+    const initialFavoriteStates = Object.fromEntries(
+        initialFavoriteIds.map((productId) => [productId, true]),
     );
 
-    const pendingMutationsRef = useRef(new Set<string>());
+    const [favoriteStates, setFavoriteStates] =
+        useState<Record<string, boolean>>(initialFavoriteStates);
+
+    const confirmedFavoriteStatesRef = useRef(initialFavoriteStates);
+    const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
+    const nextMutationIdRef = useRef(0);
 
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
 
     const [mutationError, setMutationError] = useState<Error | null>(null);
 
-    const isFavorite = useCallback(
-        (productId: string) => favoriteStates[productId] ?? false,
-        [favoriteStates],
-    );
+    const updateVisibleFavoriteStates = useCallback(() => {
+        const nextFavoriteStates = pendingMutationsRef.current.reduce(
+            (states, mutation) => ({
+                ...states,
+                [mutation.productId]: mutation.isFavorite,
+            }),
+            confirmedFavoriteStatesRef.current,
+        );
 
-    const addFavorite = useCallback(
-        async (productId: string) => {
-            if (pendingMutationsRef.current.has(productId)) return;
+        setFavoriteStates(nextFavoriteStates);
+        setFavoriteCount(
+            Object.values(nextFavoriteStates).filter(Boolean).length,
+        );
+    }, []);
 
-            setMutationError(null);
+    const enqueueMutation = useCallback(
+        (mutation: FavoriteMutation, action: FavoriteAction): Promise<void> => {
+            pendingMutationsRef.current.push(mutation);
+            updateVisibleFavoriteStates();
 
-            const previousIsFavorite = favoriteStates[productId] ?? false;
-            if (previousIsFavorite) return;
+            const execute = async () => {
+                try {
+                    await action();
 
-            pendingMutationsRef.current.add(productId);
+                    confirmedFavoriteStatesRef.current = {
+                        ...confirmedFavoriteStatesRef.current,
+                        [mutation.productId]: mutation.isFavorite,
+                    };
+                } catch (error) {
+                    setMutationError(
+                        error instanceof Error
+                            ? error
+                            : new Error('Unknown error'),
+                    );
+                } finally {
+                    pendingMutationsRef.current =
+                        pendingMutationsRef.current.filter(
+                            (pendingMutation) =>
+                                pendingMutation.id !== mutation.id,
+                        );
 
-            setFavoriteStates((current) => ({
-                ...current,
-                [productId]: true,
-            }));
-            setFavoriteCount((current) => current + 1);
+                    updateVisibleFavoriteStates();
+                }
+            };
 
-            try {
-                await addFavoriteAction(productId);
-            } catch (error) {
-                setMutationError(
-                    error instanceof Error ? error : new Error('Unknown error'),
-                );
-
-                setFavoriteStates((current) => ({
-                    ...current,
-                    [productId]: previousIsFavorite,
-                }));
-                setFavoriteCount((current) =>
-                    previousIsFavorite ? current : current - 1,
-                );
-            } finally {
-                pendingMutationsRef.current.delete(productId);
-            }
+            return actionQueue.enqueue(execute);
         },
-        [favoriteStates],
-    );
-
-    const removeFavorite = useCallback(
-        async (productId: string) => {
-            if (pendingMutationsRef.current.has(productId)) return;
-
-            setMutationError(null);
-
-            const previousIsFavorite = favoriteStates[productId] ?? false;
-            if (!previousIsFavorite) return;
-
-            pendingMutationsRef.current.add(productId);
-
-            setFavoriteStates((current) => ({
-                ...current,
-                [productId]: false,
-            }));
-            setFavoriteCount((current) => current - 1);
-
-            try {
-                await removeFavoriteAction(productId);
-            } catch (error) {
-                setMutationError(
-                    error instanceof Error ? error : new Error('Unknown error'),
-                );
-
-                setFavoriteStates((current) => ({
-                    ...current,
-                    [productId]: previousIsFavorite,
-                }));
-                setFavoriteCount((current) =>
-                    previousIsFavorite ? current + 1 : current,
-                );
-            } finally {
-                pendingMutationsRef.current.delete(productId);
-            }
-        },
-        [favoriteStates],
+        [actionQueue, updateVisibleFavoriteStates],
     );
 
     const toggleFavorite = useCallback(
         (productId: string) => {
             const currentIsFavorite = favoriteStates[productId] ?? false;
+            const nextIsFavorite = !currentIsFavorite;
 
-            if (currentIsFavorite) {
-                void removeFavorite(productId);
-                return;
-            }
+            setMutationError(null);
 
-            void addFavorite(productId);
+            void enqueueMutation(
+                {
+                    id: nextMutationIdRef.current++,
+                    productId,
+                    isFavorite: nextIsFavorite,
+                },
+                () =>
+                    nextIsFavorite
+                        ? addFavoriteAction(productId)
+                        : removeFavoriteAction(productId),
+            );
         },
-        [favoriteStates, addFavorite, removeFavorite],
+        [enqueueMutation, favoriteStates],
+    );
+
+    const isFavorite = useCallback(
+        (productId: string) => favoriteStates[productId] ?? false,
+        [favoriteStates],
     );
 
     const retryMerge = useCallback(() => {
@@ -169,11 +163,18 @@ export function useServerFavorites({
                     return;
                 }
 
+                const mergedFavoriteStates = Object.fromEntries(
+                    favoriteIds.map((productId) => [productId, true]),
+                );
+
+                confirmedFavoriteStatesRef.current = {
+                    ...confirmedFavoriteStatesRef.current,
+                    ...mergedFavoriteStates,
+                };
+
                 setFavoriteStates((current) => ({
                     ...current,
-                    ...Object.fromEntries(
-                        favoriteIds.map((productId) => [productId, true]),
-                    ),
+                    ...mergedFavoriteStates,
                 }));
 
                 setFavoriteCount(favoriteCount);
