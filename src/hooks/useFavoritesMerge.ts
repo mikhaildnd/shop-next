@@ -58,12 +58,15 @@ export function useFavoritesMerge({
             setMergeStatus('merging');
 
             try {
-                const mergedFavoriteIds = await actionQueue.enqueue(() =>
-                    mergeFavoritesAction(favoriteIdsToMerge),
-                );
+                await actionQueue.enqueue(async () => {
+                    const mergedFavoriteIds = await mergeFavoritesAction(
+                        favoriteIdsToMerge,
+                    );
 
-                replaceFavorites(mergedFavoriteIds);
-                clearFavorites();
+                    replaceFavorites(mergedFavoriteIds);
+                    clearFavorites();
+                });
+
                 setMergeStatus('idle');
             } catch {
                 setMergeStatus('error');
