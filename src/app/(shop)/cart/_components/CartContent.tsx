@@ -6,7 +6,7 @@ import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
 import { useCartContext } from '@/components/cart/CartContext';
-import { Button } from '@/components/button/Button';
+import { LoadingButton } from '@/components/button/LoadingButton';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
@@ -18,6 +18,7 @@ export function CartContent() {
         cartEntries,
         products,
         isLoadingProducts,
+        isRetryingProducts,
         productsError,
         retryProducts,
         isHydrated,
@@ -86,7 +87,13 @@ export function CartContent() {
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
-                <Button onClick={retryProducts}>Повторить</Button>
+                <LoadingButton
+                    isLoading={isRetryingProducts}
+                    pendingText="Загрузка..."
+                    onClick={retryProducts}
+                >
+                    Повторить
+                </LoadingButton>
             </PageMessage>
         );
     }
