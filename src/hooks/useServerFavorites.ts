@@ -10,7 +10,6 @@ import type { ActionQueue } from '@/lib/async/action-queue';
 
 interface UseServerFavoritesOptions {
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
     actionQueue: ActionQueue;
 }
 
@@ -33,7 +32,6 @@ type FavoriteAction = () => Promise<void>;
 
 export function useServerFavorites({
     initialFavoriteIds,
-    initialFavoriteCount,
     actionQueue,
 }: UseServerFavoritesOptions): UseServerFavoritesReturn {
     const initialFavoriteIdsSet = new Set(initialFavoriteIds);
