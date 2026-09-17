@@ -160,10 +160,12 @@ export function useServerFavorites({
         async function merge() {
             setMergeStatus('merging');
 
+            let mergedFavoriteCount = 0;
+
             try {
-                const favoriteCount = await actionQueue.enqueue(() =>
-                    mergeFavoritesAction(favoriteIds),
-                );
+                await actionQueue.enqueue(async () => {
+                    mergedFavoriteCount = await mergeFavoritesAction(favoriteIds);
+                });
 
                 if (cancelled) {
                     return;
@@ -179,7 +181,7 @@ export function useServerFavorites({
                 };
 
                 updateVisibleFavoriteStates();
-                setFavoriteCount(favoriteCount);
+                setFavoriteCount(mergedFavoriteCount);
                 clearFavorites();
                 setMergeStatus('idle');
             } catch {
