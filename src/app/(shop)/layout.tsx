@@ -25,8 +25,6 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
 
     const favoriteIds = user ? await getFavoriteIds(user.id) : [];
 
-    const favoriteCount = favoriteIds.length;
-
     const initialCartState = user ? await getCart(user.id) : { items: [] };
 
     return (
@@ -37,7 +35,6 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
             <FavoritesProvider
                 isAuthenticated={Boolean(session)}
                 initialFavoriteIds={favoriteIds}
-                initialFavoriteCount={favoriteCount}
             >
                 <Header user={profileUser} />
                 <main className="wrapper grow overflow-x-clip">{children}</main>
