@@ -4,6 +4,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
     useSyncExternalStore,
 } from 'react';
@@ -39,6 +40,11 @@ export interface UseLocalCartResult {
     retryItems: () => void;
 }
 
+type ProductLoadState =
+    | { status: 'idle' }
+    | { status: 'loading'; key: string; isRetry: boolean }
+    | { status: 'error'; key: string; error: Error };
+
 export function useLocalCart(): UseLocalCartResult {
     const cartEntries = useSyncExternalStore(
         subscribeToCart,
@@ -53,39 +59,51 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     const [products, setProducts] = useState<ProductDto[]>([]);
-    const [contentState, setContentState] = useState<
-        | { status: 'idle' }
-        | { status: 'loading'; key: string }
-        | { status: 'error'; key: string; error: Error }
-    >({ status: 'idle' });
+    const productsRef = useRef(new Map<string, ProductDto>());
+    const [contentState, setContentState] = useState<ProductLoadState>({
+        status: 'idle',
+    });
     const [retryAttempt, setRetryAttempt] = useState(0);
 
-    const productIdsKey = useMemo(
-        () =>
-            [...cartEntries]
-                .map((entry) => entry.productId)
-                .sort()
-                .join(','),
+    const productIds = useMemo(
+        () => cartEntries.map((entry) => entry.productId),
         [cartEntries],
     );
 
+    const productIdsKey = useMemo(
+        () => [...productIds].sort().join(','),
+        [productIds],
+    );
+
     useEffect(() => {
-        if (!isHydrated) {
+        if (!isHydrated || productIds.length === 0) {
             return;
         }
 
-        if (productIdsKey.length === 0) {
+        const missingProductIds = productIds.filter(
+            (productId) => !productsRef.current.has(productId),
+        );
+
+        if (missingProductIds.length === 0 && retryAttempt === 0) {
             return;
         }
 
         let cancelled = false;
 
         async function loadProducts() {
-            setContentState({ status: 'loading', key: productIdsKey });
+            const isRetry = retryAttempt > 0;
+
+            setContentState({
+                status: 'loading',
+                key: productIdsKey,
+                isRetry,
+            });
 
             try {
                 const nextProducts = await getProductsByIdsAction(
-                    cartEntries.map((entry) => entry.productId),
+                    missingProductIds.length > 0
+                        ? missingProductIds
+                        : productIds,
                 );
 
                 if (cancelled) {
@@ -93,15 +111,16 @@ export function useLocalCart(): UseLocalCartResult {
                 }
 
                 setProducts((currentProducts) => {
-                    const productById = new Map(
+                    const nextProductsById = new Map(
                         currentProducts.map((product) => [product.id, product]),
                     );
 
                     for (const product of nextProducts) {
-                        productById.set(product.id, product);
+                        nextProductsById.set(product.id, product);
+                        productsRef.current.set(product.id, product);
                     }
 
-                    return [...productById.values()];
+                    return [...nextProductsById.values()];
                 });
 
                 setContentState({ status: 'idle' });
@@ -126,21 +145,13 @@ export function useLocalCart(): UseLocalCartResult {
         return () => {
             cancelled = true;
         };
-    }, [
-        cartEntries,
-        isHydrated,
-        productIdsKey,
-        products,
-        retryAttempt,
-    ]);
+    }, [isHydrated, productIds, productIdsKey, retryAttempt]);
 
     const items = useMemo(
         () =>
             cartEntries
                 .map((entry) => {
-                    const product = products.find(
-                        (product) => product.id === entry.productId,
-                    );
+                    const product = productsRef.current.get(entry.productId);
 
                     if (!product) {
                         return null;
@@ -164,7 +175,7 @@ export function useLocalCart(): UseLocalCartResult {
             ? contentState.error
             : null;
     const isRetryingItems =
-        contentState.status === 'loading' && retryAttempt > 0;
+        contentState.status === 'loading' && contentState.isRetry;
 
     const retryItems = useCallback(() => {
         setRetryAttempt((attempt) => attempt + 1);
@@ -172,6 +183,7 @@ export function useLocalCart(): UseLocalCartResult {
 
     const addCartItem = useCallback(
         (product: ProductDto, snapshot: CartProductSnapshot) => {
+            productsRef.current.set(product.id, product);
             setProducts((currentProducts) => {
                 if (
                     currentProducts.some(
