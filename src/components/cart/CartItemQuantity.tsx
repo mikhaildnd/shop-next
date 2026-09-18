@@ -44,10 +44,10 @@ export function CartItemQuantity({
     variant = 'primary',
     className,
 }: CartItemQuantityProps) {
-    const { incrementCartEntry, decrementCartEntry, getCartEntryQuantity } =
+    const { incrementCartItem, decrementCartItem, getCartItemQuantity } =
         useCartContext();
 
-    const quantity = getCartEntryQuantity(productId);
+    const quantity = getCartItemQuantity(productId);
 
     if (quantity === undefined) {
         return null;
@@ -57,7 +57,7 @@ export function CartItemQuantity({
 
     const handleDecrement = async () => {
         try {
-            await decrementCartEntry(productId);
+            await decrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-decrement-error',
@@ -69,7 +69,7 @@ export function CartItemQuantity({
 
     const handleIncrement = async () => {
         try {
-            await incrementCartEntry(productId);
+            await incrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-increment-error',
