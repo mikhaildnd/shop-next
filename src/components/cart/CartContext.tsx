@@ -5,7 +5,10 @@ import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
-import { useLocalCart } from '@/hooks/useLocalCart';
+import {
+    type CartItemsState,
+    useLocalCart,
+} from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartProductSnapshot } from '@/lib/cart/cart.types';
@@ -24,9 +27,7 @@ interface CartContextValue {
     decrementCartItem: (productId: string) => void | Promise<void>;
     removeCartItem: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
-    isLoadingItems: boolean;
-    isRetryingItems: boolean;
-    itemsError: Error | null;
+    itemsState: CartItemsState;
     retryItems: () => void;
     isHydrated: boolean;
 }
@@ -76,9 +77,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
-        isLoadingItems: cart.isLoadingItems,
-        isRetryingItems: cart.isRetryingItems,
-        itemsError: cart.itemsError,
+        itemsState: cart.itemsState,
         retryItems: cart.retryItems,
         isHydrated: cart.isHydrated,
     };
@@ -115,9 +114,7 @@ function ServerCartProvider({
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
-        isLoadingItems: false,
-        isRetryingItems: false,
-        itemsError: null,
+        itemsState: { status: 'idle' },
         retryItems: () => {},
         isHydrated: true,
     };
