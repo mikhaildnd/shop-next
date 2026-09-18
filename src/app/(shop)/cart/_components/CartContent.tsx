@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
@@ -11,12 +9,10 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import { routes } from '@/routes';
-import type { CartItemDto } from '@/services/cart/cart.types';
 
 export function CartContent() {
     const {
-        cartEntries,
-        products,
+        items,
         isLoadingProducts,
         isRetryingProducts,
         productsError,
@@ -24,30 +20,7 @@ export function CartContent() {
         isHydrated,
     } = useCartContext();
 
-    const productsById = useMemo(
-        () => new Map(products.map((product) => [product.id, product])),
-        [products],
-    );
-
-    const items = useMemo(
-        () =>
-            cartEntries
-                .map((entry) => {
-                    const product = productsById.get(entry.productId);
-
-                    if (!product) {
-                        return null;
-                    }
-
-                    return {
-                        product,
-                        quantity: entry.quantity,
-                        snapshot: entry.snapshot,
-                    };
-                })
-                .filter((item): item is CartItemDto => item !== null),
-        [cartEntries, productsById],
-    );
+    const cartItemCount = items.length;
 
     const {
         availableItems,
@@ -70,7 +43,7 @@ export function CartContent() {
         );
     }
 
-    if (cartEntries.length === 0) {
+    if (items.length === 0 && !isLoadingProducts && !productsError) {
         return (
             <PageMessage
                 title="Корзина пуста"
@@ -101,7 +74,7 @@ export function CartContent() {
     if (isLoadingProducts) {
         return (
             <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
-                {Array.from({ length: cartEntries.length }, (_, index) => (
+                {Array.from({ length: cartItemCount || 3 }, (_, index) => (
                     <CartItemSkeleton key={index} />
                 ))}
             </div>
