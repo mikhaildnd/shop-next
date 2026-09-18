@@ -9,10 +9,7 @@ import {
 } from 'react';
 
 import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
-import type {
-    CartEntry,
-    CartProductSnapshot,
-} from '@/lib/cart/cart.types';
+import type { CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartEntry as addCartEntryToStorage,
     clearCart as clearCartStorage,
