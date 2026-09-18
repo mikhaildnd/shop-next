@@ -180,21 +180,13 @@ export function useLocalCart(): UseLocalCartResult {
         [cartEntries, productsById],
     );
 
-    const isLoadingItems =
-        isHydrated &&
-        contentState.status === 'loading' &&
-        contentState.key === productIdsKey;
-    const itemsError =
-        contentState.status === 'error' &&
-        contentState.key === productIdsKey
-            ? contentState.error
-            : null;
     const itemsState: CartItemsState =
-        contentState.status === 'loading'
-            ? { status: 'loading', isRetry: contentState.isRetry }
-            : contentState.status === 'error'
-              ? { status: 'error', error: contentState.error }
-              : { status: 'idle' };
+        contentState.status !== 'idle' &&
+        contentState.key === productIdsKey
+            ? contentState.status === 'loading'
+                ? { status: 'loading', isRetry: contentState.isRetry }
+                : { status: 'error', error: contentState.error }
+            : { status: 'idle' };
 
     const retryItems = useCallback(() => {
         setRetryKey((key) => key + 1);
