@@ -5,7 +5,6 @@ import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
-import { useCartProducts } from '@/hooks/useCartProducts';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
@@ -68,18 +67,14 @@ export function CartProvider({
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
     const cart = useLocalCart();
-    const productsState = useCartProducts({
-        cartEntries: cart.cartEntries,
-        isHydrated: cart.isHydrated,
-    });
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
-        products: productsState.products,
-        isLoadingProducts: productsState.isLoadingProducts,
-        isRetryingProducts: productsState.isRetryingProducts,
-        productsError: productsState.productsError,
-        retryProducts: productsState.retryProducts,
+        products: cart.items.map(({ product }) => product),
+        isLoadingProducts: cart.isLoadingItems,
+        isRetryingProducts: cart.isRetryingItems,
+        productsError: cart.itemsError,
+        retryProducts: cart.retryItems,
         cartCount: cart.cartCount,
         getCartEntryQuantity: cart.getCartEntryQuantity,
         addCartEntry: cart.addCartEntry,
