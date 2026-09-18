@@ -13,14 +13,14 @@ interface CartButtonProps {
 }
 
 export function CartButton({ product, className }: CartButtonProps) {
-    const { addCartEntry, getCartEntryQuantity } = useCartContext();
+    const { addCartItem, getCartItemQuantity } = useCartContext();
 
     const isOutOfStock = product.stock === 0;
-    const isInCart = getCartEntryQuantity(product.id) !== undefined;
+    const isInCart = getCartItemQuantity(product.id) !== undefined;
 
-    const handleAddCartEntry = async () => {
+    const handleAddCartItem = async () => {
         try {
-            await addCartEntry(product.id, {
+            await addCartItem(product, {
                 effectivePrice: product.effectivePrice,
             });
         } catch {
@@ -44,7 +44,7 @@ export function CartButton({ product, className }: CartButtonProps) {
                 <Button
                     className="flex-1"
                     disabled={isOutOfStock}
-                    onClick={isOutOfStock ? undefined : handleAddCartEntry}
+                    onClick={isOutOfStock ? undefined : handleAddCartItem}
                     variant="accent"
                 >
                     {isOutOfStock ? 'Нет в наличии' : 'В корзину'}
