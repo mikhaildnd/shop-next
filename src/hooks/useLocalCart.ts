@@ -53,6 +53,9 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     const [products, setProducts] = useState<ProductDto[]>([]);
+    const [unavailableProductIds, setUnavailableProductIds] = useState<Set<string>>(
+        new Set(),
+    );
     const [itemsError, setItemsError] = useState<Error | null>(null);
     const [retryAttempt, setRetryAttempt] = useState(0);
     const [isRetryingItems, setIsRetryingItems] = useState(false);
@@ -67,14 +70,24 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     useEffect(() => {
-        if (!isHydrated || productIdsKey.length === 0) {
+        if (!isHydrated) {
+            return;
+        }
+
+        if (productIdsKey.length === 0) {
+            setItemsError(null);
+            setUnavailableProductIds(new Set());
             return;
         }
 
         const knownProductIds = new Set(products.map((product) => product.id));
         const missingProductIds = cartEntries
             .map((entry) => entry.productId)
-            .filter((productId) => !knownProductIds.has(productId));
+            .filter(
+                (productId) =>
+                    !knownProductIds.has(productId) &&
+                    !unavailableProductIds.has(productId),
+            );
 
         if (missingProductIds.length === 0) {
             return;
@@ -104,6 +117,24 @@ export function useLocalCart(): UseLocalCartResult {
                     return [...productById.values()];
                 });
 
+                const loadedProductIds = new Set(
+                    nextProducts.map((product) => product.id),
+                );
+
+                setUnavailableProductIds((currentIds) => {
+                    const nextIds = new Set(currentIds);
+
+                    for (const productId of missingProductIds) {
+                        if (loadedProductIds.has(productId)) {
+                            nextIds.delete(productId);
+                        } else {
+                            nextIds.add(productId);
+                        }
+                    }
+
+                    return nextIds;
+                });
+
                 setItemsError(null);
             } catch (error) {
                 if (!cancelled) {
@@ -127,11 +158,19 @@ export function useLocalCart(): UseLocalCartResult {
         return () => {
             cancelled = true;
         };
-    }, [cartEntries, isHydrated, productIdsKey, products, retryAttempt]);
+    }, [
+        cartEntries,
+        isHydrated,
+        productIdsKey,
+        products,
+        retryAttempt,
+        unavailableProductIds,
+    ]);
 
     const items = useMemo(
         () =>
             cartEntries
+                .filter((entry) => !unavailableProductIds.has(entry.productId))
                 .map((entry) => {
                     const product = products.find(
                         (product) => product.id === entry.productId,
@@ -148,17 +187,19 @@ export function useLocalCart(): UseLocalCartResult {
                     };
                 })
                 .filter((item): item is CartItemDto => item !== null),
-        [cartEntries, products],
+        [cartEntries, products, unavailableProductIds],
     );
 
     const isLoadingItems =
         isHydrated &&
         cartEntries.some(
             (entry) =>
-                !products.some((product) => product.id === entry.productId),
+                !products.some((product) => product.id === entry.productId) &&
+                !unavailableProductIds.has(entry.productId),
         );
 
     const retryItems = useCallback(() => {
+        setUnavailableProductIds(new Set());
         setIsRetryingItems(true);
         setRetryAttempt((attempt) => attempt + 1);
     }, []);
