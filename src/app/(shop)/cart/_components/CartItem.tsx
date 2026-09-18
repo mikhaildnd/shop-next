@@ -39,7 +39,7 @@ export function CartItem({ item }: CartItemProps) {
 
     const mainImage = product.images[0];
 
-    const { removeCartEntry } = useCartContext();
+    const { removeCartItem } = useCartContext();
 
     const isOutOfStock = product.stock === 0;
     const hasInsufficientStock =
@@ -150,7 +150,7 @@ export function CartItem({ item }: CartItemProps) {
                                         size="sm"
                                         variant="destructive"
                                         onClick={() =>
-                                            removeCartEntry(product.id)
+                                            removeCartItem(product.id)
                                         }
                                     >
                                         Удалить
