@@ -34,9 +34,7 @@ export interface UseLocalCartResult {
     cartCount: number;
     getCartItemQuantity: (productId: string) => number | undefined;
     isHydrated: boolean;
-    isLoadingItems: boolean;
-    isRetryingItems: boolean;
-    itemsError: Error | null;
+    itemsState: CartItemsState;
     retryItems: () => void;
 }
 
@@ -44,6 +42,11 @@ type ProductLoadState =
     | { status: 'idle' }
     | { status: 'loading'; key: string; isRetry: boolean }
     | { status: 'error'; key: string; error: Error };
+
+export type CartItemsState =
+    | { status: 'idle' }
+    | { status: 'loading'; isRetry: boolean }
+    | { status: 'error'; error: Error };
 
 export function useLocalCart(): UseLocalCartResult {
     const cartEntries = useSyncExternalStore(
@@ -186,10 +189,12 @@ export function useLocalCart(): UseLocalCartResult {
         contentState.key === productIdsKey
             ? contentState.error
             : null;
-    const isRetryingItems =
-        isLoadingItems &&
-        contentState.status === 'loading' &&
-        contentState.isRetry;
+    const itemsState: CartItemsState =
+        contentState.status === 'loading'
+            ? { status: 'loading', isRetry: contentState.isRetry }
+            : contentState.status === 'error'
+              ? { status: 'error', error: contentState.error }
+              : { status: 'idle' };
 
     const retryItems = useCallback(() => {
         setRetryKey((key) => key + 1);
@@ -257,9 +262,7 @@ export function useLocalCart(): UseLocalCartResult {
         cartCount,
         getCartItemQuantity,
         isHydrated,
-        isLoadingItems,
-        isRetryingItems,
-        itemsError,
+        itemsState,
         retryItems,
     };
 }
