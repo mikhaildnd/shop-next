@@ -43,7 +43,7 @@ export function CartContent() {
         );
     }
 
-    if (items.length === 0 && !isLoadingProducts && !productsError) {
+    if (items.length === 0 && !isLoadingItems && !itemsError) {
         return (
             <PageMessage
                 title="Корзина пуста"
@@ -54,16 +54,16 @@ export function CartContent() {
         );
     }
 
-    if (productsError) {
+    if (itemsError) {
         return (
             <PageMessage
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
                 <LoadingButton
-                    isLoading={isRetryingProducts}
+                    isLoading={isRetryingItems}
                     pendingText="Загрузка..."
-                    onClick={retryProducts}
+                    onClick={retryItems}
                 >
                     Повторить
                 </LoadingButton>
@@ -71,7 +71,7 @@ export function CartContent() {
         );
     }
 
-    if (isLoadingProducts) {
+    if (isLoadingItems) {
         return (
             <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
                 {Array.from({ length: cartItemCount || 3 }, (_, index) => (
