@@ -52,31 +52,20 @@ export function CartContent() {
         );
     }
 
-    if (itemsState.status === 'error') {
+    if (
+        itemsState.status === 'error' ||
+        (itemsState.status === 'loading' && itemsState.isRetry)
+    ) {
         return (
             <PageMessage
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
                 <LoadingButton
-                    isLoading={false}
-                    pendingText="Загрузка..."
-                    onClick={retryItems}
-                >
-                    Повторить
-                </LoadingButton>
-            </PageMessage>
-        );
-    }
-
-    if (itemsState.status === 'loading' && itemsState.isRetry) {
-        return (
-            <PageMessage
-                title="Не удалось загрузить товары"
-                description="Попробуйте загрузить товары ещё раз"
-            >
-                <LoadingButton
-                    isLoading
+                    isLoading={
+                        itemsState.status === 'loading' &&
+                        itemsState.isRetry
+                    }
                     pendingText="Загрузка..."
                     onClick={retryItems}
                 >
