@@ -78,15 +78,6 @@ export function useLocalCart(): UseLocalCartResult {
             return;
         }
 
-        const knownProductIds = new Set(products.map((product) => product.id));
-        const missingProductIds = cartEntries
-            .map((entry) => entry.productId)
-            .filter((productId) => !knownProductIds.has(productId));
-
-        if (missingProductIds.length === 0) {
-            return;
-        }
-
         let cancelled = false;
 
         async function loadProducts() {
@@ -94,7 +85,7 @@ export function useLocalCart(): UseLocalCartResult {
 
             try {
                 const nextProducts = await getProductsByIdsAction(
-                    missingProductIds,
+                    cartEntries.map((entry) => entry.productId),
                 );
 
                 if (cancelled) {
@@ -181,6 +172,18 @@ export function useLocalCart(): UseLocalCartResult {
 
     const addCartItem = useCallback(
         (product: ProductDto, snapshot: CartProductSnapshot) => {
+            setProducts((currentProducts) => {
+                if (
+                    currentProducts.some(
+                        (currentProduct) => currentProduct.id === product.id,
+                    )
+                ) {
+                    return currentProducts;
+                }
+
+                return [...currentProducts, product];
+            });
+
             addCartEntryToStorage(product.id, snapshot);
         },
         [],
