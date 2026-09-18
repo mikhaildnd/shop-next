@@ -9,11 +9,12 @@ import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto } from '@/services/cart/cart.types';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartEntries: CartEntry[];
+    items: CartItemDto[];
     products: ProductDto[];
     isLoadingProducts: boolean;
     isRetryingProducts: boolean;
@@ -70,6 +71,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
 
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
+        items: cart.items,
         products: cart.items.map(({ product }) => product),
         isLoadingProducts: cart.isLoadingItems,
         isRetryingProducts: cart.isRetryingItems,
