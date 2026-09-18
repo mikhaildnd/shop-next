@@ -64,6 +64,7 @@ export function useLocalCart(): UseLocalCartResult {
         status: 'idle',
     });
     const [retryKey, setRetryKey] = useState(0);
+    const handledRetryKeyRef = useRef(0);
 
     const productIds = useMemo(
         () => cartEntries.map((entry) => entry.productId),
@@ -83,16 +84,15 @@ export function useLocalCart(): UseLocalCartResult {
         const missingProductIds = productIds.filter(
             (productId) => !productsRef.current.has(productId),
         );
+        const isRetry = retryKey !== handledRetryKeyRef.current;
 
-        if (missingProductIds.length === 0 && retryKey === 0) {
+        if (missingProductIds.length === 0 && !isRetry) {
             return;
         }
 
         let cancelled = false;
 
         async function loadProducts() {
-            const isRetry = retryKey > 0;
-
             setContentState({
                 status: 'loading',
                 key: productIdsKey,
@@ -110,6 +110,10 @@ export function useLocalCart(): UseLocalCartResult {
                     return;
                 }
 
+                for (const product of nextProducts) {
+                    productsRef.current.set(product.id, product);
+                }
+
                 setProducts((currentProducts) => {
                     const nextProductsById = new Map(
                         currentProducts.map((product) => [product.id, product]),
@@ -117,15 +121,16 @@ export function useLocalCart(): UseLocalCartResult {
 
                     for (const product of nextProducts) {
                         nextProductsById.set(product.id, product);
-                        productsRef.current.set(product.id, product);
                     }
 
                     return [...nextProductsById.values()];
                 });
 
+                handledRetryKeyRef.current = retryKey;
                 setContentState({ status: 'idle' });
             } catch (error) {
                 if (!cancelled) {
+                    handledRetryKeyRef.current = retryKey;
                     setContentState({
                         status: 'error',
                         key: productIdsKey,
@@ -145,13 +150,18 @@ export function useLocalCart(): UseLocalCartResult {
         return () => {
             cancelled = true;
         };
-    }, [isHydrated, productIds, productIdsKey, retryAttempt]);
+    }, [isHydrated, productIds, productIdsKey, retryKey]);
+
+    const productsById = useMemo(
+        () => new Map(products.map((product) => [product.id, product])),
+        [products],
+    );
 
     const items = useMemo(
         () =>
             cartEntries
                 .map((entry) => {
-                    const product = productsRef.current.get(entry.productId);
+                    const product = productsById.get(entry.productId);
 
                     if (!product) {
                         return null;
@@ -164,18 +174,22 @@ export function useLocalCart(): UseLocalCartResult {
                     };
                 })
                 .filter((item): item is CartItemDto => item !== null),
-        [cartEntries, products],
+        [cartEntries, productsById],
     );
 
     const isLoadingItems =
-        isHydrated && contentState.status === 'loading';
+        isHydrated &&
+        contentState.status === 'loading' &&
+        contentState.key === productIdsKey;
     const itemsError =
         contentState.status === 'error' &&
         contentState.key === productIdsKey
             ? contentState.error
             : null;
     const isRetryingItems =
-        contentState.status === 'loading' && contentState.isRetry;
+        isLoadingItems &&
+        contentState.status === 'loading' &&
+        contentState.isRetry;
 
     const retryItems = useCallback(() => {
         setRetryKey((key) => key + 1);
