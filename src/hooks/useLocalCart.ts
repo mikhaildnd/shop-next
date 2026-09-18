@@ -75,10 +75,6 @@ export function useLocalCart(): UseLocalCartResult {
         }
 
         if (productIdsKey.length === 0) {
-            setItemsError(null);
-            setUnavailableProductIds((currentIds) =>
-                currentIds.size === 0 ? currentIds : new Set(),
-            );
             return;
         }
 
