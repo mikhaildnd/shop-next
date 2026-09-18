@@ -63,7 +63,7 @@ export function useLocalCart(): UseLocalCartResult {
     const [contentState, setContentState] = useState<ProductLoadState>({
         status: 'idle',
     });
-    const [retryAttempt, setRetryAttempt] = useState(0);
+    const [retryKey, setRetryKey] = useState(0);
 
     const productIds = useMemo(
         () => cartEntries.map((entry) => entry.productId),
@@ -84,14 +84,14 @@ export function useLocalCart(): UseLocalCartResult {
             (productId) => !productsRef.current.has(productId),
         );
 
-        if (missingProductIds.length === 0 && retryAttempt === 0) {
+        if (missingProductIds.length === 0 && retryKey === 0) {
             return;
         }
 
         let cancelled = false;
 
         async function loadProducts() {
-            const isRetry = retryAttempt > 0;
+            const isRetry = retryKey > 0;
 
             setContentState({
                 status: 'loading',
@@ -178,7 +178,7 @@ export function useLocalCart(): UseLocalCartResult {
         contentState.status === 'loading' && contentState.isRetry;
 
     const retryItems = useCallback(() => {
-        setRetryAttempt((attempt) => attempt + 1);
+        setRetryKey((key) => key + 1);
     }, []);
 
     const addCartItem = useCallback(
