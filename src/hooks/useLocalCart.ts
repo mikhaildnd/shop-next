@@ -27,7 +27,7 @@ import type { CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseLocalCartResult {
-        items: CartItemDto[];
+    items: CartItemDto[];
     addCartItem: (product: ProductDto, snapshot: CartProductSnapshot) => void;
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
