@@ -27,15 +27,14 @@ import type { CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseLocalCartResult {
-    cartEntries: CartEntry[];
-    items: CartItemDto[];
-    addCartEntry: (productId: string, snapshot: CartProductSnapshot) => void;
-    incrementCartEntry: (productId: string) => void;
-    decrementCartEntry: (productId: string) => void;
-    removeCartEntry: (productId: string) => void;
+        items: CartItemDto[];
+    addCartItem: (product: ProductDto, snapshot: CartProductSnapshot) => void;
+    incrementCartItem: (productId: string) => void;
+    decrementCartItem: (productId: string) => void;
+    removeCartItem: (productId: string) => void;
     clearCart: () => void;
     cartCount: number;
-    getCartEntryQuantity: (productId: string) => number | undefined;
+    getCartItemQuantity: (productId: string) => number | undefined;
     isHydrated: boolean;
     isLoadingItems: boolean;
     isRetryingItems: boolean;
@@ -167,22 +166,22 @@ export function useLocalCart(): UseLocalCartResult {
         setRetryAttempt((attempt) => attempt + 1);
     }, []);
 
-    const addCartEntry = useCallback(
-        (productId: string, snapshot: CartProductSnapshot) => {
-            addCartEntryToStorage(productId, snapshot);
+    const addCartItem = useCallback(
+        (product: ProductDto, snapshot: CartProductSnapshot) => {
+            addCartEntryToStorage(product.id, snapshot);
         },
         [],
     );
 
-    const removeCartEntry = useCallback((productId: string) => {
+    const removeCartItem = useCallback((productId: string) => {
         removeCartEntryFromStorage(productId);
     }, []);
 
-    const incrementCartEntry = useCallback((productId: string) => {
+    const incrementCartItem = useCallback((productId: string) => {
         incrementCartEntryInStorage(productId);
     }, []);
 
-    const decrementCartEntry = useCallback((productId: string) => {
+    const decrementCartItem = useCallback((productId: string) => {
         decrementCartEntryFromStorage(productId);
     }, []);
 
@@ -190,7 +189,7 @@ export function useLocalCart(): UseLocalCartResult {
         clearCartStorage();
     }, []);
 
-    const getCartEntryQuantity = useCallback(
+    const getCartItemQuantity = useCallback(
         (productId: string) => {
             const entry = cartEntries.find(
                 (entry) => entry.productId === productId,
@@ -207,15 +206,14 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     return {
-        cartEntries,
         items,
-        addCartEntry,
-        removeCartEntry,
-        incrementCartEntry,
-        decrementCartEntry,
+        addCartItem,
+        removeCartItem,
+        incrementCartItem,
+        decrementCartItem,
         clearCart,
         cartCount,
-        getCartEntryQuantity,
+        getCartItemQuantity,
         isHydrated,
         isLoadingItems,
         isRetryingItems,
