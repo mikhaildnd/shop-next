@@ -53,12 +53,12 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     const [products, setProducts] = useState<ProductDto[]>([]);
-    const [unavailableProductIds, setUnavailableProductIds] = useState<Set<string>>(
-        new Set(),
-    );
-    const [itemsError, setItemsError] = useState<Error | null>(null);
+    const [contentState, setContentState] = useState<
+        | { status: 'idle' }
+        | { status: 'loading'; key: string }
+        | { status: 'error'; key: string; error: Error }
+    >({ status: 'idle' });
     const [retryAttempt, setRetryAttempt] = useState(0);
-    const [isRetryingItems, setIsRetryingItems] = useState(false);
 
     const productIdsKey = useMemo(
         () =>
@@ -81,11 +81,7 @@ export function useLocalCart(): UseLocalCartResult {
         const knownProductIds = new Set(products.map((product) => product.id));
         const missingProductIds = cartEntries
             .map((entry) => entry.productId)
-            .filter(
-                (productId) =>
-                    !knownProductIds.has(productId) &&
-                    !unavailableProductIds.has(productId),
-            );
+            .filter((productId) => !knownProductIds.has(productId));
 
         if (missingProductIds.length === 0) {
             return;
@@ -94,6 +90,8 @@ export function useLocalCart(): UseLocalCartResult {
         let cancelled = false;
 
         async function loadProducts() {
+            setContentState({ status: 'loading', key: productIdsKey });
+
             try {
                 const nextProducts = await getProductsByIdsAction(
                     missingProductIds,
@@ -115,39 +113,21 @@ export function useLocalCart(): UseLocalCartResult {
                     return [...productById.values()];
                 });
 
-                const loadedProductIds = new Set(
-                    nextProducts.map((product) => product.id),
-                );
-
-                setUnavailableProductIds((currentIds) => {
-                    const nextIds = new Set(currentIds);
-
-                    for (const productId of missingProductIds) {
-                        if (loadedProductIds.has(productId)) {
-                            nextIds.delete(productId);
-                        } else {
-                            nextIds.add(productId);
-                        }
-                    }
-
-                    return nextIds;
-                });
-
-                setItemsError(null);
+                setContentState({ status: 'idle' });
             } catch (error) {
                 if (!cancelled) {
-                    setItemsError(
-                        error instanceof Error
-                            ? error
-                            : new Error(
-                                  'Неизвестная ошибка: не удалось загрузить товары',
-                              ),
-                    );
+                    setContentState({
+                        status: 'error',
+                        key: productIdsKey,
+                        error:
+                            error instanceof Error
+                                ? error
+                                : new Error(
+                                      'Неизвестная ошибка: не удалось загрузить товары',
+                                  ),
+                    });
                 }
-            } finally {
-                if (!cancelled) {
-                    setIsRetryingItems(false);
-                }
+            }
             }
         }
 
@@ -162,13 +142,11 @@ export function useLocalCart(): UseLocalCartResult {
         productIdsKey,
         products,
         retryAttempt,
-        unavailableProductIds,
     ]);
 
     const items = useMemo(
         () =>
             cartEntries
-                .filter((entry) => !unavailableProductIds.has(entry.productId))
                 .map((entry) => {
                     const product = products.find(
                         (product) => product.id === entry.productId,
@@ -185,20 +163,20 @@ export function useLocalCart(): UseLocalCartResult {
                     };
                 })
                 .filter((item): item is CartItemDto => item !== null),
-        [cartEntries, products, unavailableProductIds],
+        [cartEntries, products],
     );
 
     const isLoadingItems =
-        isHydrated &&
-        cartEntries.some(
-            (entry) =>
-                !products.some((product) => product.id === entry.productId) &&
-                !unavailableProductIds.has(entry.productId),
-        );
+        isHydrated && contentState.status === 'loading';
+    const itemsError =
+        contentState.status === 'error' &&
+        contentState.key === productIdsKey
+            ? contentState.error
+            : null;
+    const isRetryingItems =
+        contentState.status === 'loading' && retryAttempt > 0;
 
     const retryItems = useCallback(() => {
-        setUnavailableProductIds(new Set());
-        setIsRetryingItems(true);
         setRetryAttempt((attempt) => attempt + 1);
     }, []);
 
