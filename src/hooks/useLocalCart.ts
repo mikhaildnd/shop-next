@@ -128,7 +128,6 @@ export function useLocalCart(): UseLocalCartResult {
                     });
                 }
             }
-            }
         }
 
         void loadProducts();
