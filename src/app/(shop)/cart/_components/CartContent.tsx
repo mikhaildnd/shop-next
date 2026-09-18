@@ -13,10 +13,10 @@ import { routes } from '@/routes';
 export function CartContent() {
     const {
         items,
-        isLoadingProducts,
-        isRetryingProducts,
-        productsError,
-        retryProducts,
+        isLoadingItems,
+        isRetryingItems,
+        itemsError,
+        retryItems,
         isHydrated,
     } = useCartContext();
 
