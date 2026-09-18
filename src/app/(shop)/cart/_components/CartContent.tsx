@@ -13,10 +13,8 @@ import { routes } from '@/routes';
 export function CartContent() {
     const {
         items,
-        isLoadingProducts,
-        isRetryingProducts,
-        productsError,
-        retryProducts,
+        itemsState,
+        retryItems,
         isHydrated,
     } = useCartContext();
 
@@ -43,7 +41,7 @@ export function CartContent() {
         );
     }
 
-    if (items.length === 0 && !isLoadingProducts && !productsError) {
+    if (items.length === 0 && itemsState.status === 'idle') {
         return (
             <PageMessage
                 title="Корзина пуста"
@@ -54,16 +52,22 @@ export function CartContent() {
         );
     }
 
-    if (productsError) {
+    if (
+        itemsState.status === 'error' ||
+        (itemsState.status === 'loading' && itemsState.isRetry)
+    ) {
         return (
             <PageMessage
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
                 <LoadingButton
-                    isLoading={isRetryingProducts}
+                    isLoading={
+                        itemsState.status === 'loading' &&
+                        itemsState.isRetry
+                    }
                     pendingText="Загрузка..."
-                    onClick={retryProducts}
+                    onClick={retryItems}
                 >
                     Повторить
                 </LoadingButton>
@@ -71,7 +75,7 @@ export function CartContent() {
         );
     }
 
-    if (isLoadingProducts) {
+    if (itemsState.status === 'loading') {
         return (
             <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
                 {Array.from({ length: cartItemCount || 3 }, (_, index) => (

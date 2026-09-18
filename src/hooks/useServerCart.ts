@@ -116,14 +116,20 @@ export function useServerCart({
     const addCartItem = useCallback(
         (product: ProductDto, snapshot: CartProductSnapshot): Promise<void> =>
             enqueueMutation(
-                createMutation((items) => [
-                    {
-                        product,
-                        quantity: 1,
-                        snapshot,
-                    },
-                    ...items,
-                ]),
+                createMutation((items) => {
+                    if (items.some((item) => item.product.id === product.id)) {
+                        return items;
+                    }
+
+                    return [
+                        {
+                            product,
+                            quantity: 1,
+                            snapshot,
+                        },
+                        ...items,
+                    ];
+                }),
                 () => addCartItemAction(product.id, snapshot),
             ),
         [createMutation, enqueueMutation],
