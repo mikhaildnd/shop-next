@@ -24,6 +24,10 @@ interface CartContextValue {
     decrementCartItem: (productId: string) => void | Promise<void>;
     removeCartItem: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
+    isLoadingItems: boolean;
+    isRetryingItems: boolean;
+    itemsError: Error | null;
+    retryItems: () => void;
     isHydrated: boolean;
 }
 
@@ -72,6 +76,10 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
+        isLoadingItems: cart.isLoadingItems,
+        isRetryingItems: cart.isRetryingItems,
+        itemsError: cart.itemsError,
+        retryItems: cart.retryItems,
         isHydrated: cart.isHydrated,
     };
 
@@ -107,6 +115,10 @@ function ServerCartProvider({
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
+        isLoadingItems: false,
+        isRetryingItems: false,
+        itemsError: null,
+        retryItems: () => {},
         isHydrated: true,
     };
 
