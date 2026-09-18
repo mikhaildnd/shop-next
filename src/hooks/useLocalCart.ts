@@ -1,8 +1,18 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+    useSyncExternalStore,
+} from 'react';
 
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
+import type {
+    CartEntry,
+    CartProductSnapshot,
+} from '@/lib/cart/cart.types';
 import {
     addCartEntry as addCartEntryToStorage,
     clearCart as clearCartStorage,
@@ -13,9 +23,12 @@ import {
     removeCartEntry as removeCartEntryFromStorage,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
+import type { CartItemDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseLocalCartResult {
     cartEntries: CartEntry[];
+    items: CartItemDto[];
     addCartEntry: (productId: string, snapshot: CartProductSnapshot) => void;
     incrementCartEntry: (productId: string) => void;
     decrementCartEntry: (productId: string) => void;
@@ -24,6 +37,10 @@ export interface UseLocalCartResult {
     cartCount: number;
     getCartEntryQuantity: (productId: string) => number | undefined;
     isHydrated: boolean;
+    isLoadingItems: boolean;
+    isRetryingItems: boolean;
+    itemsError: Error | null;
+    retryItems: () => void;
 }
 
 export function useLocalCart(): UseLocalCartResult {
@@ -38,6 +55,117 @@ export function useLocalCart(): UseLocalCartResult {
         () => true,
         () => false,
     );
+
+    const [products, setProducts] = useState<ProductDto[]>([]);
+    const [itemsError, setItemsError] = useState<Error | null>(null);
+    const [retryAttempt, setRetryAttempt] = useState(0);
+    const [isRetryingItems, setIsRetryingItems] = useState(false);
+
+    const productIdsKey = useMemo(
+        () =>
+            [...cartEntries]
+                .map((entry) => entry.productId)
+                .sort()
+                .join(','),
+        [cartEntries],
+    );
+
+    useEffect(() => {
+        if (!isHydrated || productIdsKey.length === 0) {
+            return;
+        }
+
+        const knownProductIds = new Set(products.map((product) => product.id));
+        const missingProductIds = cartEntries
+            .map((entry) => entry.productId)
+            .filter((productId) => !knownProductIds.has(productId));
+
+        if (missingProductIds.length === 0) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProducts() {
+            try {
+                const nextProducts = await getProductsByIdsAction(
+                    missingProductIds,
+                );
+
+                if (cancelled) {
+                    return;
+                }
+
+                setProducts((currentProducts) => {
+                    const productById = new Map(
+                        currentProducts.map((product) => [product.id, product]),
+                    );
+
+                    for (const product of nextProducts) {
+                        productById.set(product.id, product);
+                    }
+
+                    return [...productById.values()];
+                });
+
+                setItemsError(null);
+            } catch (error) {
+                if (!cancelled) {
+                    setItemsError(
+                        error instanceof Error
+                            ? error
+                            : new Error(
+                                  'Неизвестная ошибка: не удалось загрузить товары',
+                              ),
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsRetryingItems(false);
+                }
+            }
+        }
+
+        void loadProducts();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [cartEntries, isHydrated, productIdsKey, products, retryAttempt]);
+
+    const items = useMemo(
+        () =>
+            cartEntries
+                .map((entry) => {
+                    const product = products.find(
+                        (product) => product.id === entry.productId,
+                    );
+
+                    if (!product) {
+                        return null;
+                    }
+
+                    return {
+                        product,
+                        quantity: entry.quantity,
+                        snapshot: entry.snapshot,
+                    };
+                })
+                .filter((item): item is CartItemDto => item !== null),
+        [cartEntries, products],
+    );
+
+    const isLoadingItems =
+        isHydrated &&
+        cartEntries.some(
+            (entry) =>
+                !products.some((product) => product.id === entry.productId),
+        );
+
+    const retryItems = useCallback(() => {
+        setIsRetryingItems(true);
+        setRetryAttempt((attempt) => attempt + 1);
+    }, []);
 
     const addCartEntry = useCallback(
         (productId: string, snapshot: CartProductSnapshot) => {
@@ -65,7 +193,7 @@ export function useLocalCart(): UseLocalCartResult {
     const getCartEntryQuantity = useCallback(
         (productId: string) => {
             const entry = cartEntries.find(
-                (item) => item.productId === productId,
+                (entry) => entry.productId === productId,
             );
 
             return entry?.quantity;
@@ -80,6 +208,7 @@ export function useLocalCart(): UseLocalCartResult {
 
     return {
         cartEntries,
+        items,
         addCartEntry,
         removeCartEntry,
         incrementCartEntry,
@@ -88,5 +217,9 @@ export function useLocalCart(): UseLocalCartResult {
         cartCount,
         getCartEntryQuantity,
         isHydrated,
+        isLoadingItems,
+        isRetryingItems,
+        itemsError,
+        retryItems,
     };
 }
