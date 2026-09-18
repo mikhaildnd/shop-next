@@ -5,30 +5,24 @@ import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
-import { useCartProducts } from '@/hooks/useCartProducts';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto } from '@/services/cart/cart.types';
+import type { CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
-    cartEntries: CartEntry[];
-    products: ProductDto[];
-    isLoadingProducts: boolean;
-    isRetryingProducts: boolean;
-    productsError: Error | null;
-    retryProducts: () => void;
+    items: CartItemDto[];
     cartCount: number;
-    getCartEntryQuantity: (productId: string) => number | undefined;
-    addCartEntry: (
-        productId: string,
+    getCartItemQuantity: (productId: string) => number | undefined;
+    addCartItem: (
+        product: ProductDto,
         snapshot: CartProductSnapshot,
     ) => void | Promise<void>;
-    incrementCartEntry: (productId: string) => void | Promise<void>;
-    decrementCartEntry: (productId: string) => void | Promise<void>;
-    removeCartEntry: (productId: string) => void | Promise<void>;
+    incrementCartItem: (productId: string) => void | Promise<void>;
+    decrementCartItem: (productId: string) => void | Promise<void>;
+    removeCartItem: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
     isHydrated: boolean;
 }
@@ -68,24 +62,15 @@ export function CartProvider({
 
 function LocalCartProvider({ children }: LocalCartProviderProps) {
     const cart = useLocalCart();
-    const productsState = useCartProducts({
-        cartEntries: cart.cartEntries,
-        isHydrated: cart.isHydrated,
-    });
 
     const contextValue: CartContextValue = {
-        cartEntries: cart.cartEntries,
-        products: productsState.products,
-        isLoadingProducts: productsState.isLoadingProducts,
-        isRetryingProducts: productsState.isRetryingProducts,
-        productsError: productsState.productsError,
-        retryProducts: productsState.retryProducts,
+        items: cart.items,
         cartCount: cart.cartCount,
-        getCartEntryQuantity: cart.getCartEntryQuantity,
-        addCartEntry: cart.addCartEntry,
-        incrementCartEntry: cart.incrementCartEntry,
-        decrementCartEntry: cart.decrementCartEntry,
-        removeCartEntry: cart.removeCartEntry,
+        getCartItemQuantity: cart.getCartItemQuantity,
+        addCartItem: cart.addCartItem,
+        incrementCartItem: cart.incrementCartItem,
+        decrementCartItem: cart.decrementCartItem,
+        removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
         isHydrated: cart.isHydrated,
     };
@@ -108,29 +93,19 @@ function ServerCartProvider({
         actionQueue,
     });
 
-    const productsState = useCartProducts({
-        cartEntries: cart.cartEntries,
-        initialProducts: initialCartState.items.map(({ product }) => product),
-    });
-
     const merge = useCartMerge({
         actionQueue,
         replaceCart: cart.replaceCart,
     });
 
     const contextValue: CartContextValue = {
-        cartEntries: cart.cartEntries,
-        products: productsState.products,
-        isLoadingProducts: productsState.isLoadingProducts,
-        isRetryingProducts: productsState.isRetryingProducts,
-        productsError: productsState.productsError,
-        retryProducts: productsState.retryProducts,
+        items: cart.items,
         cartCount: cart.cartCount,
-        getCartEntryQuantity: cart.getCartEntryQuantity,
-        addCartEntry: cart.addCartEntry,
-        incrementCartEntry: cart.incrementCartEntry,
-        decrementCartEntry: cart.decrementCartEntry,
-        removeCartEntry: cart.removeCartEntry,
+        getCartItemQuantity: cart.getCartItemQuantity,
+        addCartItem: cart.addCartItem,
+        incrementCartItem: cart.incrementCartItem,
+        decrementCartItem: cart.decrementCartItem,
+        removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
         isHydrated: true,
     };
