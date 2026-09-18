@@ -5,6 +5,7 @@ import { createContext, useContext, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
 import { useCartMerge } from '@/hooks/useCartMerge';
+import { useCartProducts } from '@/hooks/useCartProducts';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
@@ -115,8 +116,27 @@ function ServerCartProvider({
         replaceCart: cart.replaceCart,
     });
 
+    const items = cart.cartEntries
+        .map((entry) => {
+            const product = productsState.products.find(
+                (product) => product.id === entry.productId,
+            );
+
+            if (!product) {
+                return null;
+            }
+
+            return {
+                product,
+                quantity: entry.quantity,
+                snapshot: entry.snapshot,
+            };
+        })
+        .filter((item): item is CartItemDto => item !== null);
+
     const contextValue: CartContextValue = {
         cartEntries: cart.cartEntries,
+        items,
         products: productsState.products,
         isLoadingProducts: productsState.isLoadingProducts,
         isRetryingProducts: productsState.isRetryingProducts,
