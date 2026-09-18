@@ -10,13 +10,14 @@ import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     items: CartItemDto[];
     cartCount: number;
     getCartItemQuantity: (productId: string) => number | undefined;
     addCartItem: (
-        product: import('@/services/product/product.types').ProductDto,
+        product: ProductDto,
         snapshot: CartProductSnapshot,
     ) => void | Promise<void>;
     incrementCartItem: (productId: string) => void | Promise<void>;
@@ -100,11 +101,11 @@ function ServerCartProvider({
     const contextValue: CartContextValue = {
         items: cart.items,
         cartCount: cart.cartCount,
-        getCartEntryQuantity: cart.getCartEntryQuantity,
-        addCartEntry: cart.addCartEntry,
-        incrementCartEntry: cart.incrementCartEntry,
-        decrementCartEntry: cart.decrementCartEntry,
-        removeCartEntry: cart.removeCartEntry,
+        getCartItemQuantity: cart.getCartItemQuantity,
+        addCartItem: cart.addCartItem,
+        incrementCartItem: cart.incrementCartItem,
+        decrementCartItem: cart.decrementCartItem,
+        removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
         isHydrated: true,
     };
