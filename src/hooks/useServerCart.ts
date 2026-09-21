@@ -106,7 +106,7 @@ export function useServerCart({
 
     const getCartItemQuantity = useCallback(
         (productId: string) => {
-            const item = items.find((item) => item.product.id === productId);
+            const item = items.find((item) => item.productId === productId);
 
             return item?.quantity;
         },
@@ -117,15 +117,24 @@ export function useServerCart({
         (product: ProductDto, snapshot: CartProductSnapshot): Promise<void> =>
             enqueueMutation(
                 createMutation((items) => {
-                    if (items.some((item) => item.product.id === product.id)) {
+                    if (items.some((item) => item.productId === product.id)) {
                         return items;
                     }
 
+                    const cartProduct = {
+                        slug: product.slug,
+                        stock: product.stock,
+                        regularPrice: product.regularPrice,
+                        effectivePrice: product.effectivePrice,
+                        discountPercent: product.discountPercent,
+                    };
+
                     return [
                         {
-                            product,
+                            productId: product.id,
                             quantity: 1,
                             snapshot,
+                            product: cartProduct,
                         },
                         ...items,
                     ];
@@ -140,7 +149,7 @@ export function useServerCart({
             enqueueMutation(
                 createMutation((items) =>
                     items.map((item) =>
-                        item.product.id === productId
+                        item.productId === productId
                             ? { ...item, quantity: item.quantity + 1 }
                             : item,
                     ),
@@ -156,7 +165,7 @@ export function useServerCart({
                 createMutation((items) =>
                     items
                         .map((item) =>
-                            item.product.id === productId
+                            item.productId === productId
                                 ? { ...item, quantity: item.quantity - 1 }
                                 : item,
                         )
@@ -171,7 +180,7 @@ export function useServerCart({
         (productId: string): Promise<void> =>
             enqueueMutation(
                 createMutation((items) =>
-                    items.filter((item) => item.product.id !== productId),
+                    items.filter((item) => item.productId !== productId),
                 ),
                 () => removeCartItemAction(productId),
             ),

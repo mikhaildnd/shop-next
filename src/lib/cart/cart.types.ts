@@ -1,4 +1,6 @@
 export type CartProductSnapshot = {
+    title: string;
+    imageUrl: string | null;
     effectivePrice: number;
 };
 

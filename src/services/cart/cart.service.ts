@@ -2,9 +2,67 @@ import { cache } from 'react';
 
 import { prisma } from '@/db';
 import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto } from '@/services/cart/cart.types';
-import { productInclude } from '@/services/product/product.constants';
-import { mapProductToDto } from '@/services/product/product.mapper';
+import type {
+    CartDto,
+    CartItemDto,
+    CartProduct,
+    CartProductLookup,
+} from '@/services/cart/cart.types';
+
+const cartProductSelect = {
+    title: true,
+    slug: true,
+    stock: true,
+    regularPrice: true,
+    effectivePrice: true,
+    discountPercent: true,
+} as const;
+
+function mapCartProduct(product: {
+    slug: string;
+    stock: number;
+    regularPrice: { toString(): string };
+    effectivePrice: { toString(): string } | null;
+    discountPercent: number | null;
+}): CartProduct {
+    if (product.effectivePrice === null) {
+        throw new Error('Product has null effectivePrice');
+    }
+
+    return {
+        slug: product.slug,
+        stock: product.stock,
+        regularPrice: Number(product.regularPrice),
+        effectivePrice: Number(product.effectivePrice),
+        discountPercent: product.discountPercent ?? 0,
+    };
+}
+
+function mapCartItem(item: {
+    productId: string;
+    quantity: number;
+    snapshotTitle: string;
+    snapshotImageUrl: string | null;
+    snapshotEffectivePrice: { toString(): string };
+    product: {
+        slug: string;
+        stock: number;
+        regularPrice: { toString(): string };
+        effectivePrice: { toString(): string } | null;
+        discountPercent: number | null;
+    };
+}): CartItemDto {
+    return {
+        productId: item.productId,
+        quantity: item.quantity,
+        snapshot: {
+            title: item.snapshotTitle,
+            imageUrl: item.snapshotImageUrl,
+            effectivePrice: Number(item.snapshotEffectivePrice),
+        },
+        product: mapCartProduct(item.product),
+    };
+}
 
 export const getCart = cache(async (userId: string): Promise<CartDto> => {
     const cart = await prisma.cart.findUnique({
@@ -18,7 +76,7 @@ export const getCart = cache(async (userId: string): Promise<CartDto> => {
                 },
                 include: {
                     product: {
-                        include: productInclude,
+                        select: cartProductSelect,
                     },
                 },
             },
@@ -32,15 +90,35 @@ export const getCart = cache(async (userId: string): Promise<CartDto> => {
     }
 
     return {
-        items: cart.items.map((item) => ({
-            product: mapProductToDto(item.product),
-            quantity: item.quantity,
-            snapshot: {
-                effectivePrice: Number(item.snapshotEffectivePrice),
-            },
-        })),
+        items: cart.items.map(mapCartItem),
     };
 });
+
+export const getCartProductsByIds = cache(
+    async (productIds: string[]): Promise<CartProductLookup[]> => {
+        if (productIds.length === 0) {
+            return [];
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                id: {
+                    in: productIds,
+                },
+            },
+            select: {
+                id: true,
+                ...cartProductSelect,
+            },
+        });
+
+        return products.map((product) => ({
+            productId: product.id,
+            title: product.title,
+            ...mapCartProduct(product),
+        }));
+    },
+);
 
 export async function addCartItem(
     userId: string,
@@ -68,6 +146,8 @@ export async function addCartItem(
             cartId: cart.id,
             productId,
             quantity: 1,
+            snapshotTitle: snapshot.title,
+            snapshotImageUrl: snapshot.imageUrl,
             snapshotEffectivePrice: snapshot.effectivePrice,
         },
         update: {},
@@ -254,12 +334,16 @@ export async function mergeCart(
                 },
                 update: {
                     quantity,
+                    snapshotTitle: snapshot.title,
+                    snapshotImageUrl: snapshot.imageUrl,
                     snapshotEffectivePrice: snapshot.effectivePrice,
                 },
                 create: {
                     cartId: cart.id,
                     productId,
                     quantity,
+                    snapshotTitle: snapshot.title,
+                    snapshotImageUrl: snapshot.imageUrl,
                     snapshotEffectivePrice: snapshot.effectivePrice,
                 },
             }),

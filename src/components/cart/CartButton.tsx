@@ -21,6 +21,8 @@ export function CartButton({ product, className }: CartButtonProps) {
     const handleAddCartItem = async () => {
         try {
             await addCartItem(product, {
+                title: product.title,
+                imageUrl: product.images[0]?.url ?? null,
                 effectivePrice: product.effectivePrice,
             });
         } catch {

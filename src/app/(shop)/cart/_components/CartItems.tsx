@@ -17,7 +17,7 @@ export function CartItems({
             <div className="flex flex-col divide-y divide-gray-200">
                 {availableItems.map((item) => (
                     <CartItem
-                        key={item.product.id}
+                        key={item.productId}
                         item={item}
                     />
                 ))}
@@ -32,7 +32,7 @@ export function CartItems({
                     <div className="flex flex-col divide-y divide-gray-200">
                         {unavailableItems.map((item) => (
                             <CartItem
-                                key={item.product.id}
+                                key={item.productId}
                                 item={item}
                             />
                         ))}

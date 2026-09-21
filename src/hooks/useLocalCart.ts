@@ -9,7 +9,7 @@ import {
     useSyncExternalStore,
 } from 'react';
 
-import { getProductsByIdsAction } from '@/app/(shop)/cart/actions';
+import { getCartProductsByIdsAction } from '@/app/(shop)/cart/actions';
 import type { CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartEntry as addCartEntryToStorage,
@@ -21,7 +21,10 @@ import {
     removeCartEntry as removeCartEntryFromStorage,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
-import type { CartItemDto } from '@/services/cart/cart.types';
+import type {
+    CartItemDto,
+    CartProductLookup,
+} from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseLocalCartResult {
@@ -61,8 +64,8 @@ export function useLocalCart(): UseLocalCartResult {
         () => false,
     );
 
-    const [products, setProducts] = useState<ProductDto[]>([]);
-    const productsRef = useRef(new Map<string, ProductDto>());
+    const [products, setProducts] = useState<CartProductLookup[]>([]);
+    const productsRef = useRef(new Map<string, CartProductLookup>());
     const [contentState, setContentState] = useState<ProductLoadState>({
         status: 'idle',
     });
@@ -103,7 +106,7 @@ export function useLocalCart(): UseLocalCartResult {
             });
 
             try {
-                const nextProducts = await getProductsByIdsAction(
+                const nextProducts = await getCartProductsByIdsAction(
                     missingProductIds.length > 0
                         ? missingProductIds
                         : productIds,
@@ -114,16 +117,19 @@ export function useLocalCart(): UseLocalCartResult {
                 }
 
                 for (const product of nextProducts) {
-                    productsRef.current.set(product.id, product);
+                    productsRef.current.set(product.productId, product);
                 }
 
                 setProducts((currentProducts) => {
                     const nextProductsById = new Map(
-                        currentProducts.map((product) => [product.id, product]),
+                        currentProducts.map((product) => [
+                            product.productId,
+                            product,
+                        ]),
                     );
 
                     for (const product of nextProducts) {
-                        nextProductsById.set(product.id, product);
+                        nextProductsById.set(product.productId, product);
                     }
 
                     return [...nextProductsById.values()];
@@ -156,7 +162,10 @@ export function useLocalCart(): UseLocalCartResult {
     }, [isHydrated, productIds, productIdsKey, retryKey]);
 
     const productsById = useMemo(
-        () => new Map(products.map((product) => [product.id, product])),
+        () =>
+            new Map(
+                products.map((product) => [product.productId, product]),
+            ),
         [products],
     );
 
@@ -171,9 +180,19 @@ export function useLocalCart(): UseLocalCartResult {
                     }
 
                     return {
-                        product,
+                        productId: entry.productId,
                         quantity: entry.quantity,
-                        snapshot: entry.snapshot,
+                        snapshot: {
+                            ...entry.snapshot,
+                            title: entry.snapshot.title || product.title,
+                        },
+                        product: {
+                            slug: product.slug,
+                            stock: product.stock,
+                            regularPrice: product.regularPrice,
+                            effectivePrice: product.effectivePrice,
+                            discountPercent: product.discountPercent,
+                        },
                     };
                 })
                 .filter((item): item is CartItemDto => item !== null),
@@ -194,17 +213,28 @@ export function useLocalCart(): UseLocalCartResult {
 
     const addCartItem = useCallback(
         (product: ProductDto, snapshot: CartProductSnapshot) => {
-            productsRef.current.set(product.id, product);
+            const cartProduct: CartProductLookup = {
+                productId: product.id,
+                title: product.title,
+                slug: product.slug,
+                stock: product.stock,
+                regularPrice: product.regularPrice,
+                effectivePrice: product.effectivePrice,
+                discountPercent: product.discountPercent,
+            };
+
+            productsRef.current.set(product.id, cartProduct);
             setProducts((currentProducts) => {
                 if (
                     currentProducts.some(
-                        (currentProduct) => currentProduct.id === product.id,
+                        (currentProduct) =>
+                            currentProduct.productId === product.id,
                     )
                 ) {
                     return currentProducts;
                 }
 
-                return [...currentProducts, product];
+                return [...currentProducts, cartProduct];
             });
 
             addCartEntryToStorage(product.id, snapshot);

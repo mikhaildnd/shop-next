@@ -30,14 +30,12 @@ interface CartItemProps {
 }
 
 export function CartItem({ item }: CartItemProps) {
-    const { product } = item;
+    const { product, snapshot } = item;
 
     const hasDiscount = product.discountPercent > 0;
 
     const priceChanged =
         item.snapshot.effectivePrice !== product.effectivePrice;
-
-    const mainImage = product.images[0];
 
     const { removeCartItem } = useCartContext();
 
@@ -51,10 +49,10 @@ export function CartItem({ item }: CartItemProps) {
                 href={routes.productPage(product.slug)}
                 className="relative size-24 shrink-0 overflow-hidden rounded"
             >
-                {mainImage && (
+                {snapshot.imageUrl && (
                     <Image
-                        src={mainImage.url}
-                        alt={mainImage.alt ?? product.title}
+                        src={snapshot.imageUrl}
+                        alt={snapshot.title}
                         fill
                         className={cn(
                             'object-cover',
@@ -73,7 +71,7 @@ export function CartItem({ item }: CartItemProps) {
                         isOutOfStock && 'opacity-60',
                     )}
                 >
-                    {product.title}
+                    {snapshot.title}
                 </Link>
 
                 {!isOutOfStock ? (
@@ -107,7 +105,7 @@ export function CartItem({ item }: CartItemProps) {
                     <div className="flex items-center gap-2 sm:gap-4">
                         {!isOutOfStock && (
                             <CartItemQuantity
-                                productId={product.id}
+                                productId={item.productId}
                                 maxQuantity={product.stock}
                                 size="sm"
                                 variant="neutral"
@@ -150,7 +148,7 @@ export function CartItem({ item }: CartItemProps) {
                                         size="sm"
                                         variant="destructive"
                                         onClick={() =>
-                                            removeCartItem(product.id)
+                                            removeCartItem(item.productId)
                                         }
                                     >
                                         Удалить
@@ -160,7 +158,7 @@ export function CartItem({ item }: CartItemProps) {
                         </AlertDialog>
 
                         <FavoriteButton
-                            productId={product.id}
+                            productId={item.productId}
                             className="bg-gray-50"
                             shape="rounded"
                         />

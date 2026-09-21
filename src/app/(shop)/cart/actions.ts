@@ -9,8 +9,8 @@ import {
     incrementCartItem,
     mergeCart,
     removeCartItem,
+    getCartProductsByIds,
 } from '@/services/cart/cart.service';
-import { getProductsByIds } from '@/services/product/product.service';
 
 export async function addCartItemAction(
     productId: string,
@@ -58,6 +58,6 @@ export async function mergeCartAction(entries: CartEntry[]) {
     return mergeCart(session.user.id, entries);
 }
 
-export async function getProductsByIdsAction(productIds: string[]) {
-    return getProductsByIds(productIds);
+export async function getCartProductsByIdsAction(productIds: string[]) {
+    return getCartProductsByIds(productIds);
 }
