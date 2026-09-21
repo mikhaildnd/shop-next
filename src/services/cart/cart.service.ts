@@ -44,13 +44,6 @@ function mapCartItem(item: {
     snapshotTitle: string;
     snapshotImageUrl: string | null;
     snapshotEffectivePrice: { toString(): string };
-    product: {
-        slug: string;
-        stock: number;
-        regularPrice: { toString(): string };
-        effectivePrice: { toString(): string } | null;
-        discountPercent: number | null;
-    };
 }): CartItemDto {
     return {
         productId: item.productId,
@@ -60,7 +53,6 @@ function mapCartItem(item: {
             imageUrl: item.snapshotImageUrl,
             effectivePrice: Number(item.snapshotEffectivePrice),
         },
-        product: mapCartProduct(item.product),
     };
 }
 
@@ -73,11 +65,6 @@ export const getCart = cache(async (userId: string): Promise<CartDto> => {
             items: {
                 orderBy: {
                     createdAt: 'desc',
-                },
-                include: {
-                    product: {
-                        select: cartProductSelect,
-                    },
                 },
             },
         },

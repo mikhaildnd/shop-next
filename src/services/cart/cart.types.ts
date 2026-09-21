@@ -17,9 +17,13 @@ export type CartItemDto = {
     productId: string;
     quantity: number;
     snapshot: CartProductSnapshot;
-    product: CartProduct;
 };
 
 export type CartDto = {
     items: CartItemDto[];
+};
+
+export type CartInitialData = {
+    cart: CartDto;
+    products: CartProductLookup[];
 };

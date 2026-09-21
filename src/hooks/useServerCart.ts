@@ -121,20 +121,11 @@ export function useServerCart({
                         return items;
                     }
 
-                    const cartProduct = {
-                        slug: product.slug,
-                        stock: product.stock,
-                        regularPrice: product.regularPrice,
-                        effectivePrice: product.effectivePrice,
-                        discountPercent: product.discountPercent,
-                    };
-
                     return [
                         {
                             productId: product.id,
                             quantity: 1,
                             snapshot,
-                            product: cartProduct,
                         },
                         ...items,
                     ];
