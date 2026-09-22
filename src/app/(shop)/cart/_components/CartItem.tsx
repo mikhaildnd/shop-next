@@ -23,10 +23,10 @@ import {
 import { cn } from '@/lib/cn';
 import { formatPrice } from '@/lib/format-price';
 import { routes } from '@/routes';
-import type { CartItemDto } from '@/services/cart/cart.types';
+import type { CartItemData } from '@/lib/cart/cart.types';
 
 interface CartItemProps {
-    item: CartItemDto;
+    item: CartItemData;
 }
 
 export function CartItem({ item }: CartItemProps) {

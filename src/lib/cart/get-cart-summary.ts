@@ -1,8 +1,8 @@
-import type { CartItemDto } from '@/services/cart/cart.types';
+import type { CartItemData } from '@/lib/cart/cart.types';
 
 type CartSummaryData = {
-    availableItems: CartItemDto[];
-    unavailableItems: CartItemDto[];
+    availableItems: CartItemData[];
+    unavailableItems: CartItemData[];
     regularPriceTotal: number;
     effectivePriceTotal: number;
     availableCartCount: number;
@@ -12,7 +12,7 @@ type CartSummaryData = {
     isCheckoutDisabled: boolean;
 };
 
-export function getCartSummary(items: CartItemDto[]): CartSummaryData {
+export function getCartSummary(items: CartItemData[]): CartSummaryData {
     const availableItems = items.filter((item) => item.product.stock > 0);
     const unavailableItems = items.filter((item) => item.product.stock === 0);
 

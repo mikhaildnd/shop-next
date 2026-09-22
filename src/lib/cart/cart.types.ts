@@ -10,4 +10,17 @@ export type CartEntry = {
     snapshot: CartProductSnapshot;
 };
 
+export type CartItemData = CartEntry & {
+    product: {
+        productId: string;
+        title: string;
+        slug: string;
+        stock: number;
+        regularPrice: number;
+        effectivePrice: number;
+        discountPercent: number;
+    };
+};
+
 export type MergeStatus = 'idle' | 'merging' | 'error';
+

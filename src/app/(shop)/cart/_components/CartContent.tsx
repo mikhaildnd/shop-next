@@ -15,7 +15,6 @@ export function CartContent() {
         items,
         itemsState,
         retryItems,
-        isHydrated,
     } = useCartContext();
 
     const cartItemCount = items.length;
@@ -30,16 +29,6 @@ export function CartContent() {
         hasPriceChanges,
         isCheckoutDisabled,
     } = getCartSummary(items);
-
-    if (!isHydrated) {
-        return (
-            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
-                {Array.from({ length: 3 }, (_, index) => (
-                    <CartItemSkeleton key={index} />
-                ))}
-            </div>
-        );
-    }
 
     if (items.length === 0 && itemsState.status === 'idle') {
         return (

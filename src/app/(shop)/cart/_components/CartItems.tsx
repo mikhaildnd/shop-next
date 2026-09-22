@@ -1,10 +1,10 @@
 import { CartItem } from '@/app/(shop)/cart/_components/CartItem';
 import { cn } from '@/lib/cn';
-import type { CartItemDto } from '@/services/cart/cart.types';
+import type { CartItemData } from '@/lib/cart/cart.types';
 
 interface CartItemsProps {
-    availableItems: CartItemDto[];
-    unavailableItems: CartItemDto[];
+    availableItems: CartItemData[];
+    unavailableItems: CartItemData[];
     className?: string;
 }
 export function CartItems({

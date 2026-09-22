@@ -12,17 +12,16 @@ import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type { CartProductSnapshot } from '@/lib/cart/cart.types';
 import type {
-    CartInitialData,
-    CartItemDto,
-    CartProductLookup,
-} from '@/services/cart/cart.types';
+    CartItemData,
+    CartProductSnapshot,
+} from '@/lib/cart/cart.types';
+import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
+import type { CartInitialData } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
-    items: CartItemDto[];
-    products: CartProductLookup[];
+    items: CartItemData[];
     itemsState: CartProductsState;
     retryItems: () => void;
     cartCount: number;
@@ -87,13 +86,17 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         cart.addCartItem(product.id, snapshot);
     };
 
-    const contextValue: CartContextValue = {
-        items: cart.entries.map((entry) => ({
+    const items = getCartItemsData(
+        cart.entries.map((entry) => ({
             productId: entry.productId,
             quantity: entry.quantity,
             snapshot: entry.snapshot,
         })),
-        products: products.products,
+        products.products,
+    );
+
+    const contextValue: CartContextValue = {
+        items,
         itemsState: products.state,
         retryItems: products.retry,
         cartCount: cart.cartCount,
@@ -134,9 +137,10 @@ function ServerCartProvider({
         replaceCart: cart.replaceCart,
     });
 
+    const items = getCartItemsData(cart.items, products.products);
+
     const contextValue: CartContextValue = {
-        items: cart.items,
-        products: products.products,
+        items,
         itemsState: products.state,
         retryItems: products.retry,
         cartCount: cart.cartCount,
