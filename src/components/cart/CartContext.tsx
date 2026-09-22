@@ -22,6 +22,7 @@ import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     items: CartItemData[];
+    isHydrated: boolean;
     itemsState: CartProductsState;
     retryItems: () => void;
     cartCount: number;
@@ -53,22 +54,6 @@ interface ServerCartProviderProps {
     children: ReactNode;
 }
 
-export function CartProvider({
-    isAuthenticated,
-    initialCartState,
-    children,
-}: CartProviderProps) {
-    if (isAuthenticated) {
-        return (
-            <ServerCartProvider initialCartState={initialCartState}>
-                {children}
-            </ServerCartProvider>
-        );
-    }
-
-    return <LocalCartProvider>{children}</LocalCartProvider>;
-}
-
 function LocalCartProvider({ children }: LocalCartProviderProps) {
     const cart = useLocalCart();
 
@@ -97,6 +82,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
 
     const contextValue: CartContextValue = {
         items,
+        isHydrated: cart.isHydrated,
         itemsState: products.state,
         retryItems: products.retry,
         cartCount: cart.cartCount,
@@ -141,6 +127,7 @@ function ServerCartProvider({
 
     const contextValue: CartContextValue = {
         items,
+        isHydrated: true,
         itemsState: products.state,
         retryItems: products.retry,
         cartCount: cart.cartCount,
@@ -170,11 +157,27 @@ function ServerCartProvider({
     );
 }
 
+export function CartProvider({
+    isAuthenticated,
+    initialCartState,
+    children,
+}: CartProviderProps) {
+    if (isAuthenticated) {
+        return (
+            <ServerCartProvider initialCartState={initialCartState}>
+                {children}
+            </ServerCartProvider>
+        );
+    }
+
+    return <LocalCartProvider>{children}</LocalCartProvider>;
+}
+
 export function useCartContext() {
     const context = useContext(CartContext);
 
     if (!context) {
-        throw new Error('useCartContext must be used within CartProvider');
+        throw new Error('useCartContext must be used within a cart provider');
     }
 
     return context;

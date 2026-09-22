@@ -3,6 +3,7 @@
 import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
+import { CartSummarySkeleton } from '@/app/(shop)/cart/_components/CartSummarySkeleton';
 import { useCartContext } from '@/components/cart/CartContext';
 import { LoadingButton } from '@/components/button/LoadingButton';
 import { ButtonLink } from '@/components/button/ButtonLink';
@@ -13,22 +14,26 @@ import { routes } from '@/routes';
 export function CartContent() {
     const {
         items,
+        isHydrated,
         itemsState,
         retryItems,
     } = useCartContext();
 
     const cartItemCount = items.length;
 
-    const {
-        availableItems,
-        unavailableItems,
-        regularPriceTotal,
-        effectivePriceTotal,
-        availableCartCount,
-        discountAmount,
-        hasPriceChanges,
-        isCheckoutDisabled,
-    } = getCartSummary(items);
+    if (!isHydrated) {
+        return (
+            <div className="grid items-start gap-6 lg:grid-cols-3">
+                <div className="flex flex-col divide-y divide-gray-200 rounded bg-white lg:col-span-2">
+                    {Array.from({ length: 3 }, (_, index) => (
+                        <CartItemSkeleton key={index} />
+                    ))}
+                </div>
+
+                <CartSummarySkeleton />
+            </div>
+        );
+    }
 
     if (items.length === 0 && itemsState.status === 'idle') {
         return (
@@ -66,13 +71,28 @@ export function CartContent() {
 
     if (itemsState.status === 'loading') {
         return (
-            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white">
-                {Array.from({ length: cartItemCount || 3 }, (_, index) => (
-                    <CartItemSkeleton key={index} />
-                ))}
+            <div className="grid items-start gap-6 lg:grid-cols-3">
+                <div className="flex flex-col divide-y divide-gray-200 rounded bg-white lg:col-span-2">
+                    {Array.from({ length: cartItemCount || 3 }, (_, index) => (
+                        <CartItemSkeleton key={index} />
+                    ))}
+                </div>
+
+                <CartSummarySkeleton />
             </div>
         );
     }
+
+    const {
+        availableItems,
+        unavailableItems,
+        regularPriceTotal,
+        effectivePriceTotal,
+        availableCartCount,
+        discountAmount,
+        hasPriceChanges,
+        isCheckoutDisabled,
+    } = getCartSummary(items);
 
     return (
         <div>
