@@ -6,19 +6,16 @@ import {
     addCartItem,
     clearCart,
     decrementCartItem,
+    getCartProductsByIds,
     incrementCartItem,
     mergeCart,
     removeCartItem,
-    getCartProductsByIds,
 } from '@/services/cart/cart.service';
 
 export async function addCartItemAction(
     productId: string,
     snapshot: CartProductSnapshot,
 ): Promise<void> {
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // throw new Error('Test cart action error');
     const session = await requireSession();
 
     await addCartItem(session.user.id, productId, snapshot);

@@ -1,8 +1,6 @@
 import type { CartItemData } from '@/lib/cart/cart.types';
 
 type CartSummaryData = {
-    availableItems: CartItemData[];
-    unavailableItems: CartItemData[];
     regularPriceTotal: number;
     effectivePriceTotal: number;
     availableCartCount: number;
@@ -14,7 +12,6 @@ type CartSummaryData = {
 
 export function getCartSummary(items: CartItemData[]): CartSummaryData {
     const availableItems = items.filter((item) => item.product.stock > 0);
-    const unavailableItems = items.filter((item) => item.product.stock === 0);
 
     const regularPriceTotal = availableItems.reduce(
         (sum, item) => sum + item.product.regularPrice * item.quantity,
@@ -44,8 +41,6 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
     const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
 
     return {
-        availableItems,
-        unavailableItems,
         regularPriceTotal,
         effectivePriceTotal,
         availableCartCount,

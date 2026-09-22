@@ -4,27 +4,24 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useMemo, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
+import { useCartMerge } from '@/hooks/useCartMerge';
 import {
     type CartProductsState,
     useCartProducts,
 } from '@/hooks/useCartProducts';
-import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type {
-    CartItemData,
-    CartProductSnapshot,
-} from '@/lib/cart/cart.types';
-import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type { CartInitialData } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
-    items: CartItemData[];
+    cartEntries: CartEntry[];
+    products: CartInitialData['products'];
     isHydrated: boolean;
-    itemsState: CartProductsState;
-    retryItems: () => void;
+    productsState: CartProductsState;
+    retryProducts: () => void;
     cartCount: number;
     getCartItemQuantity: (productId: string) => number | undefined;
     addCartItem: (
@@ -71,20 +68,12 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         cart.addCartItem(product.id, snapshot);
     };
 
-    const items = getCartItemsData(
-        cart.entries.map((entry) => ({
-            productId: entry.productId,
-            quantity: entry.quantity,
-            snapshot: entry.snapshot,
-        })),
-        products.products,
-    );
-
     const contextValue: CartContextValue = {
-        items,
+        cartEntries: cart.entries,
+        products: products.products,
         isHydrated: cart.isHydrated,
-        itemsState: products.state,
-        retryItems: products.retry,
+        productsState: products.state,
+        retryProducts: products.retry,
         cartCount: cart.cartCount,
         getCartItemQuantity: cart.getCartItemQuantity,
         addCartItem,
@@ -123,13 +112,12 @@ function ServerCartProvider({
         replaceCart: cart.replaceCart,
     });
 
-    const items = getCartItemsData(cart.items, products.products);
-
     const contextValue: CartContextValue = {
-        items,
+        cartEntries: cart.items,
+        products: products.products,
         isHydrated: true,
-        itemsState: products.state,
-        retryItems: products.retry,
+        productsState: products.state,
+        retryProducts: products.retry,
         cartCount: cart.cartCount,
         getCartItemQuantity: cart.getCartItemQuantity,
         addCartItem: (product, snapshot) => {

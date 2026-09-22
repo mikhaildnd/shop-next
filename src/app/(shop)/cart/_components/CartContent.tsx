@@ -4,22 +4,17 @@ import { CartItems } from '@/app/(shop)/cart/_components/CartItems';
 import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { CartSummary } from '@/app/(shop)/cart/_components/CartSummary';
 import { CartSummarySkeleton } from '@/app/(shop)/cart/_components/CartSummarySkeleton';
-import { useCartContext } from '@/components/cart/CartContext';
-import { LoadingButton } from '@/components/button/LoadingButton';
 import { ButtonLink } from '@/components/button/ButtonLink';
+import { LoadingButton } from '@/components/button/LoadingButton';
+import { useCartContext } from '@/components/cart/CartContext';
 import { PageMessage } from '@/components/PageMessage';
+import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import { routes } from '@/routes';
 
 export function CartContent() {
-    const {
-        items,
-        isHydrated,
-        itemsState,
-        retryItems,
-    } = useCartContext();
-
-    const cartItemCount = items.length;
+    const { cartEntries, products, isHydrated, productsState, retryProducts } =
+        useCartContext();
 
     if (!isHydrated) {
         return (
@@ -35,7 +30,7 @@ export function CartContent() {
         );
     }
 
-    if (items.length === 0 && itemsState.status === 'idle') {
+    if (cartEntries.length === 0) {
         return (
             <PageMessage
                 title="Корзина пуста"
@@ -46,22 +41,16 @@ export function CartContent() {
         );
     }
 
-    if (
-        itemsState.status === 'error' ||
-        (itemsState.status === 'loading' && itemsState.isRetry)
-    ) {
+    if (productsState.status === 'error') {
         return (
             <PageMessage
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
                 <LoadingButton
-                    isLoading={
-                        itemsState.status === 'loading' &&
-                        itemsState.isRetry
-                    }
+                    isLoading={false}
                     pendingText="Загрузка..."
-                    onClick={retryItems}
+                    onClick={retryProducts}
                 >
                     Повторить
                 </LoadingButton>
@@ -69,23 +58,10 @@ export function CartContent() {
         );
     }
 
-    if (itemsState.status === 'loading') {
-        return (
-            <div className="grid items-start gap-6 lg:grid-cols-3">
-                <div className="flex flex-col divide-y divide-gray-200 rounded bg-white lg:col-span-2">
-                    {Array.from({ length: cartItemCount || 3 }, (_, index) => (
-                        <CartItemSkeleton key={index} />
-                    ))}
-                </div>
-
-                <CartSummarySkeleton />
-            </div>
-        );
-    }
+    const items = getCartItemsData(cartEntries, products);
+    const isSummaryLoading = productsState.status === 'loading';
 
     const {
-        availableItems,
-        unavailableItems,
         regularPriceTotal,
         effectivePriceTotal,
         availableCartCount,
@@ -109,8 +85,8 @@ export function CartContent() {
 
             <div className="grid items-start gap-6 lg:grid-cols-3">
                 <CartItems
-                    availableItems={availableItems}
-                    unavailableItems={unavailableItems}
+                    entries={cartEntries}
+                    products={products}
                     className="lg:col-span-2"
                 />
 
@@ -120,6 +96,7 @@ export function CartContent() {
                     discountAmount={discountAmount}
                     effectivePriceTotal={effectivePriceTotal}
                     isCheckoutDisabled={isCheckoutDisabled}
+                    isLoading={isSummaryLoading}
                 />
             </div>
         </div>

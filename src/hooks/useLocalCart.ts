@@ -2,7 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
-import type { CartProductSnapshot, CartEntry } from '@/lib/cart/cart.types';
+import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartEntry as addCartEntryToStorage,
     clearCart as clearCartStorage,

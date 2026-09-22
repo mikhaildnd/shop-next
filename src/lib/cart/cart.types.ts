@@ -23,4 +23,3 @@ export type CartItemData = CartEntry & {
 };
 
 export type MergeStatus = 'idle' | 'merging' | 'error';
-

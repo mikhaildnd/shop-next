@@ -4,15 +4,10 @@ import type { ComponentProps } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/button/Button';
+import { Spinner } from '@/components/Spinner';
 
 interface SubmitButtonProps extends ComponentProps<typeof Button> {
     pendingText?: string;
-}
-
-function Spinner() {
-    return (
-        <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />
-    );
 }
 
 export function SubmitButton({

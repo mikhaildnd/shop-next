@@ -3,6 +3,7 @@
 import { ChevronUpIcon } from 'lucide-react';
 
 import { Button } from '@/components/button/Button';
+import { Spinner } from '@/components/Spinner';
 import {
     Drawer,
     DrawerContent,
@@ -20,13 +21,7 @@ interface CartSummaryProps {
     discountAmount: number;
     effectivePriceTotal: number;
     isCheckoutDisabled: boolean;
-}
-
-interface SummaryDetailsProps {
-    cartCount: number;
-    regularPriceTotal: number;
-    discountAmount: number;
-    effectivePriceTotal: number;
+    isLoading: boolean;
 }
 
 export function CartSummary({
@@ -35,23 +30,25 @@ export function CartSummary({
     discountAmount,
     effectivePriceTotal,
     isCheckoutDisabled,
+    isLoading,
 }: CartSummaryProps) {
     const { direction } = useScrollDirection();
     const isNavigationHidden = direction === 'down';
 
     return (
         <>
-            <div className="hidden rounded-md border border-gray-100 bg-white px-4 py-4 text-[#414141] lg:sticky lg:top-22 lg:flex lg:flex-col lg:gap-8">
+            <div className="relative hidden rounded-md border border-gray-100 bg-white px-4 py-4 text-[#414141] lg:sticky lg:top-22 lg:flex lg:flex-col lg:gap-8">
                 <SummaryDetails
                     cartCount={cartCount}
                     regularPriceTotal={regularPriceTotal}
                     discountAmount={discountAmount}
                     effectivePriceTotal={effectivePriceTotal}
                 />
-
-                <Button disabled={isCheckoutDisabled}>
+                <Button disabled={isCheckoutDisabled || isLoading}>
                     Перейти к оформлению
                 </Button>
+
+                {isLoading && <SummaryLoadingOverlay />}
             </div>
 
             <div className="lg:hidden">
@@ -82,7 +79,7 @@ export function CartSummary({
                             </span>
                         </DrawerTrigger>
 
-                        <Button disabled={isCheckoutDisabled}>
+                        <Button disabled={isCheckoutDisabled || isLoading}>
                             К оформлению
                         </Button>
                     </div>
@@ -100,15 +97,24 @@ export function CartSummary({
                                 effectivePriceTotal={effectivePriceTotal}
                             />
 
-                            <Button disabled={isCheckoutDisabled}>
+                            <Button disabled={isCheckoutDisabled || isLoading}>
                                 Перейти к оформлению
                             </Button>
+
+                            {isLoading && <SummaryLoadingOverlay />}
                         </div>
                     </DrawerContent>
                 </Drawer>
             </div>
         </>
     );
+}
+
+interface SummaryDetailsProps {
+    cartCount: number;
+    regularPriceTotal: number;
+    discountAmount: number;
+    effectivePriceTotal: number;
 }
 
 function SummaryDetails({
@@ -142,6 +148,14 @@ function SummaryDetails({
                     {formatPrice(effectivePriceTotal)} ₸
                 </span>
             </div>
+        </div>
+    );
+}
+
+function SummaryLoadingOverlay() {
+    return (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-white/10 supports-backdrop-filter:backdrop-blur-xs">
+            <Spinner />
         </div>
     );
 }
