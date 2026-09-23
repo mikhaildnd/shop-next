@@ -32,7 +32,7 @@ const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
 
 interface CartItemQuantityProps {
     productId: string;
-    maxQuantity: number;
+    maxQuantity?: number;
     size?: CartItemQuantitySize;
     variant?: CartItemQuantityVariant;
     className?: string;
@@ -53,7 +53,9 @@ export function CartItemQuantity({
         return null;
     }
 
-    const isIncrementDisabled = quantity >= maxQuantity;
+    const disabled = maxQuantity === undefined;
+
+    const isIncrementDisabled = disabled || quantity >= maxQuantity;
 
     const handleDecrement = async () => {
         try {
@@ -90,8 +92,9 @@ export function CartItemQuantity({
         >
             <button
                 type="button"
+                disabled={disabled}
                 className={cn(
-                    'flex h-full items-center justify-between',
+                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}

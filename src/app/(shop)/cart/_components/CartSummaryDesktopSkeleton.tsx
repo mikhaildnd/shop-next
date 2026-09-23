@@ -1,6 +1,19 @@
-export function CartSummarySkeleton() {
+import { cn } from '@/lib/cn';
+
+interface CartSummaryDesktopSkeletonProps {
+    className?: string;
+}
+
+export function CartSummaryDesktopSkeleton({
+    className,
+}: CartSummaryDesktopSkeletonProps) {
     return (
-        <div className="flex animate-pulse flex-col gap-8 rounded-md border border-gray-100 bg-white px-4 py-4">
+        <div
+            className={cn(
+                'flex animate-pulse flex-col gap-8 rounded-md border border-gray-100 bg-white px-4 py-4',
+                className,
+            )}
+        >
             <div className="flex flex-col gap-4">
                 <div className="h-7 w-40 rounded bg-gray-200" />
 

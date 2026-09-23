@@ -112,6 +112,23 @@ export async function addCartItem(
     productId: string,
     snapshot: CartProductSnapshot,
 ): Promise<void> {
+    const product = await prisma.product.findUnique({
+        where: {
+            id: productId,
+        },
+        select: {
+            stock: true,
+        },
+    });
+
+    if (!product) {
+        throw new Error('Product not found');
+    }
+
+    if (product.stock < 1) {
+        throw new Error('Product is out of stock');
+    }
+
     const cart = await prisma.cart.upsert({
         where: {
             userId,
@@ -167,11 +184,20 @@ export async function incrementCartItem(
         },
         select: {
             quantity: true,
+            product: {
+                select: {
+                    stock: true,
+                },
+            },
         },
     });
 
     if (!cartItem) {
         return;
+    }
+
+    if (cartItem.quantity >= cartItem.product.stock) {
+        throw new Error('Not enough product stock');
     }
 
     await prisma.cartItem.update({

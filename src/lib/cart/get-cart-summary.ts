@@ -1,6 +1,6 @@
 import type { CartItemData } from '@/lib/cart/cart.types';
 
-type CartSummaryData = {
+export type CartSummaryData = {
     regularPriceTotal: number;
     effectivePriceTotal: number;
     availableCartCount: number;
@@ -26,7 +26,8 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
     );
 
     const effectivePriceTotal = availableItems.reduce(
-        (sum, { item, product }) => sum + product.effectivePrice * item.quantity,
+        (sum, { item, product }) =>
+            sum + product.effectivePrice * item.quantity,
         0,
     );
 

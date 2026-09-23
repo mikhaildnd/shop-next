@@ -12,14 +12,16 @@ import {
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartItemData, CartProductSnapshot } from '@/lib/cart/cart.types';
+import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
+import type { CartSummaryData } from '@/lib/cart/get-cart-summary';
+import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import type { CartInitialData } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
-    cartEntries: CartEntry[];
-    products: CartInitialData['products'];
-    missingProductIds: string[];
+    cartItems: CartItemData[];
+    cartSummary: CartSummaryData;
     isHydrated: boolean;
     productsState: CartProductsState;
     retryProducts: () => void;
@@ -64,15 +66,29 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         enabled: cart.isHydrated,
     });
 
-    const addCartItem = (product: ProductDto, snapshot: CartProductSnapshot) => {
+    const cartItems = useMemo(
+        () =>
+            getCartItemsData(
+                cart.entries,
+                products.products,
+                products.missingProductIds,
+            ),
+        [cart.entries, products.products, products.missingProductIds],
+    );
+
+    const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
+
+    const addCartItem = (
+        product: ProductDto,
+        snapshot: CartProductSnapshot,
+    ) => {
         products.upsertProduct(product);
         cart.addCartItem(product.id, snapshot);
     };
 
     const contextValue: CartContextValue = {
-        cartEntries: cart.entries,
-        products: products.products,
-        missingProductIds: products.missingProductIds,
+        cartItems,
+        cartSummary,
         isHydrated: cart.isHydrated,
         productsState: products.state,
         retryProducts: products.retry,
@@ -109,15 +125,26 @@ function ServerCartProvider({
         initialProducts: initialCartState.products,
     });
 
+    const cartItems = useMemo(
+        () =>
+            getCartItemsData(
+                cart.items,
+                products.products,
+                products.missingProductIds,
+            ),
+        [cart.items, products.products, products.missingProductIds],
+    );
+
+    const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
+
     const merge = useCartMerge({
         actionQueue,
         replaceCart: cart.replaceCart,
     });
 
     const contextValue: CartContextValue = {
-        cartEntries: cart.items,
-        products: products.products,
-        missingProductIds: products.missingProductIds,
+        cartItems,
+        cartSummary,
         isHydrated: true,
         productsState: products.state,
         retryProducts: products.retry,
