@@ -310,32 +310,50 @@ export async function mergeCart(
         },
     });
 
-    await prisma.$transaction(
-        entries.map(({ productId, quantity, snapshot }) =>
-            prisma.cartItem.upsert({
-                where: {
-                    cartId_productId: {
+    const products = await prisma.product.findMany({
+        where: {
+            id: {
+                in: entries.map((entry) => entry.productId),
+            },
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    const productIds = new Set(products.map((product) => product.id));
+    const validEntries = entries.filter((entry) =>
+        productIds.has(entry.productId),
+    );
+
+    if (validEntries.length > 0) {
+        await prisma.$transaction(
+            validEntries.map(({ productId, quantity, snapshot }) =>
+                prisma.cartItem.upsert({
+                    where: {
+                        cartId_productId: {
+                            cartId: cart.id,
+                            productId,
+                        },
+                    },
+                    update: {
+                        quantity,
+                        snapshotTitle: snapshot.title,
+                        snapshotImageUrl: snapshot.imageUrl,
+                        snapshotEffectivePrice: snapshot.effectivePrice,
+                    },
+                    create: {
                         cartId: cart.id,
                         productId,
+                        quantity,
+                        snapshotTitle: snapshot.title,
+                        snapshotImageUrl: snapshot.imageUrl,
+                        snapshotEffectivePrice: snapshot.effectivePrice,
                     },
-                },
-                update: {
-                    quantity,
-                    snapshotTitle: snapshot.title,
-                    snapshotImageUrl: snapshot.imageUrl,
-                    snapshotEffectivePrice: snapshot.effectivePrice,
-                },
-                create: {
-                    cartId: cart.id,
-                    productId,
-                    quantity,
-                    snapshotTitle: snapshot.title,
-                    snapshotImageUrl: snapshot.imageUrl,
-                    snapshotEffectivePrice: snapshot.effectivePrice,
-                },
-            }),
-        ),
-    );
+                }),
+            ),
+        );
+    }
 
     return getCart(userId);
 }

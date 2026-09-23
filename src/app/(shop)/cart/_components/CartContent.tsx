@@ -13,8 +13,17 @@ import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import { routes } from '@/routes';
 
 export function CartContent() {
-    const { cartEntries, products, isHydrated, productsState, retryProducts } =
-        useCartContext();
+    const {
+        cartEntries,
+        products,
+        missingProductIds,
+        isHydrated,
+        productsState,
+        retryProducts,
+    } = useCartContext();
+
+    const isRetrying =
+        productsState.status === 'loading' && productsState.isRetry;
 
     if (!isHydrated) {
         return (
@@ -41,14 +50,14 @@ export function CartContent() {
         );
     }
 
-    if (productsState.status === 'error') {
+    if (productsState.status === 'error' || isRetrying) {
         return (
             <PageMessage
                 title="Не удалось загрузить товары"
                 description="Попробуйте загрузить товары ещё раз"
             >
                 <LoadingButton
-                    isLoading={false}
+                    isLoading={isRetrying}
                     pendingText="Загрузка..."
                     onClick={retryProducts}
                 >
@@ -58,7 +67,7 @@ export function CartContent() {
         );
     }
 
-    const items = getCartItemsData(cartEntries, products);
+    const items = getCartItemsData(cartEntries, products, missingProductIds);
     const isSummaryLoading = productsState.status === 'loading';
 
     const {

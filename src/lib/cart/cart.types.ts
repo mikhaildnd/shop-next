@@ -19,7 +19,7 @@ export type CartItemData = CartEntry & {
         regularPrice: number;
         effectivePrice: number;
         discountPercent: number;
-    };
+    } | null;
 };
 
 export type MergeStatus = 'idle' | 'merging' | 'error';

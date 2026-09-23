@@ -3,13 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getCartProductsByIdsAction } from '@/app/(shop)/cart/actions';
-import type {
-    CartProductLookup,
-} from '@/services/cart/cart.types';
+import type { CartProductLookup } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseCartProductsResult {
     products: CartProductLookup[];
+    missingProductIds: string[];
     state: CartProductsState;
     upsertProduct: (product: ProductDto) => void;
     retry: () => void;
@@ -33,11 +32,11 @@ export function useCartProducts({
 }: UseCartProductsOptions): UseCartProductsResult {
     const [products, setProducts] =
         useState<CartProductLookup[]>(initialProducts);
-    const productsRef = useRef(
-        new Map(
-            initialProducts.map((product) => [product.productId, product]),
-        ),
+    const [missingProductIds, setMissingProductIds] = useState<string[]>([]);
+    const resolvedProductIdsRef = useRef(
+        new Set(initialProducts.map((product) => product.productId)),
     );
+    const missingProductIdsRef = useRef(new Set<string>());
     const [loadState, setLoadState] = useState<
         | { status: 'idle' }
         | { status: 'loading'; key: string; isRetry: boolean }
@@ -53,15 +52,34 @@ export function useCartProducts({
 
     useEffect(() => {
         if (!enabled || productIds.length === 0) {
+            resolvedProductIdsRef.current.clear();
+            missingProductIdsRef.current.clear();
+
             return;
         }
 
-        const missingProductIds = productIds.filter(
-            (productId) => !productsRef.current.has(productId),
-        );
-        const isRetry = retryKey !== handledRetryKeyRef.current;
+        const currentProductIds = new Set(productIds);
 
-        if (missingProductIds.length === 0 && !isRetry) {
+        for (const productId of resolvedProductIdsRef.current) {
+            if (!currentProductIds.has(productId)) {
+                resolvedProductIdsRef.current.delete(productId);
+            }
+        }
+
+        for (const productId of missingProductIdsRef.current) {
+            if (!currentProductIds.has(productId)) {
+                missingProductIdsRef.current.delete(productId);
+            }
+        }
+
+        const isRetry = retryKey !== handledRetryKeyRef.current;
+        const idsToLoad = isRetry
+            ? productIds
+            : productIds.filter(
+                  (productId) => !resolvedProductIdsRef.current.has(productId),
+              );
+
+        if (idsToLoad.length === 0) {
             return;
         }
 
@@ -75,18 +93,32 @@ export function useCartProducts({
             });
 
             try {
-                const nextProducts = await getCartProductsByIdsAction(
-                    missingProductIds.length > 0
-                        ? missingProductIds
-                        : productIds,
-                );
+                const nextProducts =
+                    await getCartProductsByIdsAction(idsToLoad);
 
                 if (cancelled) {
                     return;
                 }
 
-                for (const product of nextProducts) {
-                    productsRef.current.set(product.productId, product);
+                const loadedProductIds = new Set(
+                    nextProducts.map((product) => product.productId),
+                );
+
+                if (isRetry) {
+                    for (const productId of productIds) {
+                        resolvedProductIdsRef.current.delete(productId);
+                        missingProductIdsRef.current.delete(productId);
+                    }
+                }
+
+                for (const productId of idsToLoad) {
+                    resolvedProductIdsRef.current.add(productId);
+
+                    if (loadedProductIds.has(productId)) {
+                        missingProductIdsRef.current.delete(productId);
+                    } else {
+                        missingProductIdsRef.current.add(productId);
+                    }
                 }
 
                 setProducts((currentProducts) => {
@@ -97,12 +129,26 @@ export function useCartProducts({
                         ]),
                     );
 
+                    for (const productId of idsToLoad) {
+                        if (!loadedProductIds.has(productId)) {
+                            nextProductsById.delete(productId);
+                        }
+                    }
+
                     for (const product of nextProducts) {
                         nextProductsById.set(product.productId, product);
                     }
 
-                    return [...nextProductsById.values()];
+                    return [...nextProductsById.values()].filter((product) =>
+                        currentProductIds.has(product.productId),
+                    );
                 });
+
+                setMissingProductIds(
+                    [...missingProductIdsRef.current].filter((productId) =>
+                        currentProductIds.has(productId),
+                    ),
+                );
 
                 handledRetryKeyRef.current = retryKey;
                 setLoadState({ status: 'idle' });
@@ -141,7 +187,8 @@ export function useCartProducts({
             discountPercent: product.discountPercent,
         };
 
-        productsRef.current.set(product.id, cartProduct);
+        resolvedProductIdsRef.current.add(product.id);
+        missingProductIdsRef.current.delete(product.id);
 
         setProducts((currentProducts) => {
             const nextProductsById = new Map(
@@ -155,6 +202,12 @@ export function useCartProducts({
 
             return [...nextProductsById.values()];
         });
+
+        setMissingProductIds((currentMissingProductIds) =>
+            currentMissingProductIds.filter(
+                (productId) => productId !== product.id,
+            ),
+        );
     }, []);
 
     const retry = useCallback(() => {
@@ -168,8 +221,19 @@ export function useCartProducts({
                 : { status: 'error', error: loadState.error }
             : { status: 'idle' };
 
+    const currentProductIds = new Set(productIds);
+
+    const visibleProducts = products.filter((product) =>
+        currentProductIds.has(product.productId),
+    );
+
+    const visibleMissingProductIds = missingProductIds.filter((productId) =>
+        currentProductIds.has(productId),
+    );
+
     return {
-        products,
+        products: visibleProducts,
+        missingProductIds: visibleMissingProductIds,
         state,
         upsertProduct,
         retry,

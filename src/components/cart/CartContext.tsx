@@ -19,6 +19,7 @@ import type { ProductDto } from '@/services/product/product.types';
 interface CartContextValue {
     cartEntries: CartEntry[];
     products: CartInitialData['products'];
+    missingProductIds: string[];
     isHydrated: boolean;
     productsState: CartProductsState;
     retryProducts: () => void;
@@ -71,6 +72,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
     const contextValue: CartContextValue = {
         cartEntries: cart.entries,
         products: products.products,
+        missingProductIds: products.missingProductIds,
         isHydrated: cart.isHydrated,
         productsState: products.state,
         retryProducts: products.retry,
@@ -115,6 +117,7 @@ function ServerCartProvider({
     const contextValue: CartContextValue = {
         cartEntries: cart.items,
         products: products.products,
+        missingProductIds: products.missingProductIds,
         isHydrated: true,
         productsState: products.state,
         retryProducts: products.retry,
