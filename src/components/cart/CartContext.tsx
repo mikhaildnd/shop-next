@@ -116,8 +116,13 @@ function ServerCartProvider({
         actionQueue,
     });
 
+    const productIds = useMemo(
+        () => cart.items.map((item) => item.productId),
+        [cart.items],
+    );
+
     const products = useCartProducts({
-        productIds: cart.items.map((item) => item.productId),
+        productIds,
         enabled: true,
         initialProducts: initialCartState.products,
     });

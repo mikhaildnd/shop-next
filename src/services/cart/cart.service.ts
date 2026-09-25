@@ -347,8 +347,11 @@ export async function mergeCart(
     });
 
     const productIds = new Set(products.map((product) => product.id));
-    const validEntries = entries.filter((entry) =>
-        productIds.has(entry.productId),
+    const validEntries = entries.filter(
+        (entry) =>
+            productIds.has(entry.productId) &&
+            Number.isInteger(entry.quantity) &&
+            entry.quantity > 0,
     );
 
     if (validEntries.length > 0) {
