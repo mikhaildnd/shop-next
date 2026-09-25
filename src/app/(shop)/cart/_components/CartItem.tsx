@@ -1,25 +1,14 @@
 'use client';
 
-import { ImageOff, Trash2Icon } from 'lucide-react';
+import { ImageOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { CartItemRemoveButton } from '@/app/(shop)/cart/_components/CartItemRemoveButton';
-import { Button } from '@/components/button/Button';
 import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
+import { DeletionDialog } from '@/components/DeletionDialog';
 import { FavoriteButton } from '@/components/favorite/FavoriteButton';
-import {
-    AlertDialog,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogMedia,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import type { CartItemData } from '@/lib/cart/cart.types';
 import { cn } from '@/lib/cn';
 import { formatPrice } from '@/lib/format-price';
@@ -144,50 +133,17 @@ export function CartItem({ item }: CartItemProps) {
                             />
                         )}
 
-                        <AlertDialog>
-                            <AlertDialogTrigger
-                                render={
-                                    <CartItemRemoveButton
-                                        className="bg-gray-50"
-                                        shape="rounded"
-                                    />
-                                }
-                            />
-                            <AlertDialogContent size="sm">
-                                <AlertDialogHeader>
-                                    <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                                        <Trash2Icon />
-                                    </AlertDialogMedia>
-                                    <AlertDialogTitle>
-                                        Удалить товар?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Товар будет удалён из корзины.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel
-                                        render={
-                                            <Button
-                                                size="sm"
-                                                variant="neutral"
-                                            >
-                                                Отмена
-                                            </Button>
-                                        }
-                                    />
-                                    <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        onClick={() =>
-                                            removeCartItem(item.productId)
-                                        }
-                                    >
-                                        Удалить
-                                    </Button>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <DeletionDialog
+                            trigger={
+                                <CartItemRemoveButton
+                                    className="bg-gray-50"
+                                    shape="rounded"
+                                />
+                            }
+                            title="Удалить товар?"
+                            description="Товар будет удалён из корзины."
+                            onConfirm={() => removeCartItem(item.productId)}
+                        />
 
                         <FavoriteButton
                             productId={item.productId}
