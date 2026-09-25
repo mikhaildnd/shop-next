@@ -34,7 +34,7 @@ export async function removeFavorite(
 export async function mergeFavorites(
     userId: string,
     productIds: string[],
-): Promise<number> {
+): Promise<string[]> {
     if (productIds.length > 0) {
         const products = await prisma.product.findMany({
             where: {
@@ -56,11 +56,16 @@ export async function mergeFavorites(
         });
     }
 
-    return prisma.favorite.count({
+    const favorites = await prisma.favorite.findMany({
         where: {
             userId,
         },
+        select: {
+            productId: true,
+        },
     });
+
+    return favorites.map(({ productId }) => productId);
 }
 
 export async function getFavoriteIds(userId: string): Promise<string[]> {

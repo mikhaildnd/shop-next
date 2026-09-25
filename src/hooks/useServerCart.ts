@@ -9,96 +9,76 @@ import {
     incrementCartItemAction,
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { ActionQueue } from '@/lib/async/action-queue';
+import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
+import type { ProductDto } from '@/services/product/product.types';
 
 interface UseServerCartOptions {
     initialCartState: CartDto;
+    actionQueue: ActionQueue;
 }
 
 export interface UseServerCartResult {
-    cartEntries: CartEntry[];
-    addCartEntry: (
-        productId: string,
-        snapshot: CartProductSnapshot,
+    items: CartItemDto[];
+    addCartItem: (
+        product: ProductDto,
+        snapshot: CartItemSnapshot,
     ) => Promise<void>;
-    incrementCartEntry: (productId: string) => Promise<void>;
-    decrementCartEntry: (productId: string) => Promise<void>;
-    removeCartEntry: (productId: string) => Promise<void>;
+    incrementCartItem: (productId: string) => Promise<void>;
+    decrementCartItem: (productId: string) => Promise<void>;
+    removeCartItem: (productId: string) => Promise<void>;
     clearCart: () => Promise<void>;
     cartCount: number;
-    getCartEntryQuantity: (productId: string) => number | undefined;
-    initialCartItems: CartItemDto[];
+    getCartItemQuantity: (productId: string) => number | undefined;
     replaceCart: (cart: CartDto) => void;
 }
 
 type CartMutation = {
     id: number;
-    apply: (entries: CartEntry[]) => CartEntry[];
+    apply: (items: CartItemDto[]) => CartItemDto[];
 };
 
 type CartAction = () => Promise<void>;
 
 export function useServerCart({
     initialCartState,
+    actionQueue,
 }: UseServerCartOptions): UseServerCartResult {
-    const [initialCartItems, setInitialCartItems] = useState(
-        initialCartState.items,
-    );
+    const [items, setItems] = useState(initialCartState.items);
 
-    const initialCartEntries = initialCartState.items.map(
-        ({ product, quantity, snapshot }) => ({
-            productId: product.id,
-            quantity,
-            snapshot,
-        }),
-    );
-
-    const [cartEntries, setCartEntries] = useState(initialCartEntries);
-
-    const cartEntriesRef = useRef(initialCartEntries);
-    const confirmedCartEntriesRef = useRef(initialCartEntries);
+    const confirmedItemsRef = useRef(initialCartState.items);
     const pendingMutationsRef = useRef<CartMutation[]>([]);
-    const mutationQueueRef = useRef<Promise<void>>(Promise.resolve());
     const nextMutationIdRef = useRef(0);
 
-    const updateVisibleCartEntries = useCallback(() => {
-        const nextCartEntries = pendingMutationsRef.current.reduce(
-            (entries, mutation) => mutation.apply(entries),
-            confirmedCartEntriesRef.current,
+    const updateVisibleItems = useCallback(() => {
+        const nextItems = pendingMutationsRef.current.reduce(
+            (currentItems, mutation) => mutation.apply(currentItems),
+            confirmedItemsRef.current,
         );
 
-        cartEntriesRef.current = nextCartEntries;
-        setCartEntries(nextCartEntries);
+        setItems(nextItems);
     }, []);
 
     const replaceCart = useCallback(
         (cart: CartDto) => {
-            setInitialCartItems(cart.items);
-
-            confirmedCartEntriesRef.current = cart.items.map(
-                ({ product, quantity, snapshot }) => ({
-                    productId: product.id,
-                    quantity,
-                    snapshot,
-                }),
-            );
-            updateVisibleCartEntries();
+            confirmedItemsRef.current = cart.items;
+            updateVisibleItems();
         },
-        [updateVisibleCartEntries],
+        [updateVisibleItems],
     );
 
     const enqueueMutation = useCallback(
         (mutation: CartMutation, action: CartAction): Promise<void> => {
             pendingMutationsRef.current.push(mutation);
-            updateVisibleCartEntries();
+            updateVisibleItems();
 
             const execute = async () => {
                 try {
                     await action();
 
-                    confirmedCartEntriesRef.current = mutation.apply(
-                        confirmedCartEntriesRef.current,
+                    confirmedItemsRef.current = mutation.apply(
+                        confirmedItemsRef.current,
                     );
                 } finally {
                     pendingMutationsRef.current =
@@ -107,20 +87,13 @@ export function useServerCart({
                                 pendingMutation.id !== mutation.id,
                         );
 
-                    updateVisibleCartEntries();
+                    updateVisibleItems();
                 }
             };
 
-            const queuedMutation = mutationQueueRef.current.then(
-                execute,
-                execute,
-            );
-
-            mutationQueueRef.current = queuedMutation.catch(() => undefined);
-
-            return queuedMutation;
+            return actionQueue.enqueue(execute);
         },
-        [updateVisibleCartEntries],
+        [actionQueue, updateVisibleItems],
     );
 
     const createMutation = useCallback(
@@ -131,41 +104,45 @@ export function useServerCart({
         [],
     );
 
-    const getCartEntryQuantity = useCallback(
+    const getCartItemQuantity = useCallback(
         (productId: string) => {
-            const entry = cartEntries.find(
-                (entry) => entry.productId === productId,
-            );
+            const item = items.find((item) => item.productId === productId);
 
-            return entry?.quantity;
+            return item?.quantity;
         },
-        [cartEntries],
+        [items],
     );
 
-    const addCartEntry = useCallback(
-        (productId: string, snapshot: CartProductSnapshot): Promise<void> =>
+    const addCartItem = useCallback(
+        (product: ProductDto, snapshot: CartItemSnapshot): Promise<void> =>
             enqueueMutation(
-                createMutation((entries) => [
-                    {
-                        productId,
-                        quantity: 1,
-                        snapshot,
-                    },
-                    ...entries,
-                ]),
-                () => addCartItemAction(productId, snapshot),
+                createMutation((items) => {
+                    if (items.some((item) => item.productId === product.id)) {
+                        return items;
+                    }
+
+                    return [
+                        {
+                            productId: product.id,
+                            quantity: 1,
+                            snapshot,
+                        },
+                        ...items,
+                    ];
+                }),
+                () => addCartItemAction(product.id, snapshot),
             ),
         [createMutation, enqueueMutation],
     );
 
-    const incrementCartEntry = useCallback(
+    const incrementCartItem = useCallback(
         (productId: string): Promise<void> =>
             enqueueMutation(
-                createMutation((entries) =>
-                    entries.map((entry) =>
-                        entry.productId === productId
-                            ? { ...entry, quantity: entry.quantity + 1 }
-                            : entry,
+                createMutation((items) =>
+                    items.map((item) =>
+                        item.productId === productId
+                            ? { ...item, quantity: item.quantity + 1 }
+                            : item,
                     ),
                 ),
                 () => incrementCartItemAction(productId),
@@ -173,28 +150,28 @@ export function useServerCart({
         [createMutation, enqueueMutation],
     );
 
-    const decrementCartEntry = useCallback(
+    const decrementCartItem = useCallback(
         (productId: string): Promise<void> =>
             enqueueMutation(
-                createMutation((entries) =>
-                    entries
-                        .map((entry) =>
-                            entry.productId === productId
-                                ? { ...entry, quantity: entry.quantity - 1 }
-                                : entry,
+                createMutation((items) =>
+                    items
+                        .map((item) =>
+                            item.productId === productId
+                                ? { ...item, quantity: item.quantity - 1 }
+                                : item,
                         )
-                        .filter((entry) => entry.quantity > 0),
+                        .filter((item) => item.quantity > 0),
                 ),
                 () => decrementCartItemAction(productId),
             ),
         [createMutation, enqueueMutation],
     );
 
-    const removeCartEntry = useCallback(
+    const removeCartItem = useCallback(
         (productId: string): Promise<void> =>
             enqueueMutation(
-                createMutation((entries) =>
-                    entries.filter((entry) => entry.productId !== productId),
+                createMutation((items) =>
+                    items.filter((item) => item.productId !== productId),
                 ),
                 () => removeCartItemAction(productId),
             ),
@@ -210,21 +187,17 @@ export function useServerCart({
         [createMutation, enqueueMutation],
     );
 
-    const cartCount = cartEntries.reduce(
-        (total, entry) => total + entry.quantity,
-        0,
-    );
+    const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
     return {
-        initialCartItems,
-        cartEntries,
-        addCartEntry,
-        incrementCartEntry,
-        decrementCartEntry,
-        removeCartEntry,
+        items,
+        addCartItem,
+        incrementCartItem,
+        decrementCartItem,
+        removeCartItem,
         clearCart,
         cartCount,
-        getCartEntryQuantity,
+        getCartItemQuantity,
         replaceCart,
     };
 }

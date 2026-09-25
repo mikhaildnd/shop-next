@@ -1,10 +1,65 @@
-import { prisma } from '@/db';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
-import type { CartDto } from '@/services/cart/cart.types';
-import { productInclude } from '@/services/product/product.constants';
-import { mapProductToDto } from '@/services/product/product.mapper';
+import { cache } from 'react';
 
-export async function getCart(userId: string): Promise<CartDto> {
+import { prisma } from '@/db';
+import type {
+    CartEntry,
+    CartItemSnapshot,
+    CartProduct,
+} from '@/lib/cart/cart.types';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
+
+const cartProductSelect = {
+    title: true,
+    slug: true,
+    stock: true,
+    regularPrice: true,
+    effectivePrice: true,
+    discountPercent: true,
+} as const;
+
+function mapCartProduct(product: {
+    id: string;
+    title: string;
+    slug: string;
+    stock: number;
+    regularPrice: { toString(): string };
+    effectivePrice: { toString(): string } | null;
+    discountPercent: number | null;
+}): CartProduct {
+    if (product.effectivePrice === null) {
+        throw new Error('Product has null effectivePrice');
+    }
+
+    return {
+        productId: product.id,
+        title: product.title,
+        slug: product.slug,
+        stock: product.stock,
+        regularPrice: Number(product.regularPrice),
+        effectivePrice: Number(product.effectivePrice),
+        discountPercent: product.discountPercent ?? 0,
+    };
+}
+
+function mapCartItem(item: {
+    productId: string;
+    quantity: number;
+    snapshotTitle: string;
+    snapshotImageUrl: string | null;
+    snapshotEffectivePrice: { toString(): string };
+}): CartItemDto {
+    return {
+        productId: item.productId,
+        quantity: item.quantity,
+        snapshot: {
+            title: item.snapshotTitle,
+            imageUrl: item.snapshotImageUrl,
+            effectivePrice: Number(item.snapshotEffectivePrice),
+        },
+    };
+}
+
+export const getCart = cache(async (userId: string): Promise<CartDto> => {
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
@@ -13,11 +68,6 @@ export async function getCart(userId: string): Promise<CartDto> {
             items: {
                 orderBy: {
                     createdAt: 'desc',
-                },
-                include: {
-                    product: {
-                        include: productInclude,
-                    },
                 },
             },
         },
@@ -30,21 +80,54 @@ export async function getCart(userId: string): Promise<CartDto> {
     }
 
     return {
-        items: cart.items.map((item) => ({
-            product: mapProductToDto(item.product),
-            quantity: item.quantity,
-            snapshot: {
-                effectivePrice: Number(item.snapshotEffectivePrice),
-            },
-        })),
+        items: cart.items.map(mapCartItem),
     };
-}
+});
+
+export const getCartProductsByIds = cache(
+    async (productIds: string[]): Promise<CartProduct[]> => {
+        if (productIds.length === 0) {
+            return [];
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                id: {
+                    in: productIds,
+                },
+            },
+            select: {
+                id: true,
+                ...cartProductSelect,
+            },
+        });
+
+        return products.map(mapCartProduct);
+    },
+);
 
 export async function addCartItem(
     userId: string,
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): Promise<void> {
+    const product = await prisma.product.findUnique({
+        where: {
+            id: productId,
+        },
+        select: {
+            stock: true,
+        },
+    });
+
+    if (!product) {
+        throw new Error('Product not found');
+    }
+
+    if (product.stock < 1) {
+        throw new Error('Product is out of stock');
+    }
+
     const cart = await prisma.cart.upsert({
         where: {
             userId,
@@ -66,6 +149,8 @@ export async function addCartItem(
             cartId: cart.id,
             productId,
             quantity: 1,
+            snapshotTitle: snapshot.title,
+            snapshotImageUrl: snapshot.imageUrl,
             snapshotEffectivePrice: snapshot.effectivePrice,
         },
         update: {},
@@ -98,11 +183,20 @@ export async function incrementCartItem(
         },
         select: {
             quantity: true,
+            product: {
+                select: {
+                    stock: true,
+                },
+            },
         },
     });
 
     if (!cartItem) {
         return;
+    }
+
+    if (cartItem.quantity >= cartItem.product.stock) {
+        throw new Error('Not enough product stock');
     }
 
     await prisma.cartItem.update({
@@ -241,28 +335,53 @@ export async function mergeCart(
         },
     });
 
-    await prisma.$transaction(
-        entries.map(({ productId, quantity, snapshot }) =>
-            prisma.cartItem.upsert({
-                where: {
-                    cartId_productId: {
+    const products = await prisma.product.findMany({
+        where: {
+            id: {
+                in: entries.map((entry) => entry.productId),
+            },
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    const productIds = new Set(products.map((product) => product.id));
+    const validEntries = entries.filter(
+        (entry) =>
+            productIds.has(entry.productId) &&
+            Number.isInteger(entry.quantity) &&
+            entry.quantity > 0,
+    );
+
+    if (validEntries.length > 0) {
+        await prisma.$transaction(
+            validEntries.map(({ productId, quantity, snapshot }) =>
+                prisma.cartItem.upsert({
+                    where: {
+                        cartId_productId: {
+                            cartId: cart.id,
+                            productId,
+                        },
+                    },
+                    update: {
+                        quantity,
+                        snapshotTitle: snapshot.title,
+                        snapshotImageUrl: snapshot.imageUrl,
+                        snapshotEffectivePrice: snapshot.effectivePrice,
+                    },
+                    create: {
                         cartId: cart.id,
                         productId,
+                        quantity,
+                        snapshotTitle: snapshot.title,
+                        snapshotImageUrl: snapshot.imageUrl,
+                        snapshotEffectivePrice: snapshot.effectivePrice,
                     },
-                },
-                update: {
-                    quantity,
-                    snapshotEffectivePrice: snapshot.effectivePrice,
-                },
-                create: {
-                    cartId: cart.id,
-                    productId,
-                    quantity,
-                    snapshotEffectivePrice: snapshot.effectivePrice,
-                },
-            }),
-        ),
-    );
+                }),
+            ),
+        );
+    }
 
     return getCart(userId);
 }
