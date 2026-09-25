@@ -1,13 +1,13 @@
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartEntry, CartItemSnapshot } from '@/lib/cart/cart.types';
 import { CART_STORAGE_KEY } from '@/lib/cart/cart-storage.constants';
 
 type CartListener = () => void;
 
 const listeners = new Set<CartListener>();
 
-function isCartEntry(value: unknown): value is CartEntry {
+function parseCartEntry(value: unknown): CartEntry | null {
     if (typeof value !== 'object' || value === null) {
-        return false;
+        return null;
     }
 
     const entry = value as Record<string, unknown>;
@@ -18,19 +18,34 @@ function isCartEntry(value: unknown): value is CartEntry {
         !Number.isInteger(entry.quantity) ||
         entry.quantity <= 0
     ) {
-        return false;
+        return null;
     }
 
     if (typeof entry.snapshot !== 'object' || entry.snapshot === null) {
-        return false;
+        return null;
     }
 
     const snapshot = entry.snapshot as Record<string, unknown>;
 
-    return (
-        typeof snapshot.effectivePrice === 'number' &&
-        Number.isFinite(snapshot.effectivePrice)
-    );
+    if (
+        typeof snapshot.effectivePrice !== 'number' ||
+        !Number.isFinite(snapshot.effectivePrice)
+    ) {
+        return null;
+    }
+
+    return {
+        productId: entry.productId,
+        quantity: entry.quantity,
+        snapshot: {
+            title: typeof snapshot.title === 'string' ? snapshot.title : '',
+            imageUrl:
+                typeof snapshot.imageUrl === 'string'
+                    ? snapshot.imageUrl
+                    : null,
+            effectivePrice: snapshot.effectivePrice,
+        },
+    };
 }
 
 function parseCartEntries(value: string | null): CartEntry[] {
@@ -41,7 +56,11 @@ function parseCartEntries(value: string | null): CartEntry[] {
     try {
         const parsed: unknown = JSON.parse(value);
 
-        return Array.isArray(parsed) ? parsed.filter(isCartEntry) : [];
+        return Array.isArray(parsed)
+            ? parsed
+                  .map(parseCartEntry)
+                  .filter((entry): entry is CartEntry => entry !== null)
+            : [];
     } catch {
         return [];
     }
@@ -98,7 +117,7 @@ function notifyListeners(): void {
 
 export function addCartEntry(
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): CartEntry[] {
     const cartEntries = getCartEntries();
 

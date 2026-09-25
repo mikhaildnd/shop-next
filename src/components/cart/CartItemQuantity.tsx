@@ -32,7 +32,7 @@ const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
 
 interface CartItemQuantityProps {
     productId: string;
-    maxQuantity: number;
+    maxQuantity?: number;
     size?: CartItemQuantitySize;
     variant?: CartItemQuantityVariant;
     className?: string;
@@ -44,20 +44,22 @@ export function CartItemQuantity({
     variant = 'primary',
     className,
 }: CartItemQuantityProps) {
-    const { incrementCartEntry, decrementCartEntry, getCartEntryQuantity } =
+    const { incrementCartItem, decrementCartItem, getCartItemQuantity } =
         useCartContext();
 
-    const quantity = getCartEntryQuantity(productId);
+    const quantity = getCartItemQuantity(productId);
 
     if (quantity === undefined) {
         return null;
     }
 
-    const isIncrementDisabled = quantity >= maxQuantity;
+    const disabled = maxQuantity === undefined;
+
+    const isIncrementDisabled = disabled || quantity >= maxQuantity;
 
     const handleDecrement = async () => {
         try {
-            await decrementCartEntry(productId);
+            await decrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-decrement-error',
@@ -69,7 +71,7 @@ export function CartItemQuantity({
 
     const handleIncrement = async () => {
         try {
-            await incrementCartEntry(productId);
+            await incrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-increment-error',
@@ -90,8 +92,9 @@ export function CartItemQuantity({
         >
             <button
                 type="button"
+                disabled={disabled}
                 className={cn(
-                    'flex h-full items-center justify-between',
+                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2Icon } from 'lucide-react';
+import { ImageOff, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -20,72 +20,102 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import type { CartItemData } from '@/lib/cart/cart.types';
 import { cn } from '@/lib/cn';
 import { formatPrice } from '@/lib/format-price';
 import { routes } from '@/routes';
-import type { CartItemDto } from '@/services/cart/cart.types';
 
 interface CartItemProps {
-    item: CartItemDto;
+    item: CartItemData;
 }
 
 export function CartItem({ item }: CartItemProps) {
-    const { product } = item;
+    const { removeCartItem } = useCartContext();
 
-    const hasDiscount = product.discountPercent > 0;
+    const hasDiscount =
+        item.product !== null && item.product.discountPercent > 0;
 
     const priceChanged =
-        item.snapshot.effectivePrice !== product.effectivePrice;
+        item.product !== null &&
+        item.snapshot.effectivePrice !== item.product.effectivePrice;
 
-    const mainImage = product.images[0];
+    const isOutOfStock = item.product?.stock === 0;
 
-    const { removeCartEntry } = useCartContext();
-
-    const isOutOfStock = product.stock === 0;
     const hasInsufficientStock =
-        product.stock > 0 && item.quantity > product.stock;
+        item.product !== null &&
+        item.product.stock > 0 &&
+        item.quantity > item.product.stock;
 
     return (
         <article className="flex gap-2 bg-white py-2 sm:gap-4 md:py-4">
-            <Link
-                href={routes.productPage(product.slug)}
-                className="relative size-24 shrink-0 overflow-hidden rounded"
-            >
-                {mainImage && (
-                    <Image
-                        src={mainImage.url}
-                        alt={mainImage.alt ?? product.title}
-                        fill
-                        className={cn(
-                            'object-cover',
-                            isOutOfStock && 'opacity-60 grayscale',
-                        )}
-                        sizes="96px"
-                    />
+            <div className="relative size-24 shrink-0 overflow-hidden rounded">
+                {item.snapshot.imageUrl ? (
+                    item.product ? (
+                        <Link
+                            href={routes.productPage(item.product.slug)}
+                            className="absolute inset-0"
+                        >
+                            <Image
+                                src={item.snapshot.imageUrl}
+                                alt={item.snapshot.title}
+                                fill
+                                className={cn(
+                                    'object-cover',
+                                    isOutOfStock && 'opacity-60 grayscale',
+                                )}
+                                sizes="96px"
+                            />
+                        </Link>
+                    ) : (
+                        <Image
+                            src={item.snapshot.imageUrl}
+                            alt={item.snapshot.title}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                        />
+                    )
+                ) : (
+                    <div className="flex size-full items-center justify-center">
+                        <ImageOff
+                            aria-hidden="true"
+                            className="size-10 text-gray-300"
+                        />
+                    </div>
                 )}
-            </Link>
+            </div>
 
             <div className="flex min-w-0 flex-col gap-2">
-                <Link
-                    href={routes.productPage(product.slug)}
-                    className={cn(
-                        'line-clamp-3 text-[#414141] hover:text-(--color-primary) hover:underline',
-                        isOutOfStock && 'opacity-60',
-                    )}
-                >
-                    {product.title}
-                </Link>
+                {item.product ? (
+                    <Link
+                        href={routes.productPage(item.product.slug)}
+                        className={cn(
+                            'line-clamp-3 text-[#414141] hover:text-(--color-primary) hover:underline',
+                            isOutOfStock && 'opacity-60',
+                        )}
+                    >
+                        {item.snapshot.title}
+                    </Link>
+                ) : (
+                    <p className="line-clamp-3 text-[#414141]">
+                        {item.snapshot.title}
+                    </p>
+                )}
 
                 {!isOutOfStock ? (
                     <>
                         <div className="flex items-center gap-2">
                             <p className="font-bold text-[#414141]">
-                                {formatPrice(product.effectivePrice)} ₸
+                                {formatPrice(
+                                    item.product?.effectivePrice ??
+                                        item.snapshot.effectivePrice,
+                                )}{' '}
+                                ₸
                             </p>
 
-                            {hasDiscount && (
+                            {item.product && hasDiscount && (
                                 <p className="text-sm text-[#bfbfbf] line-through">
-                                    {formatPrice(product.regularPrice)} ₸
+                                    {formatPrice(item.product.regularPrice)} ₸
                                 </p>
                             )}
                         </div>
@@ -107,8 +137,8 @@ export function CartItem({ item }: CartItemProps) {
                     <div className="flex items-center gap-2 sm:gap-4">
                         {!isOutOfStock && (
                             <CartItemQuantity
-                                productId={product.id}
-                                maxQuantity={product.stock}
+                                productId={item.productId}
+                                maxQuantity={item.product?.stock}
                                 size="sm"
                                 variant="neutral"
                             />
@@ -150,7 +180,7 @@ export function CartItem({ item }: CartItemProps) {
                                         size="sm"
                                         variant="destructive"
                                         onClick={() =>
-                                            removeCartEntry(product.id)
+                                            removeCartItem(item.productId)
                                         }
                                     >
                                         Удалить
@@ -160,7 +190,7 @@ export function CartItem({ item }: CartItemProps) {
                         </AlertDialog>
 
                         <FavoriteButton
-                            productId={product.id}
+                            productId={item.productId}
                             className="bg-gray-50"
                             shape="rounded"
                         />
@@ -168,7 +198,7 @@ export function CartItem({ item }: CartItemProps) {
 
                     {hasInsufficientStock && (
                         <p className="text-sm text-amber-700">
-                            Доступно только {product.stock} шт.
+                            Доступно только {item.product?.stock} шт.
                         </p>
                     )}
                 </div>

@@ -1,8 +1,6 @@
-import type { CartItemDto } from '@/services/cart/cart.types';
+import type { CartItemData } from '@/lib/cart/cart.types';
 
-type CartSummaryData = {
-    availableItems: CartItemDto[];
-    unavailableItems: CartItemDto[];
+export type CartSummaryData = {
     regularPriceTotal: number;
     effectivePriceTotal: number;
     availableCartCount: number;
@@ -12,40 +10,51 @@ type CartSummaryData = {
     isCheckoutDisabled: boolean;
 };
 
-export function getCartSummary(items: CartItemDto[]): CartSummaryData {
-    const availableItems = items.filter((item) => item.product.stock > 0);
-    const unavailableItems = items.filter((item) => item.product.stock === 0);
+export function getCartSummary(items: CartItemData[]): CartSummaryData {
+    const availableItems = items.flatMap((item) => {
+        if (!item.product || item.product.stock === 0) {
+            return [];
+        }
+
+        return [{ item, product: item.product }];
+    });
+    const hasMissingProducts = items.some((item) => item.product === null);
 
     const regularPriceTotal = availableItems.reduce(
-        (sum, item) => sum + item.product.regularPrice * item.quantity,
+        (sum, { item, product }) => sum + product.regularPrice * item.quantity,
         0,
     );
 
     const effectivePriceTotal = availableItems.reduce(
-        (sum, item) => sum + item.product.effectivePrice * item.quantity,
+        (sum, { item, product }) =>
+            sum + product.effectivePrice * item.quantity,
         0,
     );
 
     const availableCartCount = availableItems.reduce(
-        (sum, item) => sum + item.quantity,
+        (sum, { item }) => sum + item.quantity,
         0,
     );
 
     const discountAmount = regularPriceTotal - effectivePriceTotal;
 
     const hasPriceChanges = items.some(
-        (item) => item.snapshot.effectivePrice !== item.product.effectivePrice,
+        (item) =>
+            item.product !== null &&
+            item.snapshot.effectivePrice !== item.product.effectivePrice,
     );
 
     const hasStockIssues = items.some(
-        (item) => item.product.stock > 0 && item.quantity > item.product.stock,
+        (item) =>
+            item.product !== null &&
+            item.product.stock > 0 &&
+            item.quantity > item.product.stock,
     );
 
-    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
+    const isCheckoutDisabled =
+        availableItems.length === 0 || hasMissingProducts || hasStockIssues;
 
     return {
-        availableItems,
-        unavailableItems,
         regularPriceTotal,
         effectivePriceTotal,
         availableCartCount,

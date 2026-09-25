@@ -128,6 +128,8 @@ model CartItem {
   cartId                 String   @map("cart_id")
   productId              String   @map("product_id")
   quantity               Int
+  snapshotTitle          String   @map("snapshot_title")
+  snapshotImageUrl       String?  @map("snapshot_image_url")
   snapshotEffectivePrice Decimal  @map("snapshot_effective_price") @db.Decimal(10, 2)
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
