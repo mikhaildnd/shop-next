@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useCartContext } from '@/components/cart/CartContext';
+import { DeletionDialog } from '@/components/DeletionDialog';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
@@ -49,6 +52,8 @@ export function CartItemQuantity({
 
     const quantity = getCartItemQuantity(productId);
 
+    const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
+
     if (quantity === undefined) {
         return null;
     }
@@ -59,6 +64,11 @@ export function CartItemQuantity({
 
     const handleDecrement = async () => {
         try {
+            if (quantity === 1) {
+                setIsRemoveDialogOpen(true);
+                return;
+            }
+
             await decrementCartItem(productId);
         } catch {
             toast.add({
@@ -119,6 +129,14 @@ export function CartItemQuantity({
             >
                 +
             </button>
+
+            <DeletionDialog
+                open={isRemoveDialogOpen}
+                onOpenChange={setIsRemoveDialogOpen}
+                title="Удалить товар?"
+                description="Товар будет удалён из корзины."
+                onConfirm={() => decrementCartItem(productId)}
+            />
         </div>
     );
 }
