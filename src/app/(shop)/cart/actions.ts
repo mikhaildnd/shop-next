@@ -1,7 +1,7 @@
 'use server';
 
 import { requireSession } from '@/auth/session';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartEntry, CartItemSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartItem,
     clearCart,
@@ -14,7 +14,7 @@ import {
 
 export async function addCartItemAction(
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): Promise<void> {
     const session = await requireSession();
 

@@ -10,7 +10,7 @@ import {
     removeCartItemAction,
 } from '@/app/(shop)/cart/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
-import type { CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
@@ -23,7 +23,7 @@ export interface UseServerCartResult {
     items: CartItemDto[];
     addCartItem: (
         product: ProductDto,
-        snapshot: CartProductSnapshot,
+        snapshot: CartItemSnapshot,
     ) => Promise<void>;
     incrementCartItem: (productId: string) => Promise<void>;
     decrementCartItem: (productId: string) => Promise<void>;
@@ -114,7 +114,7 @@ export function useServerCart({
     );
 
     const addCartItem = useCallback(
-        (product: ProductDto, snapshot: CartProductSnapshot): Promise<void> =>
+        (product: ProductDto, snapshot: CartItemSnapshot): Promise<void> =>
             enqueueMutation(
                 createMutation((items) => {
                     if (items.some((item) => item.productId === product.id)) {
@@ -180,14 +180,14 @@ export function useServerCart({
 
     const clearCart = useCallback(
         (): Promise<void> =>
-            enqueueMutation(createMutation(() => []), clearCartAction),
+            enqueueMutation(
+                createMutation(() => []),
+                clearCartAction,
+            ),
         [createMutation, enqueueMutation],
     );
 
-    const cartCount = items.reduce(
-        (total, item) => total + item.quantity,
-        0,
-    );
+    const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
     return {
         items,

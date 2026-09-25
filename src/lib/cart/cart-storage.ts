@@ -1,4 +1,4 @@
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartEntry, CartItemSnapshot } from '@/lib/cart/cart.types';
 import { CART_STORAGE_KEY } from '@/lib/cart/cart-storage.constants';
 
 type CartListener = () => void;
@@ -117,7 +117,7 @@ function notifyListeners(): void {
 
 export function addCartEntry(
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): CartEntry[] {
     const cartEntries = getCartEntries();
 

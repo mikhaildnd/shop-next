@@ -1,9 +1,12 @@
-import type { CartEntry, CartItemData } from '@/lib/cart/cart.types';
-import type { CartProductLookup } from '@/services/cart/cart.types';
+import type {
+    CartEntry,
+    CartItemData,
+    CartProduct,
+} from '@/lib/cart/cart.types';
 
 export function getCartItemsData(
     entries: CartEntry[],
-    products: CartProductLookup[],
+    products: CartProduct[],
     missingProductIds: string[],
 ): CartItemData[] {
     const productsById = new Map(

@@ -1,13 +1,12 @@
 import { cache } from 'react';
 
 import { prisma } from '@/db';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
 import type {
-    CartDto,
-    CartItemDto,
+    CartEntry,
+    CartItemSnapshot,
     CartProduct,
-    CartProductLookup,
-} from '@/services/cart/cart.types';
+} from '@/lib/cart/cart.types';
+import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 
 const cartProductSelect = {
     title: true,
@@ -19,6 +18,8 @@ const cartProductSelect = {
 } as const;
 
 function mapCartProduct(product: {
+    id: string;
+    title: string;
     slug: string;
     stock: number;
     regularPrice: { toString(): string };
@@ -30,6 +31,8 @@ function mapCartProduct(product: {
     }
 
     return {
+        productId: product.id,
+        title: product.title,
         slug: product.slug,
         stock: product.stock,
         regularPrice: Number(product.regularPrice),
@@ -82,7 +85,7 @@ export const getCart = cache(async (userId: string): Promise<CartDto> => {
 });
 
 export const getCartProductsByIds = cache(
-    async (productIds: string[]): Promise<CartProductLookup[]> => {
+    async (productIds: string[]): Promise<CartProduct[]> => {
         if (productIds.length === 0) {
             return [];
         }
@@ -99,18 +102,14 @@ export const getCartProductsByIds = cache(
             },
         });
 
-        return products.map((product) => ({
-            productId: product.id,
-            title: product.title,
-            ...mapCartProduct(product),
-        }));
+        return products.map(mapCartProduct);
     },
 );
 
 export async function addCartItem(
     userId: string,
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): Promise<void> {
     const product = await prisma.product.findUnique({
         where: {

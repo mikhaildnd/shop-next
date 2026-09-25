@@ -12,7 +12,7 @@ import {
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type { CartItemData, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartItemData, CartItemSnapshot } from '@/lib/cart/cart.types';
 import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
 import type { CartSummaryData } from '@/lib/cart/get-cart-summary';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
@@ -29,7 +29,7 @@ interface CartContextValue {
     getCartItemQuantity: (productId: string) => number | undefined;
     addCartItem: (
         product: ProductDto,
-        snapshot: CartProductSnapshot,
+        snapshot: CartItemSnapshot,
     ) => void | Promise<void>;
     incrementCartItem: (productId: string) => void | Promise<void>;
     decrementCartItem: (productId: string) => void | Promise<void>;
@@ -78,10 +78,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
 
     const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
 
-    const addCartItem = (
-        product: ProductDto,
-        snapshot: CartProductSnapshot,
-    ) => {
+    const addCartItem = (product: ProductDto, snapshot: CartItemSnapshot) => {
         products.upsertProduct(product);
         cart.addCartItem(product.id, snapshot);
     };

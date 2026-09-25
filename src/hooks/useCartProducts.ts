@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getCartProductsByIdsAction } from '@/app/(shop)/cart/actions';
-import type { CartProductLookup } from '@/services/cart/cart.types';
+import type { CartProduct } from '@/lib/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 export interface UseCartProductsResult {
-    products: CartProductLookup[];
+    products: CartProduct[];
     missingProductIds: string[];
     state: CartProductsState;
     upsertProduct: (product: ProductDto) => void;
@@ -22,7 +22,7 @@ export type CartProductsState =
 interface UseCartProductsOptions {
     productIds: string[];
     enabled: boolean;
-    initialProducts?: CartProductLookup[];
+    initialProducts?: CartProduct[];
 }
 
 export function useCartProducts({
@@ -30,8 +30,7 @@ export function useCartProducts({
     enabled,
     initialProducts = [],
 }: UseCartProductsOptions): UseCartProductsResult {
-    const [products, setProducts] =
-        useState<CartProductLookup[]>(initialProducts);
+    const [products, setProducts] = useState<CartProduct[]>(initialProducts);
     const [missingProductIds, setMissingProductIds] = useState<string[]>([]);
     const resolvedProductIdsRef = useRef(
         new Set(initialProducts.map((product) => product.productId)),
@@ -177,7 +176,7 @@ export function useCartProducts({
     }, [enabled, productIds, productIdsKey, retryKey]);
 
     const upsertProduct = useCallback((product: ProductDto) => {
-        const cartProduct: CartProductLookup = {
+        const cartProduct: CartProduct = {
             productId: product.id,
             title: product.title,
             slug: product.slug,

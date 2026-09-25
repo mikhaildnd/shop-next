@@ -2,7 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartEntry, CartItemSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartEntry as addCartEntryToStorage,
     clearCart as clearCartStorage,
@@ -16,7 +16,7 @@ import {
 
 export interface UseLocalCartResult {
     entries: CartEntry[];
-    addCartItem: (productId: string, snapshot: CartProductSnapshot) => void;
+    addCartItem: (productId: string, snapshot: CartItemSnapshot) => void;
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
     removeCartItem: (productId: string) => void;
@@ -40,7 +40,7 @@ export function useLocalCart(): UseLocalCartResult {
     );
 
     const addCartItem = useCallback(
-        (productId: string, snapshot: CartProductSnapshot) => {
+        (productId: string, snapshot: CartItemSnapshot) => {
             addCartEntryToStorage(productId, snapshot);
         },
         [],

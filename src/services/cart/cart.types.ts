@@ -1,22 +1,9 @@
-import type { CartProductSnapshot } from '@/lib/cart/cart.types';
-
-export type CartProduct = {
-    slug: string;
-    stock: number;
-    regularPrice: number;
-    effectivePrice: number;
-    discountPercent: number;
-};
-
-export type CartProductLookup = CartProduct & {
-    productId: string;
-    title: string;
-};
+import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
 
 export type CartItemDto = {
     productId: string;
     quantity: number;
-    snapshot: CartProductSnapshot;
+    snapshot: CartItemSnapshot;
 };
 
 export type CartDto = {
@@ -25,5 +12,5 @@ export type CartDto = {
 
 export type CartInitialData = {
     cart: CartDto;
-    products: CartProductLookup[];
+    products: CartProduct[];
 };
