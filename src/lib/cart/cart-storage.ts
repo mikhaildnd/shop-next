@@ -115,6 +115,42 @@ function notifyListeners(): void {
     });
 }
 
+export function setCartEntryQuantity(
+    productId: string,
+    quantity: number,
+): CartEntry[] {
+    const cartEntries = getCartEntries();
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        return cartEntries;
+    }
+
+    const existingEntry = cartEntries.find(
+        (entry) => entry.productId === productId,
+    );
+
+    if (!existingEntry) {
+        return cartEntries;
+    }
+
+    const nextCartEntries = cartEntries.map((entry) => {
+        if (entry.productId !== productId) {
+            return entry;
+        }
+
+        return {
+            ...entry,
+            quantity,
+        };
+    });
+
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartEntries));
+
+    notifyListeners();
+
+    return nextCartEntries;
+}
+
 export function addCartEntry(
     productId: string,
     snapshot: CartItemSnapshot,

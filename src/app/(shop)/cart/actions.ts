@@ -10,7 +10,9 @@ import {
     incrementCartItem,
     mergeCart,
     removeCartItem,
+    setCartItemQuantity,
 } from '@/services/cart/cart.service';
+import type { CartDto } from '@/services/cart/cart.types';
 
 export async function addCartItemAction(
     productId: string,
@@ -19,6 +21,15 @@ export async function addCartItemAction(
     const session = await requireSession();
 
     await addCartItem(session.user.id, productId, snapshot);
+}
+
+export async function setCartItemQuantityAction(
+    productId: string,
+    quantity: number,
+): Promise<CartDto> {
+    const session = await requireSession();
+
+    return setCartItemQuantity(session.user.id, productId, quantity);
 }
 
 export async function incrementCartItemAction(

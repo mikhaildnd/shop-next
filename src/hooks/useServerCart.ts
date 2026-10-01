@@ -8,6 +8,7 @@ import {
     decrementCartItemAction,
     incrementCartItemAction,
     removeCartItemAction,
+    setCartItemQuantityAction,
 } from '@/app/(shop)/cart/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
 import type { CartItemSnapshot } from '@/lib/cart/cart.types';
@@ -27,6 +28,7 @@ export interface UseServerCartResult {
     ) => Promise<void>;
     incrementCartItem: (productId: string) => Promise<void>;
     decrementCartItem: (productId: string) => Promise<void>;
+    setCartItemQuantity: (productId: string, quantity: number) => Promise<void>;
     removeCartItem: (productId: string) => Promise<void>;
     clearCart: () => Promise<void>;
     cartCount: number;
@@ -135,6 +137,20 @@ export function useServerCart({
         [createMutation, enqueueMutation],
     );
 
+    const setCartItemQuantity = useCallback(
+        (productId: string, quantity: number): Promise<void> =>
+            actionQueue.enqueue(async () => {
+                const cart = await setCartItemQuantityAction(
+                    productId,
+                    quantity,
+                );
+
+                confirmedItemsRef.current = cart.items;
+                updateVisibleItems();
+            }),
+        [actionQueue, updateVisibleItems],
+    );
+
     const incrementCartItem = useCallback(
         (productId: string): Promise<void> =>
             enqueueMutation(
@@ -192,6 +208,7 @@ export function useServerCart({
     return {
         items,
         addCartItem,
+        setCartItemQuantity,
         incrementCartItem,
         decrementCartItem,
         removeCartItem,

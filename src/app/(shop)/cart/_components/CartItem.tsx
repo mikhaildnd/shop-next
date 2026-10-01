@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageOff } from 'lucide-react';
+import { ImageOff, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -19,7 +19,11 @@ interface CartItemProps {
 }
 
 export function CartItem({ item }: CartItemProps) {
-    const { removeCartItem } = useCartContext();
+    const { removeCartItem, quantityAdjustmentProductIds } = useCartContext();
+
+    const wasQuantityAdjusted = quantityAdjustmentProductIds.includes(
+        item.productId,
+    );
 
     const hasDiscount =
         item.product !== null && item.product.discountPercent > 0;
@@ -29,11 +33,6 @@ export function CartItem({ item }: CartItemProps) {
         item.snapshot.effectivePrice !== item.product.effectivePrice;
 
     const isOutOfStock = item.product?.stock === 0;
-
-    const hasInsufficientStock =
-        item.product !== null &&
-        item.product.stock > 0 &&
-        item.quantity > item.product.stock;
 
     return (
         <article className="flex gap-2 bg-white py-2 sm:gap-4 md:py-4">
@@ -80,7 +79,7 @@ export function CartItem({ item }: CartItemProps) {
                         href={routes.productPage(item.product.slug)}
                         className={cn(
                             'line-clamp-3 text-[#414141] hover:text-(--color-primary) hover:underline',
-                            isOutOfStock && 'opacity-60',
+                            isOutOfStock && 'text-gray-500',
                         )}
                     >
                         {item.snapshot.title}
@@ -117,12 +116,20 @@ export function CartItem({ item }: CartItemProps) {
                         )}
                     </>
                 ) : (
-                    <p className="text-sm text-[#414141] opacity-60">
-                        Товар закончился
+                    <p className="text-sm text-gray-400">Товар закончился</p>
+                )}
+
+                {wasQuantityAdjusted && (
+                    <p className="flex items-center gap-3 rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-500">
+                        <Info className="size-5 shrink-0" />
+                        <span>
+                            Количество товара было уменьшено из-за недостатка на
+                            складе.
+                        </span>
                     </p>
                 )}
 
-                <div className="mt-auto flex flex-col items-start gap-1">
+                <div className="mt-auto flex flex-col items-start gap-2">
                     <div className="flex items-center gap-2 sm:gap-4">
                         {!isOutOfStock && (
                             <CartItemQuantity
@@ -151,12 +158,6 @@ export function CartItem({ item }: CartItemProps) {
                             shape="rounded"
                         />
                     </div>
-
-                    {hasInsufficientStock && (
-                        <p className="text-sm text-amber-700">
-                            Доступно только {item.product?.stock} шт.
-                        </p>
-                    )}
                 </div>
             </div>
         </article>

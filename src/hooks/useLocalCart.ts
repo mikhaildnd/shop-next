@@ -11,6 +11,7 @@ import {
     getServerCartEntries,
     incrementCartEntry as incrementCartEntryInStorage,
     removeCartEntry as removeCartEntryFromStorage,
+    setCartEntryQuantity as setCartEntryQuantityInStorage,
     subscribeToCart,
 } from '@/lib/cart/cart-storage';
 
@@ -23,6 +24,7 @@ export interface UseLocalCartResult {
     clearCart: () => void;
     cartCount: number;
     getCartItemQuantity: (productId: string) => number | undefined;
+    setCartItemQuantity: (productId: string, quantity: number) => void;
     isHydrated: boolean;
 }
 
@@ -49,6 +51,13 @@ export function useLocalCart(): UseLocalCartResult {
     const removeCartItem = useCallback((productId: string) => {
         removeCartEntryFromStorage(productId);
     }, []);
+
+    const setCartItemQuantity = useCallback(
+        (productId: string, quantity: number) => {
+            setCartEntryQuantityInStorage(productId, quantity);
+        },
+        [],
+    );
 
     const incrementCartItem = useCallback((productId: string) => {
         incrementCartEntryInStorage(productId);
@@ -84,6 +93,7 @@ export function useLocalCart(): UseLocalCartResult {
         removeCartItem,
         incrementCartItem,
         decrementCartItem,
+        setCartItemQuantity,
         clearCart,
         cartCount,
         getCartItemQuantity,

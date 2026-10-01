@@ -16,23 +16,27 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
             return [];
         }
 
-        return [{ item, product: item.product }];
+        const availableQuantity = Math.min(item.quantity, item.product.stock);
+
+        return [{ product: item.product, availableQuantity }];
     });
+
     const hasMissingProducts = items.some((item) => item.product === null);
 
     const regularPriceTotal = availableItems.reduce(
-        (sum, { item, product }) => sum + product.regularPrice * item.quantity,
+        (sum, { product, availableQuantity }) =>
+            sum + product.regularPrice * availableQuantity,
         0,
     );
 
     const effectivePriceTotal = availableItems.reduce(
-        (sum, { item, product }) =>
-            sum + product.effectivePrice * item.quantity,
+        (sum, { product, availableQuantity }) =>
+            sum + product.effectivePrice * availableQuantity,
         0,
     );
 
     const availableCartCount = availableItems.reduce(
-        (sum, { item }) => sum + item.quantity,
+        (sum, { availableQuantity }) => sum + availableQuantity,
         0,
     );
 

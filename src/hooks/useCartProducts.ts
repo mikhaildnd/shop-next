@@ -12,11 +12,13 @@ export interface UseCartProductsResult {
     state: CartProductsState;
     upsertProduct: (product: ProductDto) => void;
     retry: () => void;
+    refreshProducts: (productIds: string[]) => Promise<void>;
 }
 
 export type CartProductsState =
-    | { status: 'idle' }
+    | { status: 'initial' }
     | { status: 'loading'; isRetry: boolean }
+    | { status: 'success' }
     | { status: 'error'; error: Error };
 
 interface UseCartProductsOptions {
@@ -37,10 +39,11 @@ export function useCartProducts({
     );
     const missingProductIdsRef = useRef(new Set<string>());
     const [loadState, setLoadState] = useState<
-        | { status: 'idle' }
+        | { status: 'initial' }
         | { status: 'loading'; key: string; isRetry: boolean }
+        | { status: 'success'; key: string }
         | { status: 'error'; key: string; error: Error }
-    >({ status: 'idle' });
+    >({ status: 'initial' });
     const [retryKey, setRetryKey] = useState(0);
     const handledRetryKeyRef = useRef(0);
 
@@ -79,6 +82,11 @@ export function useCartProducts({
               );
 
         if (idsToLoad.length === 0) {
+            setLoadState({
+                status: 'success',
+                key: productIdsKey,
+            });
+
             return;
         }
 
@@ -150,7 +158,10 @@ export function useCartProducts({
                 );
 
                 handledRetryKeyRef.current = retryKey;
-                setLoadState({ status: 'idle' });
+                setLoadState({
+                    status: 'success',
+                    key: productIdsKey,
+                });
             } catch (error) {
                 if (!cancelled) {
                     handledRetryKeyRef.current = retryKey;
@@ -213,12 +224,84 @@ export function useCartProducts({
         setRetryKey((key) => key + 1);
     }, []);
 
+    const refreshProducts = useCallback(
+        async (productIdsToRefresh: string[]): Promise<void> => {
+            if (productIdsToRefresh.length === 0) {
+                return;
+            }
+
+            const nextProducts =
+                await getCartProductsByIdsAction(productIdsToRefresh);
+
+            const loadedProductIds = new Set(
+                nextProducts.map((product) => product.productId),
+            );
+
+            for (const productId of productIdsToRefresh) {
+                resolvedProductIdsRef.current.add(productId);
+
+                if (loadedProductIds.has(productId)) {
+                    missingProductIdsRef.current.delete(productId);
+                } else {
+                    missingProductIdsRef.current.add(productId);
+                }
+            }
+
+            setProducts((currentProducts) => {
+                const nextProductsById = new Map(
+                    currentProducts.map((product) => [
+                        product.productId,
+                        product,
+                    ]),
+                );
+
+                for (const productId of productIdsToRefresh) {
+                    nextProductsById.delete(productId);
+                }
+
+                for (const product of nextProducts) {
+                    nextProductsById.set(product.productId, product);
+                }
+
+                return [...nextProductsById.values()];
+            });
+
+            setMissingProductIds((currentMissingProductIds) => {
+                const nextMissingProductIds = currentMissingProductIds.filter(
+                    (productId) => !productIdsToRefresh.includes(productId),
+                );
+
+                for (const productId of productIdsToRefresh) {
+                    if (!loadedProductIds.has(productId)) {
+                        nextMissingProductIds.push(productId);
+                    }
+                }
+
+                return nextMissingProductIds;
+            });
+        },
+        [],
+    );
+
     const state: CartProductsState =
-        loadState.status !== 'idle' && loadState.key === productIdsKey
-            ? loadState.status === 'loading'
-                ? { status: 'loading', isRetry: loadState.isRetry }
-                : { status: 'error', error: loadState.error }
-            : { status: 'idle' };
+        loadState.status === 'loading' && loadState.key === productIdsKey
+            ? {
+                  status: 'loading',
+                  isRetry: loadState.isRetry,
+              }
+            : loadState.status === 'error' && loadState.key === productIdsKey
+              ? {
+                    status: 'error',
+                    error: loadState.error,
+                }
+              : loadState.status === 'success' &&
+                  loadState.key === productIdsKey
+                ? {
+                      status: 'success',
+                  }
+                : {
+                      status: 'initial',
+                  };
 
     const currentProductIds = new Set(productIds);
 
@@ -236,5 +319,6 @@ export function useCartProducts({
         state,
         upsertProduct,
         retry,
+        refreshProducts,
     };
 }

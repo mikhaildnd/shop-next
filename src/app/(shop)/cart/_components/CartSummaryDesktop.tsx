@@ -16,7 +16,8 @@ export function CartSummaryDesktop({ className }: CartSummaryDesktopProps) {
         useCartContext();
 
     const isInitialLoading =
-        productsState.status === 'loading' && !productsState.isRetry;
+        productsState.status === 'initial' ||
+        (productsState.status === 'loading' && !productsState.isRetry);
 
     const isRetrying =
         productsState.status === 'loading' && productsState.isRetry;

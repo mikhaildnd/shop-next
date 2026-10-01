@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { createContext, useContext, useMemo, useState } from 'react';
 
 import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
@@ -14,6 +15,7 @@ import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartItemData, CartItemSnapshot } from '@/lib/cart/cart.types';
 import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
+import { getCartQuantityAdjustments } from '@/lib/cart/get-cart-quantity-adjustments';
 import type { CartSummaryData } from '@/lib/cart/get-cart-summary';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import type { CartInitialData } from '@/services/cart/cart.types';
@@ -35,6 +37,7 @@ interface CartContextValue {
     decrementCartItem: (productId: string) => void | Promise<void>;
     removeCartItem: (productId: string) => void | Promise<void>;
     clearCart: () => void | Promise<void>;
+    quantityAdjustmentProductIds: string[];
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -83,6 +86,28 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         cart.addCartItem(product.id, snapshot);
     };
 
+    const quantityAdjustments = useMemo(
+        () => getCartQuantityAdjustments(cartItems),
+        [cartItems],
+    );
+
+    const quantityAdjustmentProductIds = useMemo(
+        () => quantityAdjustments.map((adjustment) => adjustment.productId),
+        [quantityAdjustments],
+    );
+
+    const { setCartItemQuantity } = cart;
+
+    useEffect(() => {
+        if (quantityAdjustments.length === 0) {
+            return;
+        }
+
+        for (const adjustment of quantityAdjustments) {
+            setCartItemQuantity(adjustment.productId, adjustment.quantity);
+        }
+    }, [setCartItemQuantity, quantityAdjustments]);
+
     const contextValue: CartContextValue = {
         cartItems,
         cartSummary,
@@ -96,6 +121,7 @@ function LocalCartProvider({ children }: LocalCartProviderProps) {
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
+        quantityAdjustmentProductIds,
     };
 
     return (
@@ -144,6 +170,53 @@ function ServerCartProvider({
         replaceCart: cart.replaceCart,
     });
 
+    const [quantityAdjustmentProductIds, setQuantityAdjustmentProductIds] =
+        useState<string[]>([]);
+
+    const adjustingProductIdsRef = useRef(new Set<string>());
+
+    const quantityAdjustments = useMemo(
+        () => getCartQuantityAdjustments(cartItems),
+        [cartItems],
+    );
+
+    const { setCartItemQuantity } = cart;
+
+    useEffect(() => {
+        if (quantityAdjustments.length === 0) {
+            return;
+        }
+
+        const adjustQuantities = async () => {
+            for (const adjustment of quantityAdjustments) {
+                if (adjustingProductIdsRef.current.has(adjustment.productId)) {
+                    continue;
+                }
+
+                adjustingProductIdsRef.current.add(adjustment.productId);
+
+                try {
+                    await setCartItemQuantity(
+                        adjustment.productId,
+                        adjustment.quantity,
+                    );
+
+                    setQuantityAdjustmentProductIds((currentIds) =>
+                        currentIds.includes(adjustment.productId)
+                            ? currentIds
+                            : [...currentIds, adjustment.productId],
+                    );
+                } catch {
+                    // Пока ничего не делаем.
+                } finally {
+                    adjustingProductIdsRef.current.delete(adjustment.productId);
+                }
+            }
+        };
+
+        void adjustQuantities();
+    }, [setCartItemQuantity, quantityAdjustments]);
+
     const contextValue: CartContextValue = {
         cartItems,
         cartSummary,
@@ -160,6 +233,7 @@ function ServerCartProvider({
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
+        quantityAdjustmentProductIds,
     };
 
     return (
