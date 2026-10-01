@@ -99,6 +99,7 @@ model User {
   image         String?
   phone         String?  @unique
   role          UserRole @default(USER)
+  isAnonymous   Boolean?
   isSeed        Boolean  @default(false) @map("is_seed")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")

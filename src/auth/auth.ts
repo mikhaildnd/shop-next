@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
-import { emailOTP } from 'better-auth/plugins';
+import { anonymous, emailOTP } from 'better-auth/plugins';
 
 import {
     OTP_ALLOWED_ATTEMPTS,
@@ -28,6 +28,7 @@ export const auth = betterAuth({
         },
     },
     plugins: [
+        anonymous(),
         emailOTP({
             overrideDefaultEmailVerification: true,
             changeEmail: {
