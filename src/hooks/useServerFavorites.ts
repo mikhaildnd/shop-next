@@ -1,205 +1,136 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
     addFavoriteAction,
-    mergeFavoritesAction,
     removeFavoriteAction,
 } from '@/app/(shop)/(catalog)/favorites/actions';
-import {
-    clearFavorites,
-    getFavoriteIds,
-} from '@/lib/favorite/favorite-storage';
+import type { ActionQueue } from '@/lib/async/action-queue';
 
 interface UseServerFavoritesOptions {
     initialFavoriteIds: string[];
-    initialFavoriteCount: number;
+    actionQueue: ActionQueue;
 }
 
 interface UseServerFavoritesReturn {
     favoriteCount: number;
+    favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
-    toggleFavorite: (productId: string) => void;
-    mergeStatus: MergeStatus;
-    retryMerge: () => void;
-    mutationError: Error | null;
-    mergeAttempt: number;
+    toggleFavorite: (productId: string) => Promise<void>;
+    replaceFavorites: (favoriteIds: string[]) => void;
 }
 
-type MergeStatus = 'idle' | 'merging' | 'error';
+type FavoriteMutation = {
+    id: number;
+    productId: string;
+    isFavorite: boolean;
+};
+
+type FavoriteAction = () => Promise<void>;
 
 export function useServerFavorites({
     initialFavoriteIds,
-    initialFavoriteCount,
+    actionQueue,
 }: UseServerFavoritesOptions): UseServerFavoritesReturn {
-    const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
+    const initialFavoriteIdsSet = new Set(initialFavoriteIds);
+    const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIdsSet);
 
-    const [favoriteStates, setFavoriteStates] = useState<
-        Record<string, boolean>
-    >(() =>
-        Object.fromEntries(
-            initialFavoriteIds.map((productId) => [productId, true]),
-        ),
-    );
+    const favoriteIdsRef = useRef(favoriteIds);
+    const confirmedFavoriteIdsRef = useRef(initialFavoriteIdsSet);
+    const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
+    const nextMutationIdRef = useRef(0);
 
-    const pendingMutationsRef = useRef(new Set<string>());
+    const updateVisibleFavoriteIds = useCallback(() => {
+        const nextFavoriteIds = new Set(confirmedFavoriteIdsRef.current);
 
-    const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
-    const [mergeAttempt, setMergeAttempt] = useState(0);
-
-    const [mutationError, setMutationError] = useState<Error | null>(null);
-
-    const isFavorite = useCallback(
-        (productId: string) => favoriteStates[productId] ?? false,
-        [favoriteStates],
-    );
-
-    const addFavorite = useCallback(
-        async (productId: string) => {
-            if (pendingMutationsRef.current.has(productId)) return;
-
-            setMutationError(null);
-
-            const previousIsFavorite = favoriteStates[productId] ?? false;
-            if (previousIsFavorite) return;
-
-            pendingMutationsRef.current.add(productId);
-
-            setFavoriteStates((current) => ({
-                ...current,
-                [productId]: true,
-            }));
-            setFavoriteCount((current) => current + 1);
-
-            try {
-                await addFavoriteAction(productId);
-            } catch (error) {
-                setMutationError(
-                    error instanceof Error ? error : new Error('Unknown error'),
-                );
-
-                setFavoriteStates((current) => ({
-                    ...current,
-                    [productId]: previousIsFavorite,
-                }));
-                setFavoriteCount((current) =>
-                    previousIsFavorite ? current : current - 1,
-                );
-            } finally {
-                pendingMutationsRef.current.delete(productId);
+        for (const mutation of pendingMutationsRef.current) {
+            if (mutation.isFavorite) {
+                nextFavoriteIds.add(mutation.productId);
+            } else {
+                nextFavoriteIds.delete(mutation.productId);
             }
+        }
+
+        favoriteIdsRef.current = nextFavoriteIds;
+        setFavoriteIds(nextFavoriteIds);
+    }, []);
+
+    const replaceFavorites = useCallback(
+        (favoriteIds: string[]) => {
+            confirmedFavoriteIdsRef.current = new Set(favoriteIds);
+            updateVisibleFavoriteIds();
         },
-        [favoriteStates],
+        [updateVisibleFavoriteIds],
     );
 
-    const removeFavorite = useCallback(
-        async (productId: string) => {
-            if (pendingMutationsRef.current.has(productId)) return;
+    const enqueueMutation = useCallback(
+        (mutation: FavoriteMutation, action: FavoriteAction): Promise<void> => {
+            pendingMutationsRef.current.push(mutation);
+            updateVisibleFavoriteIds();
 
-            setMutationError(null);
+            const execute = async () => {
+                try {
+                    await action();
 
-            const previousIsFavorite = favoriteStates[productId] ?? false;
-            if (!previousIsFavorite) return;
+                    if (mutation.isFavorite) {
+                        confirmedFavoriteIdsRef.current = new Set(
+                            confirmedFavoriteIdsRef.current,
+                        );
+                        confirmedFavoriteIdsRef.current.add(mutation.productId);
+                    } else {
+                        const nextFavoriteIds = new Set(
+                            confirmedFavoriteIdsRef.current,
+                        );
+                        nextFavoriteIds.delete(mutation.productId);
+                        confirmedFavoriteIdsRef.current = nextFavoriteIds;
+                    }
+                } finally {
+                    pendingMutationsRef.current =
+                        pendingMutationsRef.current.filter(
+                            (pendingMutation) =>
+                                pendingMutation.id !== mutation.id,
+                        );
 
-            pendingMutationsRef.current.add(productId);
+                    updateVisibleFavoriteIds();
+                }
+            };
 
-            setFavoriteStates((current) => ({
-                ...current,
-                [productId]: false,
-            }));
-            setFavoriteCount((current) => current - 1);
-
-            try {
-                await removeFavoriteAction(productId);
-            } catch (error) {
-                setMutationError(
-                    error instanceof Error ? error : new Error('Unknown error'),
-                );
-
-                setFavoriteStates((current) => ({
-                    ...current,
-                    [productId]: previousIsFavorite,
-                }));
-                setFavoriteCount((current) =>
-                    previousIsFavorite ? current + 1 : current,
-                );
-            } finally {
-                pendingMutationsRef.current.delete(productId);
-            }
+            return actionQueue.enqueue(execute);
         },
-        [favoriteStates],
+        [actionQueue, updateVisibleFavoriteIds],
     );
 
     const toggleFavorite = useCallback(
-        (productId: string) => {
-            const currentIsFavorite = favoriteStates[productId] ?? false;
+        (productId: string): Promise<void> => {
+            const currentIsFavorite = favoriteIdsRef.current.has(productId);
+            const nextIsFavorite = !currentIsFavorite;
 
-            if (currentIsFavorite) {
-                void removeFavorite(productId);
-                return;
-            }
-
-            void addFavorite(productId);
+            return enqueueMutation(
+                {
+                    id: nextMutationIdRef.current++,
+                    productId,
+                    isFavorite: nextIsFavorite,
+                },
+                () =>
+                    nextIsFavorite
+                        ? addFavoriteAction(productId)
+                        : removeFavoriteAction(productId),
+            );
         },
-        [favoriteStates, addFavorite, removeFavorite],
+        [enqueueMutation],
     );
 
-    const retryMerge = useCallback(() => {
-        setMergeStatus('idle');
-        setMergeAttempt((attempt) => attempt + 1);
-    }, []);
-
-    useEffect(() => {
-        const favoriteIds = getFavoriteIds();
-
-        if (favoriteIds.length === 0) {
-            return;
-        }
-
-        let cancelled = false;
-
-        async function merge() {
-            setMergeStatus('merging');
-
-            try {
-                const favoriteCount = await mergeFavoritesAction(favoriteIds);
-
-                if (cancelled) {
-                    return;
-                }
-
-                setFavoriteStates((current) => ({
-                    ...current,
-                    ...Object.fromEntries(
-                        favoriteIds.map((productId) => [productId, true]),
-                    ),
-                }));
-
-                setFavoriteCount(favoriteCount);
-                clearFavorites();
-                setMergeStatus('idle');
-            } catch {
-                if (!cancelled) {
-                    setMergeStatus('error');
-                }
-            }
-        }
-
-        void merge();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [mergeAttempt]);
+    const isFavorite = useCallback(
+        (productId: string) => favoriteIds.has(productId),
+        [favoriteIds],
+    );
 
     return {
-        favoriteCount,
+        favoriteCount: favoriteIds.size,
+        favoriteIds,
         isFavorite,
         toggleFavorite,
-        mergeStatus,
-        retryMerge,
-        mutationError,
-        mergeAttempt,
+        replaceFavorites,
     };
 }

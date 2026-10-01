@@ -1,27 +1,35 @@
 'use server';
 
 import { requireSession } from '@/auth/session';
-import type { CartEntry, CartProductSnapshot } from '@/lib/cart/cart.types';
+import type { CartEntry, CartItemSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartItem,
     clearCart,
     decrementCartItem,
+    getCartProductsByIds,
     incrementCartItem,
     mergeCart,
     removeCartItem,
+    setCartItemQuantity,
 } from '@/services/cart/cart.service';
-import { getProductsByIds } from '@/services/product/product.service';
+import type { CartDto } from '@/services/cart/cart.types';
 
 export async function addCartItemAction(
     productId: string,
-    snapshot: CartProductSnapshot,
+    snapshot: CartItemSnapshot,
 ): Promise<void> {
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // throw new Error('Test cart action error');
     const session = await requireSession();
 
     await addCartItem(session.user.id, productId, snapshot);
+}
+
+export async function setCartItemQuantityAction(
+    productId: string,
+    quantity: number,
+): Promise<CartDto> {
+    const session = await requireSession();
+
+    return setCartItemQuantity(session.user.id, productId, quantity);
 }
 
 export async function incrementCartItemAction(
@@ -58,6 +66,6 @@ export async function mergeCartAction(entries: CartEntry[]) {
     return mergeCart(session.user.id, entries);
 }
 
-export async function getProductsByIdsAction(productIds: string[]) {
-    return getProductsByIds(productIds);
+export async function getCartProductsByIdsAction(productIds: string[]) {
+    return getCartProductsByIds(productIds);
 }

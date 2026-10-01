@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useCartContext } from '@/components/cart/CartContext';
+import { DeletionDialog } from '@/components/DeletionDialog';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
@@ -32,7 +35,7 @@ const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
 
 interface CartItemQuantityProps {
     productId: string;
-    maxQuantity: number;
+    maxQuantity?: number;
     size?: CartItemQuantitySize;
     variant?: CartItemQuantityVariant;
     className?: string;
@@ -44,20 +47,29 @@ export function CartItemQuantity({
     variant = 'primary',
     className,
 }: CartItemQuantityProps) {
-    const { incrementCartEntry, decrementCartEntry, getCartEntryQuantity } =
+    const { incrementCartItem, decrementCartItem, getCartItemQuantity } =
         useCartContext();
 
-    const quantity = getCartEntryQuantity(productId);
+    const quantity = getCartItemQuantity(productId);
+
+    const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
 
     if (quantity === undefined) {
         return null;
     }
 
-    const isIncrementDisabled = quantity >= maxQuantity;
+    const disabled = maxQuantity === undefined;
+
+    const isIncrementDisabled = disabled || quantity >= maxQuantity;
 
     const handleDecrement = async () => {
         try {
-            await decrementCartEntry(productId);
+            if (quantity === 1) {
+                setIsRemoveDialogOpen(true);
+                return;
+            }
+
+            await decrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-decrement-error',
@@ -69,7 +81,7 @@ export function CartItemQuantity({
 
     const handleIncrement = async () => {
         try {
-            await incrementCartEntry(productId);
+            await incrementCartItem(productId);
         } catch {
             toast.add({
                 id: 'cart-increment-error',
@@ -90,8 +102,9 @@ export function CartItemQuantity({
         >
             <button
                 type="button"
+                disabled={disabled}
                 className={cn(
-                    'flex h-full items-center justify-between',
+                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
@@ -116,6 +129,14 @@ export function CartItemQuantity({
             >
                 +
             </button>
+
+            <DeletionDialog
+                open={isRemoveDialogOpen}
+                onOpenChange={setIsRemoveDialogOpen}
+                title="Удалить товар?"
+                description="Товар будет удалён из корзины."
+                onConfirm={() => decrementCartItem(productId)}
+            />
         </div>
     );
 }

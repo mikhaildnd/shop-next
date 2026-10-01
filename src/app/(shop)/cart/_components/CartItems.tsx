@@ -1,23 +1,39 @@
 import { CartItem } from '@/app/(shop)/cart/_components/CartItem';
+import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
+import { useCartContext } from '@/components/cart/CartContext';
 import { cn } from '@/lib/cn';
-import type { CartItemDto } from '@/services/cart/cart.types';
 
 interface CartItemsProps {
-    availableItems: CartItemDto[];
-    unavailableItems: CartItemDto[];
     className?: string;
 }
-export function CartItems({
-    availableItems,
-    unavailableItems,
-    className,
-}: CartItemsProps) {
+
+export function CartItems({ className }: CartItemsProps) {
+    const { cartItems, isHydrated } = useCartContext();
+
+    if (!isHydrated) {
+        return (
+            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white lg:col-span-2">
+                {Array.from({ length: 3 }, (_, index) => (
+                    <CartItemSkeleton key={index} />
+                ))}
+            </div>
+        );
+    }
+
+    const availableItems = cartItems.filter((item) => {
+        return !item.product || item.product.stock > 0;
+    });
+
+    const unavailableItems = cartItems.filter((item) => {
+        return item.product?.stock === 0;
+    });
+
     return (
         <div className={cn('flex flex-col gap-6', className)}>
             <div className="flex flex-col divide-y divide-gray-200">
                 {availableItems.map((item) => (
                     <CartItem
-                        key={item.product.id}
+                        key={item.productId}
                         item={item}
                     />
                 ))}
@@ -32,7 +48,7 @@ export function CartItems({
                     <div className="flex flex-col divide-y divide-gray-200">
                         {unavailableItems.map((item) => (
                             <CartItem
-                                key={item.product.id}
+                                key={item.productId}
                                 item={item}
                             />
                         ))}

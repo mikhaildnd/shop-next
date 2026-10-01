@@ -1,17 +1,12 @@
 import type { ComponentProps } from 'react';
 
 import { Button } from '@/components/button/Button';
+import { Spinner } from '@/components/Spinner';
 import { cn } from '@/lib/cn';
 
 interface LoadingButtonProps extends ComponentProps<typeof Button> {
     isLoading?: boolean;
     pendingText?: string;
-}
-
-function Spinner() {
-    return (
-        <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-    );
 }
 
 export function LoadingButton({

@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { routes } from '@/routes';
 
-export default async function CartPage() {
+export default function CartPage() {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             label: 'Главная',

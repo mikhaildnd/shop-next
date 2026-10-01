@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 import {
     addFavorite as addFavoriteToStorage,
@@ -18,7 +18,6 @@ interface UseLocalFavoritesResult {
     removeFavorite: (productId: string) => void;
     toggleFavorite: (productId: string) => void;
     clearFavorites: () => void;
-    mutationError: Error | null;
 }
 
 export function useLocalFavorites(): UseLocalFavoritesResult {
@@ -28,8 +27,6 @@ export function useLocalFavorites(): UseLocalFavoritesResult {
         getServerFavoriteIds,
     );
 
-    const [mutationError, setMutationError] = useState<Error | null>(null);
-
     const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
 
     const isFavorite = useCallback(
@@ -38,27 +35,11 @@ export function useLocalFavorites(): UseLocalFavoritesResult {
     );
 
     const addFavorite = useCallback((productId: string) => {
-        setMutationError(null);
-
-        try {
-            addFavoriteToStorage(productId);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        addFavoriteToStorage(productId);
     }, []);
 
     const removeFavorite = useCallback((productId: string) => {
-        setMutationError(null);
-
-        try {
-            removeFavoriteFromStorage(productId);
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        removeFavoriteFromStorage(productId);
     }, []);
 
     const toggleFavorite = useCallback(
@@ -73,15 +54,7 @@ export function useLocalFavorites(): UseLocalFavoritesResult {
     );
 
     const clearFavorites = useCallback(() => {
-        setMutationError(null);
-
-        try {
-            clearFavoritesStorage();
-        } catch (error) {
-            setMutationError(
-                error instanceof Error ? error : new Error('Unknown error'),
-            );
-        }
+        clearFavoritesStorage();
     }, []);
 
     return {
@@ -91,6 +64,5 @@ export function useLocalFavorites(): UseLocalFavoritesResult {
         removeFavorite,
         toggleFavorite,
         clearFavorites,
-        mutationError,
     };
 }

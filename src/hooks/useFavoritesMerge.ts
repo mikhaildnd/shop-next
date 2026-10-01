@@ -2,30 +2,32 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { mergeCartAction } from '@/app/(shop)/cart/actions';
+import { mergeFavoritesAction } from '@/app/(shop)/(catalog)/favorites/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
-import type { CartEntry, MergeStatus } from '@/lib/cart/cart.types';
-import { getCartEntries, removeMergedCartEntries } from '@/lib/cart/cart-storage';
-import type { CartDto } from '@/services/cart/cart.types';
+import {
+    clearFavorites,
+    getFavoriteIds,
+} from '@/lib/favorite/favorite-storage';
 
-interface UseCartMergeOptions {
+interface UseFavoritesMergeOptions {
     actionQueue: ActionQueue;
-    replaceCart: (cart: CartDto) => void;
+    replaceFavorites: (favoriteIds: string[]) => void;
 }
 
-export interface UseCartMergeResult {
+export interface UseFavoritesMergeResult {
     mergeStatus: MergeStatus;
     mergeAttempt: number;
     retryMerge: () => void;
 }
 
-export function useCartMerge({
+type MergeStatus = 'idle' | 'merging' | 'error';
+
+export function useFavoritesMerge({
     actionQueue,
-    replaceCart,
-}: UseCartMergeOptions): UseCartMergeResult {
+    replaceFavorites,
+}: UseFavoritesMergeOptions): UseFavoritesMergeResult {
     const [mergeStatus, setMergeStatus] = useState<MergeStatus>('idle');
     const [mergeAttempt, setMergeAttempt] = useState(0);
-
     const isMergingRef = useRef(false);
 
     const retryMerge = useCallback(() => {
@@ -42,31 +44,30 @@ export function useCartMerge({
             return;
         }
 
-        const localCartEntries = getCartEntries();
+        const favoriteIds = getFavoriteIds();
 
-        if (localCartEntries.length === 0) {
+        if (favoriteIds.length === 0) {
             return;
         }
 
-        const entriesToMerge: CartEntry[] = localCartEntries.map((entry) => ({
-            ...entry,
-        }));
+        const favoriteIdsToMerge = [...favoriteIds];
 
         isMergingRef.current = true;
 
-        async function mergeCart() {
+        async function merge() {
             setMergeStatus('merging');
 
             try {
                 await actionQueue.enqueue(async () => {
-                    const cart = await mergeCartAction(entriesToMerge);
+                    const mergedFavoriteIds = await mergeFavoritesAction(
+                        favoriteIdsToMerge,
+                    );
 
-                    replaceCart(cart);
-                    removeMergedCartEntries(entriesToMerge);
+                    replaceFavorites(mergedFavoriteIds);
+                    clearFavorites();
                 });
 
                 setMergeStatus('idle');
-                setMergeAttempt((attempt) => attempt + 1);
             } catch {
                 setMergeStatus('error');
             } finally {
@@ -74,13 +75,8 @@ export function useCartMerge({
             }
         }
 
-        async function startMerge() {
-            await Promise.resolve();
-            await mergeCart();
-        }
-
-        void startMerge();
-    }, [actionQueue, mergeAttempt, replaceCart]);
+        void merge();
+    }, [actionQueue, mergeAttempt, replaceFavorites]);
 
     return {
         mergeStatus,
