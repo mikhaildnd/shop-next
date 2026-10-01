@@ -33,7 +33,6 @@ export interface UseCartResult {
     clearCart: () => Promise<void>;
     cartCount: number;
     getCartItemQuantity: (productId: string) => number | undefined;
-    replaceCart: (cart: CartDto) => void;
 }
 
 type CartMutation = {
@@ -61,14 +60,6 @@ export function useCart({
 
         setItems(nextItems);
     }, []);
-
-    const replaceCart = useCallback(
-        (cart: CartDto) => {
-            confirmedItemsRef.current = cart.items;
-            updateVisibleItems();
-        },
-        [updateVisibleItems],
-    );
 
     const enqueueMutation = useCallback(
         (mutation: CartMutation, action: CartAction): Promise<void> => {
@@ -215,6 +206,5 @@ export function useCart({
         clearCart,
         cartCount,
         getCartItemQuantity,
-        replaceCart,
     };
 }
