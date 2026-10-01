@@ -9,9 +9,9 @@ import { PageMessage } from '@/components/PageMessage';
 import { routes } from '@/routes';
 
 export function CartContent() {
-    const { cartItems, cartSummary, isHydrated } = useCartContext();
+    const { cartItems, cartSummary } = useCartContext();
 
-    if (isHydrated && cartItems.length === 0) {
+    if (cartItems.length === 0) {
         return (
             <PageMessage
                 title="Корзина пуста"

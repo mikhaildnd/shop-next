@@ -12,8 +12,7 @@ interface CartSummaryDesktopProps {
 }
 
 export function CartSummaryDesktop({ className }: CartSummaryDesktopProps) {
-    const { isHydrated, productsState, cartSummary, retryProducts } =
-        useCartContext();
+    const { productsState, cartSummary, retryProducts } = useCartContext();
 
     const isInitialLoading =
         productsState.status === 'initial' ||
@@ -24,7 +23,7 @@ export function CartSummaryDesktop({ className }: CartSummaryDesktopProps) {
 
     const isProductsError = productsState.status === 'error';
 
-    if (!isHydrated || isInitialLoading) {
+    if (isInitialLoading) {
         return <CartSummaryDesktopSkeleton className={className} />;
     }
 

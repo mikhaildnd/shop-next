@@ -29,9 +29,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     const cart = user ? await getCart(user.id) : { items: [] };
 
     const products = user
-        ? await getCartProductsByIds(
-              cart.items.map((item) => item.productId),
-          )
+        ? await getCartProductsByIds(cart.items.map((item) => item.productId))
         : [];
 
     const initialCartState: CartInitialData = {
@@ -40,10 +38,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     };
 
     return (
-        <CartProvider
-            isAuthenticated={Boolean(session)}
-            initialCartState={initialCartState}
-        >
+        <CartProvider initialCartState={initialCartState}>
             <FavoritesProvider
                 isAuthenticated={Boolean(session)}
                 initialFavoriteIds={favoriteIds}

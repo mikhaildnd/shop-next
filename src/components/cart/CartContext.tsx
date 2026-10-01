@@ -4,14 +4,11 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { createContext, useContext, useMemo, useState } from 'react';
 
-import { CartMergeStatus } from '@/app/(shop)/cart/_components/CartMergeStatus';
-import { useCartMerge } from '@/hooks/useCartMerge';
+import { useCart } from '@/hooks/useCart';
 import {
     type CartProductsState,
     useCartProducts,
 } from '@/hooks/useCartProducts';
-import { useLocalCart } from '@/hooks/useLocalCart';
-import { useServerCart } from '@/hooks/useServerCart';
 import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartItemData, CartItemSnapshot } from '@/lib/cart/cart.types';
 import { getCartItemsData } from '@/lib/cart/get-cart-items-data';
@@ -24,7 +21,6 @@ import type { ProductDto } from '@/services/product/product.types';
 interface CartContextValue {
     cartItems: CartItemData[];
     cartSummary: CartSummaryData;
-    isHydrated: boolean;
     productsState: CartProductsState;
     retryProducts: () => void;
     cartCount: number;
@@ -43,101 +39,17 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 interface CartProviderProps {
-    isAuthenticated: boolean;
     initialCartState: CartInitialData;
     children: ReactNode;
 }
 
-interface LocalCartProviderProps {
-    children: ReactNode;
-}
-
-interface ServerCartProviderProps {
-    initialCartState: CartInitialData;
-    children: ReactNode;
-}
-
-function LocalCartProvider({ children }: LocalCartProviderProps) {
-    const cart = useLocalCart();
-
-    const productIds = useMemo(
-        () => cart.entries.map((entry) => entry.productId),
-        [cart.entries],
-    );
-    const products = useCartProducts({
-        productIds,
-        enabled: cart.isHydrated,
-    });
-
-    const cartItems = useMemo(
-        () =>
-            getCartItemsData(
-                cart.entries,
-                products.products,
-                products.missingProductIds,
-            ),
-        [cart.entries, products.products, products.missingProductIds],
-    );
-
-    const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
-
-    const addCartItem = (product: ProductDto, snapshot: CartItemSnapshot) => {
-        products.upsertProduct(product);
-        cart.addCartItem(product.id, snapshot);
-    };
-
-    const quantityAdjustments = useMemo(
-        () => getCartQuantityAdjustments(cartItems),
-        [cartItems],
-    );
-
-    const quantityAdjustmentProductIds = useMemo(
-        () => quantityAdjustments.map((adjustment) => adjustment.productId),
-        [quantityAdjustments],
-    );
-
-    const { setCartItemQuantity } = cart;
-
-    useEffect(() => {
-        if (quantityAdjustments.length === 0) {
-            return;
-        }
-
-        for (const adjustment of quantityAdjustments) {
-            setCartItemQuantity(adjustment.productId, adjustment.quantity);
-        }
-    }, [setCartItemQuantity, quantityAdjustments]);
-
-    const contextValue: CartContextValue = {
-        cartItems,
-        cartSummary,
-        isHydrated: cart.isHydrated,
-        productsState: products.state,
-        retryProducts: products.retry,
-        cartCount: cart.cartCount,
-        getCartItemQuantity: cart.getCartItemQuantity,
-        addCartItem,
-        incrementCartItem: cart.incrementCartItem,
-        decrementCartItem: cart.decrementCartItem,
-        removeCartItem: cart.removeCartItem,
-        clearCart: cart.clearCart,
-        quantityAdjustmentProductIds,
-    };
-
-    return (
-        <CartContext.Provider value={contextValue}>
-            {children}
-        </CartContext.Provider>
-    );
-}
-
-function ServerCartProvider({
+export function CartProvider({
     initialCartState,
     children,
-}: ServerCartProviderProps) {
+}: CartProviderProps) {
     const [actionQueue] = useState(createActionQueue);
 
-    const cart = useServerCart({
+    const cart = useCart({
         initialCartState: initialCartState.cart,
         actionQueue,
     });
@@ -164,11 +76,6 @@ function ServerCartProvider({
     );
 
     const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
-
-    const merge = useCartMerge({
-        actionQueue,
-        replaceCart: cart.replaceCart,
-    });
 
     const [quantityAdjustmentProductIds, setQuantityAdjustmentProductIds] =
         useState<string[]>([]);
@@ -220,7 +127,6 @@ function ServerCartProvider({
     const contextValue: CartContextValue = {
         cartItems,
         cartSummary,
-        isHydrated: true,
         productsState: products.state,
         retryProducts: products.retry,
         cartCount: cart.cartCount,
@@ -237,34 +143,10 @@ function ServerCartProvider({
     };
 
     return (
-        <>
-            <CartContext.Provider value={contextValue}>
-                {children}
-            </CartContext.Provider>
-
-            <CartMergeStatus
-                mergeStatus={merge.mergeStatus}
-                mergeAttempt={merge.mergeAttempt}
-                retryMerge={merge.retryMerge}
-            />
-        </>
+        <CartContext.Provider value={contextValue}>
+            {children}
+        </CartContext.Provider>
     );
-}
-
-export function CartProvider({
-    isAuthenticated,
-    initialCartState,
-    children,
-}: CartProviderProps) {
-    if (isAuthenticated) {
-        return (
-            <ServerCartProvider initialCartState={initialCartState}>
-                {children}
-            </ServerCartProvider>
-        );
-    }
-
-    return <LocalCartProvider>{children}</LocalCartProvider>;
 }
 
 export function useCartContext() {

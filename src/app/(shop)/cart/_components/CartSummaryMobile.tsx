@@ -25,8 +25,7 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
     const { direction } = useScrollDirection();
     const isNavigationHidden = direction === 'down';
 
-    const { isHydrated, productsState, cartSummary, retryProducts } =
-        useCartContext();
+    const { productsState, cartSummary, retryProducts } = useCartContext();
 
     const isInitialLoading =
         productsState.status === 'initial' ||
@@ -51,7 +50,7 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
                             'translate-y-(--bottom-nav-height)',
                     )}
                 >
-                    {!isHydrated || isInitialLoading ? (
+                    {isInitialLoading ? (
                         // Skeleton
                         <>
                             <div className="h-6 flex-1 animate-pulse rounded bg-gray-200" />
@@ -116,10 +115,7 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
                     )}
                 </div>
 
-                {!isHydrated ||
-                isInitialLoading ||
-                isProductsError ||
-                isRetrying ? null : (
+                {isInitialLoading || isProductsError || isRetrying ? null : (
                     <DrawerContent>
                         <DrawerHeader>
                             <DrawerTitle>Детали заказа</DrawerTitle>

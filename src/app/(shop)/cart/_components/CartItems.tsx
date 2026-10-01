@@ -1,5 +1,4 @@
 import { CartItem } from '@/app/(shop)/cart/_components/CartItem';
-import { CartItemSkeleton } from '@/app/(shop)/cart/_components/CartItemSkeleton';
 import { useCartContext } from '@/components/cart/CartContext';
 import { cn } from '@/lib/cn';
 
@@ -8,17 +7,7 @@ interface CartItemsProps {
 }
 
 export function CartItems({ className }: CartItemsProps) {
-    const { cartItems, isHydrated } = useCartContext();
-
-    if (!isHydrated) {
-        return (
-            <div className="flex flex-col divide-y divide-gray-200 rounded bg-white lg:col-span-2">
-                {Array.from({ length: 3 }, (_, index) => (
-                    <CartItemSkeleton key={index} />
-                ))}
-            </div>
-        );
-    }
+    const { cartItems } = useCartContext();
 
     const availableItems = cartItems.filter((item) => {
         return !item.product || item.product.stock > 0;

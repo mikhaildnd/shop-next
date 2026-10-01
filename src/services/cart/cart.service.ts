@@ -1,11 +1,7 @@
 import { cache } from 'react';
 
 import { prisma } from '@/db';
-import type {
-    CartEntry,
-    CartItemSnapshot,
-    CartProduct,
-} from '@/lib/cart/cart.types';
+import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 
 const cartProductSelect = {
@@ -380,69 +376,4 @@ export async function clearCart(userId: string): Promise<void> {
             cartId: cart.id,
         },
     });
-}
-
-export async function mergeCart(
-    userId: string,
-    entries: CartEntry[],
-): Promise<CartDto> {
-    const cart = await prisma.cart.upsert({
-        where: {
-            userId,
-        },
-        update: {},
-        create: {
-            userId,
-        },
-    });
-
-    const products = await prisma.product.findMany({
-        where: {
-            id: {
-                in: entries.map((entry) => entry.productId),
-            },
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    const productIds = new Set(products.map((product) => product.id));
-    const validEntries = entries.filter(
-        (entry) =>
-            productIds.has(entry.productId) &&
-            Number.isInteger(entry.quantity) &&
-            entry.quantity > 0,
-    );
-
-    if (validEntries.length > 0) {
-        await prisma.$transaction(
-            validEntries.map(({ productId, quantity, snapshot }) =>
-                prisma.cartItem.upsert({
-                    where: {
-                        cartId_productId: {
-                            cartId: cart.id,
-                            productId,
-                        },
-                    },
-                    update: {
-                        quantity,
-                        snapshotTitle: snapshot.title,
-                        snapshotImageUrl: snapshot.imageUrl,
-                        snapshotEffectivePrice: snapshot.effectivePrice,
-                    },
-                    create: {
-                        cartId: cart.id,
-                        productId,
-                        quantity,
-                        snapshotTitle: snapshot.title,
-                        snapshotImageUrl: snapshot.imageUrl,
-                        snapshotEffectivePrice: snapshot.effectivePrice,
-                    },
-                }),
-            ),
-        );
-    }
-
-    return getCart(userId);
 }

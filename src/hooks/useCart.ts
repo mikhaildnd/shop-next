@@ -15,12 +15,12 @@ import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import type { CartDto, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
-interface UseServerCartOptions {
+interface UseCartOptions {
     initialCartState: CartDto;
     actionQueue: ActionQueue;
 }
 
-export interface UseServerCartResult {
+export interface UseCartResult {
     items: CartItemDto[];
     addCartItem: (
         product: ProductDto,
@@ -43,10 +43,10 @@ type CartMutation = {
 
 type CartAction = () => Promise<void>;
 
-export function useServerCart({
+export function useCart({
     initialCartState,
     actionQueue,
-}: UseServerCartOptions): UseServerCartResult {
+}: UseCartOptions): UseCartResult {
     const [items, setItems] = useState(initialCartState.items);
 
     const confirmedItemsRef = useRef(initialCartState.items);
