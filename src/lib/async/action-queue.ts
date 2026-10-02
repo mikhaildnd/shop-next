@@ -1,17 +1,19 @@
-type AsyncAction = () => Promise<void>;
+type AsyncAction<T> = () => Promise<T>;
 
 export interface ActionQueue {
-    enqueue: (action: AsyncAction) => Promise<void>;
+    enqueue: <T>(action: AsyncAction<T>) => Promise<T>;
 }
 
 export function createActionQueue(): ActionQueue {
     let queue = Promise.resolve();
 
     return {
-        enqueue(action) {
+        enqueue<T>(action: AsyncAction<T>) {
             const next = queue.then(action, action);
-
-            queue = next.catch(() => undefined);
+            queue = next.then(
+                () => undefined,
+                () => undefined,
+            );
 
             return next;
         },

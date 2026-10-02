@@ -35,6 +35,7 @@ const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
 
 interface CartItemQuantityProps {
     productId: string;
+    quantity: number;
     maxQuantity?: number;
     size?: CartItemQuantitySize;
     variant?: CartItemQuantityVariant;
@@ -42,25 +43,20 @@ interface CartItemQuantityProps {
 }
 export function CartItemQuantity({
     productId,
+    quantity,
     maxQuantity,
     size = 'md',
     variant = 'primary',
     className,
 }: CartItemQuantityProps) {
-    const { incrementCartItem, decrementCartItem, getCartItemQuantity } =
-        useCartContext();
-
-    const quantity = getCartItemQuantity(productId);
+    const { incrementCartItem, decrementCartItem } = useCartContext();
 
     const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
 
-    if (quantity === undefined) {
-        return null;
-    }
-
     const disabled = maxQuantity === undefined;
 
-    const isIncrementDisabled = disabled || quantity >= maxQuantity;
+    const isIncrementDisabled =
+        maxQuantity === undefined || quantity >= maxQuantity;
 
     const handleDecrement = async () => {
         try {
@@ -112,7 +108,6 @@ export function CartItemQuantity({
             >
                 −
             </button>
-
             <span className="text-md flex min-w-10 items-center justify-center text-gray-500">
                 {quantity}
             </span>
@@ -129,7 +124,6 @@ export function CartItemQuantity({
             >
                 +
             </button>
-
             <DeletionDialog
                 open={isRemoveDialogOpen}
                 onOpenChange={setIsRemoveDialogOpen}

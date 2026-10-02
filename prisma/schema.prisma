@@ -129,6 +129,7 @@ model CartItem {
   cartId                 String   @map("cart_id")
   productId              String   @map("product_id")
   quantity               Int
+  quantityAdjustedFrom   Int?     @map("quantity_adjusted_from")
   snapshotTitle          String   @map("snapshot_title")
   snapshotImageUrl       String?  @map("snapshot_image_url")
   snapshotEffectivePrice Decimal  @map("snapshot_effective_price") @db.Decimal(10, 2)

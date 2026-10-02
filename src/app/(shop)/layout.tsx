@@ -7,8 +7,11 @@ import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import { MobileNavigation } from '@/components/header/MobileNavigation';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { getCart, getCartProductsByIds } from '@/services/cart/cart.service';
-import type { CartInitialData } from '@/services/cart/cart.types';
+import {
+    getCartProductsByIds,
+    reconcileCartQuantities,
+} from '@/services/cart/cart.service';
+import type { CartData } from '@/services/cart/cart.types';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
 
 interface ShopLayoutProps {
@@ -26,13 +29,13 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
 
     const favoriteIds = user ? await getFavoriteIds(user.id) : [];
 
-    const cart = user ? await getCart(user.id) : { items: [] };
+    const cart = user ? await reconcileCartQuantities(user.id) : { items: [] };
 
     const products = user
         ? await getCartProductsByIds(cart.items.map((item) => item.productId))
         : [];
 
-    const initialCartState: CartInitialData = {
+    const initialCartState: CartData = {
         cart,
         products,
     };

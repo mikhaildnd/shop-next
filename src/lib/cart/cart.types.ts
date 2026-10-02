@@ -14,14 +14,10 @@ export type CartItemSnapshot = {
     effectivePrice: number;
 };
 
-export type CartEntry = {
+export type CartItemData = {
     productId: string;
     quantity: number;
+    quantityAdjustedFrom: number | null;
     snapshot: CartItemSnapshot;
-};
-
-export type CartItemData = CartEntry & {
     product: CartProduct | null;
 };
-
-export type MergeStatus = 'idle' | 'merging' | 'error';

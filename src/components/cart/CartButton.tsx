@@ -13,10 +13,12 @@ interface CartButtonProps {
 }
 
 export function CartButton({ product, className }: CartButtonProps) {
-    const { addCartItem, getCartItemQuantity } = useCartContext();
+    const { addCartItem, getCartItem } = useCartContext();
+
+    const cartItem = getCartItem(product.id);
 
     const isOutOfStock = product.stock === 0;
-    const isInCart = getCartItemQuantity(product.id) !== undefined;
+    const isInCart = cartItem !== undefined;
 
     const handleAddCartItem = async () => {
         try {
@@ -40,6 +42,7 @@ export function CartButton({ product, className }: CartButtonProps) {
                 <CartItemQuantity
                     className="flex-1"
                     productId={product.id}
+                    quantity={cartItem.quantity}
                     maxQuantity={product.stock}
                 />
             ) : (
