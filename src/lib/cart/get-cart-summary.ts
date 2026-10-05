@@ -12,7 +12,7 @@ export type CartSummaryData = {
 
 export function getCartSummary(items: CartItemData[]): CartSummaryData {
     const availableItems = items.flatMap((item) => {
-        if (!item.product || item.product.stock === 0) {
+        if (item.product.stock === 0) {
             return [];
         }
 
@@ -20,8 +20,6 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
 
         return [{ product: item.product, availableQuantity }];
     });
-
-    const hasMissingProducts = items.some((item) => item.product === null);
 
     const regularPriceTotal = availableItems.reduce(
         (sum, { product, availableQuantity }) =>
@@ -55,8 +53,7 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
             item.quantity > item.product.stock,
     );
 
-    const isCheckoutDisabled =
-        availableItems.length === 0 || hasMissingProducts || hasStockIssues;
+    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
 
     return {
         regularPriceTotal,

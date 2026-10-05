@@ -9,13 +9,11 @@ interface CartItemsProps {
 export function CartItems({ className }: CartItemsProps) {
     const { cartItems } = useCartContext();
 
-    const availableItems = cartItems.filter((item) => {
-        return !item.product || item.product.stock > 0;
-    });
+    const availableItems = cartItems.filter((item) => item.product.stock > 0);
 
-    const unavailableItems = cartItems.filter((item) => {
-        return item.product?.stock === 0;
-    });
+    const unavailableItems = cartItems.filter(
+        (item) => item.product.stock === 0,
+    );
 
     return (
         <div className={cn('flex flex-col gap-6', className)}>
