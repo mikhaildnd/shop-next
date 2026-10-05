@@ -14,8 +14,6 @@ export type CartProduct = {
 };
 
 export type CartItemSnapshot = {
-    title: string;
-    imageUrl: string | null;
     effectivePrice: number;
 };
 

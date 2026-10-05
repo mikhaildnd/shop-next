@@ -67,8 +67,6 @@ function mapCartItem(item: {
     productId: string;
     quantity: number;
     quantityAdjustedFrom: number | null;
-    snapshotTitle: string;
-    snapshotImageUrl: string | null;
     snapshotEffectivePrice: { toString(): string };
 }): CartItemDto {
     return {
@@ -76,8 +74,6 @@ function mapCartItem(item: {
         quantity: item.quantity,
         quantityAdjustedFrom: item.quantityAdjustedFrom,
         snapshot: {
-            title: item.snapshotTitle,
-            imageUrl: item.snapshotImageUrl,
             effectivePrice: Number(item.snapshotEffectivePrice),
         },
     };
@@ -242,8 +238,6 @@ export async function addCartItem(
             productId,
             quantity: 1,
             quantityAdjustedFrom: null,
-            snapshotTitle: snapshot.title,
-            snapshotImageUrl: snapshot.imageUrl,
             snapshotEffectivePrice: snapshot.effectivePrice,
         },
         update: {},
