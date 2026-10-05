@@ -144,6 +144,7 @@ export function useCart({
                                       productId: product.id,
                                       title: product.title,
                                       slug: product.slug,
+                                      imageUrl: product.images[0]?.url ?? null,
                                       stock: product.stock,
                                       regularPrice: product.regularPrice,
                                       effectivePrice: product.effectivePrice,

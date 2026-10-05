@@ -5,7 +5,7 @@ import { headers } from 'next/headers';
 import { auth } from '@/auth/auth';
 import { getSession, requireSession } from '@/auth/session';
 import type { CartItemSnapshot } from '@/lib/cart/cart.types';
-import { getCartQuantityAdjustments } from '@/lib/cart/get-сart-quantity-adjustments';
+import { getCartQuantityAdjustments } from '@/lib/cart/get-cart-quantity-adjustments';
 import {
     addCartItem,
     applyCartQuantityAdjustments,

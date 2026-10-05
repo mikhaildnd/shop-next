@@ -2,7 +2,7 @@ import { cache } from 'react';
 
 import { prisma } from '@/db';
 import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
-import { getCartQuantityAdjustments } from '@/lib/cart/get-сart-quantity-adjustments';
+import { getCartQuantityAdjustments } from '@/lib/cart/get-cart-quantity-adjustments';
 import type {
     CartData,
     CartDto,

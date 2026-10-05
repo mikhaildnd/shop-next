@@ -41,16 +41,11 @@ export function getCartSummary(items: CartItemData[]): CartSummaryData {
     const discountAmount = regularPriceTotal - effectivePriceTotal;
 
     const hasPriceChanges = items.some(
-        (item) =>
-            item.product !== null &&
-            item.snapshot.effectivePrice !== item.product.effectivePrice,
+        (item) => item.snapshot.effectivePrice !== item.product.effectivePrice,
     );
 
     const hasStockIssues = items.some(
-        (item) =>
-            item.product !== null &&
-            item.product.stock > 0 &&
-            item.quantity > item.product.stock,
+        (item) => item.product.stock > 0 && item.quantity > item.product.stock,
     );
 
     const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
