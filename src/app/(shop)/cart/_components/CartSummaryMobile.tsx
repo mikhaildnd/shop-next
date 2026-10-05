@@ -24,7 +24,10 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
     const { direction } = useScrollDirection();
     const isNavigationHidden = direction === 'down';
 
-    const { cartSummary } = useCartContext();
+    const { cartSummary, isQuantityUpdating } = useCartContext();
+
+    const isCheckoutDisabled =
+        cartSummary.isCheckoutDisabled || isQuantityUpdating;
 
     return (
         <div className={className}>
@@ -54,9 +57,7 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
                         </span>
                     </DrawerTrigger>
 
-                    <Button disabled={cartSummary.isCheckoutDisabled}>
-                        К оформлению
-                    </Button>
+                    <Button disabled={isCheckoutDisabled}>К оформлению</Button>
                 </div>
 
                 <DrawerContent>
@@ -67,7 +68,12 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
                     <div className="flex flex-col gap-8 p-4">
                         <SummaryDetails />
 
-                        <Button disabled={cartSummary.isCheckoutDisabled}>
+                        <Button
+                            disabled={
+                                cartSummary.isCheckoutDisabled ||
+                                isQuantityUpdating
+                            }
+                        >
                             Перейти к оформлению
                         </Button>
                     </div>

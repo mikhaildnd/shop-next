@@ -1,14 +1,16 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
 import {
     addCartItemAction,
     clearCartAction,
-    decrementCartItemAction,
-    incrementCartItemAction,
     removeCartItemAction,
+    setCartItemQuantityAction,
 } from '@/app/(shop)/cart/actions';
+import { toast } from '@/components/ui/toast';
+import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
 import type { ActionQueue } from '@/lib/async/action-queue';
 import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import type { CartData, CartItemDto } from '@/services/cart/cart.types';
@@ -26,76 +28,88 @@ export interface UseCartResult {
         product: ProductDto,
         snapshot: CartItemSnapshot,
     ) => Promise<void>;
-    getCartItem: (productId: string) => CartItemDto | undefined;
-    incrementCartItem: (productId: string) => Promise<void>;
-    decrementCartItem: (productId: string) => Promise<void>;
+    incrementCartItem: (productId: string) => void;
+    decrementCartItem: (productId: string) => void;
     removeCartItem: (productId: string) => Promise<void>;
     clearCart: () => Promise<void>;
     cartCount: number;
+    pendingQuantity: PendingQuantity | null;
 }
 
-type CartMutation = {
-    id: number;
-    apply: (data: CartData) => CartData;
+type PendingQuantity = {
+    productId: string;
+    quantity: number;
 };
-
-type CartAction = () => Promise<CartData>;
 
 export function useCart({
     initialCartState,
     actionQueue,
 }: UseCartOptions): UseCartResult {
-    const [cartData, setCartData] = useState(initialCartState);
-    const confirmedCartDataRef = useRef(initialCartState);
+    const [pendingQuantity, setPendingQuantity] =
+        useState<PendingQuantity | null>(null);
 
-    const pendingMutationsRef = useRef<CartMutation[]>([]);
-    const nextMutationIdRef = useRef(0);
+    const pendingQuantityRef = useRef<PendingQuantity | null>(null);
 
-    const updateVisibleCartData = useCallback(() => {
-        const nextCartData = pendingMutationsRef.current.reduce(
-            (currentCartData, mutation) => mutation.apply(currentCartData),
-            confirmedCartDataRef.current,
-        );
+    const { data: cartData, mutate } = useOptimisticMutations({
+        initialData: initialCartState,
+        actionQueue,
+    });
 
-        setCartData(nextCartData);
-    }, []);
-
-    const enqueueMutation = useCallback(
-        (mutation: CartMutation, action: CartAction): Promise<void> => {
-            pendingMutationsRef.current.push(mutation);
-            updateVisibleCartData();
-
-            const execute = async () => {
-                try {
-                    confirmedCartDataRef.current = await action();
-                } finally {
-                    pendingMutationsRef.current =
-                        pendingMutationsRef.current.filter(
-                            (pendingMutation) =>
-                                pendingMutation.id !== mutation.id,
-                        );
-
-                    updateVisibleCartData();
-                }
-            };
-
-            return actionQueue.enqueue(execute);
+    const updatePendingQuantity = useCallback(
+        (nextPendingQuantity: PendingQuantity | null) => {
+            pendingQuantityRef.current = nextPendingQuantity;
+            setPendingQuantity(nextPendingQuantity);
         },
-        [actionQueue, updateVisibleCartData],
-    );
-
-    const createMutation = useCallback(
-        (apply: CartMutation['apply']): CartMutation => ({
-            id: nextMutationIdRef.current++,
-            apply,
-        }),
         [],
     );
 
+    const saveQuantity = useDebouncedCallback(
+        async (productId: string, quantity: number) => {
+            try {
+                await mutate({
+                    update: (data) => ({
+                        ...data,
+                        cart: {
+                            ...data.cart,
+                            items: data.cart.items.map((item) =>
+                                item.productId === productId
+                                    ? {
+                                          ...item,
+                                          quantity,
+                                          quantityAdjustedFrom: null,
+                                      }
+                                    : item,
+                            ),
+                        },
+                    }),
+                    action: () =>
+                        setCartItemQuantityAction(productId, quantity),
+                });
+            } catch {
+                toast.add({
+                    id: 'cart-quantity-error',
+                    description:
+                        'Не удалось изменить количество товара в корзине',
+                    type: 'error',
+                });
+            } finally {
+                const currentPendingQuantity = pendingQuantityRef.current;
+
+                if (
+                    currentPendingQuantity?.productId === productId &&
+                    currentPendingQuantity.quantity === quantity
+                ) {
+                    updatePendingQuantity(null);
+                }
+            }
+        },
+        400,
+    );
+
     const addCartItem = useCallback(
-        (product: ProductDto, snapshot: CartItemSnapshot): Promise<void> =>
-            enqueueMutation(
-                createMutation((data) => {
+        (product: ProductDto, snapshot: CartItemSnapshot) =>
+            mutate({
+                update: (data) => {
                     const hasItem = data.cart.items.some(
                         (item) => item.productId === product.id,
                     );
@@ -134,73 +148,85 @@ export function useCart({
                                       regularPrice: product.regularPrice,
                                       effectivePrice: product.effectivePrice,
                                       discountPercent: product.discountPercent,
+                                      measureType: product.measureType,
+                                      measureValue: product.measureValue,
                                   },
                               ],
                     };
-                }),
-                () => addCartItemAction(product.id, snapshot),
-            ),
-        [createMutation, enqueueMutation],
+                },
+                action: () => addCartItemAction(product.id, snapshot),
+            }),
+        [mutate],
     );
 
-    const getCartItem = useCallback(
-        (productId: string) =>
-            cartData.cart.items.find((item) => item.productId === productId),
+    const setPendingItemQuantity = useCallback(
+        (productId: string, quantity: number) => {
+            const currentPending = pendingQuantityRef.current;
+
+            if (currentPending && currentPending.productId !== productId) {
+                saveQuantity.flush();
+            }
+
+            updatePendingQuantity({
+                productId,
+                quantity,
+            });
+
+            saveQuantity(productId, quantity);
+        },
+        [saveQuantity, updatePendingQuantity],
+    );
+
+    const getVisibleQuantity = useCallback(
+        (productId: string) => {
+            const pending = pendingQuantityRef.current;
+
+            if (pending?.productId === productId) {
+                return pending.quantity;
+            }
+
+            return cartData.cart.items.find(
+                (item) => item.productId === productId,
+            )?.quantity;
+        },
         [cartData.cart.items],
     );
 
     const incrementCartItem = useCallback(
-        (productId: string): Promise<void> =>
-            enqueueMutation(
-                createMutation((data) => ({
-                    ...data,
-                    cart: {
-                        ...data.cart,
-                        items: data.cart.items.map((item) =>
-                            item.productId === productId
-                                ? {
-                                      ...item,
-                                      quantity: item.quantity + 1,
-                                      quantityAdjustedFrom: null,
-                                  }
-                                : item,
-                        ),
-                    },
-                })),
-                () => incrementCartItemAction(productId),
-            ),
-        [createMutation, enqueueMutation],
+        (productId: string) => {
+            const quantity = getVisibleQuantity(productId);
+
+            if (quantity === undefined) {
+                return;
+            }
+
+            setPendingItemQuantity(productId, quantity + 1);
+        },
+        [getVisibleQuantity, setPendingItemQuantity],
     );
 
     const decrementCartItem = useCallback(
-        (productId: string): Promise<void> =>
-            enqueueMutation(
-                createMutation((data) => ({
-                    ...data,
-                    cart: {
-                        ...data.cart,
-                        items: data.cart.items
-                            .map((item) =>
-                                item.productId === productId
-                                    ? {
-                                          ...item,
-                                          quantity: item.quantity - 1,
-                                          quantityAdjustedFrom: null,
-                                      }
-                                    : item,
-                            )
-                            .filter((item) => item.quantity > 0),
-                    },
-                })),
-                () => decrementCartItemAction(productId),
-            ),
-        [createMutation, enqueueMutation],
+        (productId: string) => {
+            const quantity = getVisibleQuantity(productId);
+
+            if (quantity === undefined || quantity <= 1) {
+                return;
+            }
+
+            setPendingItemQuantity(productId, quantity - 1);
+        },
+        [getVisibleQuantity, setPendingItemQuantity],
     );
 
     const removeCartItem = useCallback(
-        (productId: string): Promise<void> =>
-            enqueueMutation(
-                createMutation((data) => ({
+        (productId: string) => {
+            if (pendingQuantityRef.current?.productId === productId) {
+                saveQuantity.cancel();
+                updatePendingQuantity(null);
+            }
+
+            return mutate({
+                update: (data) => ({
                     ...data,
                     cart: {
                         ...data.cart,
@@ -208,26 +234,28 @@ export function useCart({
                             (item) => item.productId !== productId,
                         ),
                     },
-                })),
-                () => removeCartItemAction(productId),
-            ),
-        [createMutation, enqueueMutation],
+                }),
+                action: () => removeCartItemAction(productId),
+            });
+        },
+        [mutate, saveQuantity, updatePendingQuantity],
     );
 
-    const clearCart = useCallback(
-        (): Promise<void> =>
-            enqueueMutation(
-                createMutation((data) => ({
-                    ...data,
-                    cart: {
-                        ...data.cart,
-                        items: [],
-                    },
-                })),
-                clearCartAction,
-            ),
-        [createMutation, enqueueMutation],
-    );
+    const clearCart = useCallback(() => {
+        saveQuantity.cancel();
+        updatePendingQuantity(null);
+
+        return mutate({
+            update: (data) => ({
+                ...data,
+                cart: {
+                    ...data.cart,
+                    items: [],
+                },
+            }),
+            action: clearCartAction,
+        });
+    }, [mutate, saveQuantity, updatePendingQuantity]);
 
     const cartCount = cartData.cart.items.reduce(
         (total, item) => total + item.quantity,
@@ -238,11 +266,11 @@ export function useCart({
         items: cartData.cart.items,
         products: cartData.products,
         addCartItem,
-        getCartItem,
         incrementCartItem,
         decrementCartItem,
         removeCartItem,
         clearCart,
         cartCount,
+        pendingQuantity,
     };
 }

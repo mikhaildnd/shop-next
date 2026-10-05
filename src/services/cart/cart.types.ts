@@ -15,3 +15,9 @@ export type CartData = {
     cart: CartDto;
     products: CartProduct[];
 };
+
+export type CartQuantityAdjustment = {
+    productId: string;
+    quantity: number;
+    quantityAdjustedFrom: number | null;
+};

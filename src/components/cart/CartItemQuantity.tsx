@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import { useCartContext } from '@/components/cart/CartContext';
 import { DeletionDialog } from '@/components/DeletionDialog';
-import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 type CartItemQuantitySize = 'sm' | 'md';
@@ -49,42 +48,22 @@ export function CartItemQuantity({
     variant = 'primary',
     className,
 }: CartItemQuantityProps) {
-    const { incrementCartItem, decrementCartItem } = useCartContext();
+    const { incrementCartItem, decrementCartItem, removeCartItem } =
+        useCartContext();
 
     const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
 
     const disabled = maxQuantity === undefined;
 
-    const isIncrementDisabled =
-        maxQuantity === undefined || quantity >= maxQuantity;
+    const isIncrementDisabled = disabled || quantity >= maxQuantity;
 
     const handleDecrement = async () => {
-        try {
-            if (quantity === 1) {
-                setIsRemoveDialogOpen(true);
-                return;
-            }
-
-            await decrementCartItem(productId);
-        } catch {
-            toast.add({
-                id: 'cart-decrement-error',
-                description: 'Не удалось уменьшить количество товара в корзине',
-                type: 'error',
-            });
+        if (quantity === 1) {
+            setIsRemoveDialogOpen(true);
+            return;
         }
-    };
 
-    const handleIncrement = async () => {
-        try {
-            await incrementCartItem(productId);
-        } catch {
-            toast.add({
-                id: 'cart-increment-error',
-                description: 'Не удалось увеличить количество товара в корзине',
-                type: 'error',
-            });
-        }
+        decrementCartItem(productId);
     };
 
     return (
@@ -113,6 +92,9 @@ export function CartItemQuantity({
             </span>
 
             <button
+                // Firefox persists the disabled state without autocomplete="off".
+                // @ts-expect-error — autoComplete is valid HTML for button but missing from React types.
+                autoComplete="off"
                 type="button"
                 disabled={isIncrementDisabled}
                 className={cn(
@@ -120,7 +102,7 @@ export function CartItemQuantity({
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
-                onClick={handleIncrement}
+                onClick={() => incrementCartItem(productId)}
             >
                 +
             </button>
@@ -129,7 +111,7 @@ export function CartItemQuantity({
                 onOpenChange={setIsRemoveDialogOpen}
                 title="Удалить товар?"
                 description="Товар будет удалён из корзины."
-                onConfirm={() => decrementCartItem(productId)}
+                onConfirm={() => removeCartItem(productId)}
             />
         </div>
     );

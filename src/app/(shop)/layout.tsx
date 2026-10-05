@@ -7,10 +7,7 @@ import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import { MobileNavigation } from '@/components/header/MobileNavigation';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import {
-    getCartProductsByIds,
-    reconcileCartQuantities,
-} from '@/services/cart/cart.service';
+import { getReconciledCartData } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
 
@@ -29,16 +26,12 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
 
     const favoriteIds = user ? await getFavoriteIds(user.id) : [];
 
-    const cart = user ? await reconcileCartQuantities(user.id) : { items: [] };
-
-    const products = user
-        ? await getCartProductsByIds(cart.items.map((item) => item.productId))
-        : [];
-
-    const initialCartState: CartData = {
-        cart,
-        products,
-    };
+    const initialCartState: CartData = user
+        ? await getReconciledCartData(user.id)
+        : {
+              cart: { items: [] },
+              products: [],
+          };
 
     return (
         <CartProvider initialCartState={initialCartState}>

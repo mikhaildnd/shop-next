@@ -5,12 +5,14 @@ import { headers } from 'next/headers';
 import { auth } from '@/auth/auth';
 import { getSession, requireSession } from '@/auth/session';
 import type { CartItemSnapshot } from '@/lib/cart/cart.types';
+import { getCartQuantityAdjustments } from '@/lib/cart/get-сart-quantity-adjustments';
 import {
     addCartItem,
+    applyCartQuantityAdjustments,
     clearCart,
-    decrementCartItem,
-    incrementCartItem,
+    getCartData,
     removeCartItem,
+    setCartItemQuantity,
 } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
 
@@ -37,20 +39,29 @@ export async function addCartItemAction(
     return addCartItem(userId, productId, snapshot);
 }
 
-export async function incrementCartItemAction(
+export async function setCartItemQuantityAction(
     productId: string,
+    quantity: number,
 ): Promise<CartData> {
     const session = await requireSession();
+    const userId = session.user.id;
 
-    return incrementCartItem(session.user.id, productId);
-}
+    await setCartItemQuantity(userId, productId, quantity);
 
-export async function decrementCartItemAction(
-    productId: string,
-): Promise<CartData> {
-    const session = await requireSession();
+    const cartData = await getCartData(userId);
 
-    return decrementCartItem(session.user.id, productId);
+    const adjustments = getCartQuantityAdjustments(
+        cartData.cart,
+        cartData.products,
+    );
+
+    if (adjustments.length === 0) {
+        return cartData;
+    }
+
+    await applyCartQuantityAdjustments(userId, adjustments);
+
+    return getCartData(userId);
 }
 
 export async function removeCartItemAction(

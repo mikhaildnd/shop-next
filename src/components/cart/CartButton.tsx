@@ -42,7 +42,7 @@ export function CartButton({ product, className }: CartButtonProps) {
                 <CartItemQuantity
                     className="flex-1"
                     productId={product.id}
-                    quantity={cartItem.quantity}
+                    quantity={cartItem.displayQuantity}
                     maxQuantity={product.stock}
                 />
             ) : (

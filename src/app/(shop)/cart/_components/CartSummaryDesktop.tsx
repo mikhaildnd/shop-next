@@ -10,7 +10,10 @@ interface CartSummaryDesktopProps {
 }
 
 export function CartSummaryDesktop({ className }: CartSummaryDesktopProps) {
-    const { cartSummary } = useCartContext();
+    const { cartSummary, isQuantityUpdating } = useCartContext();
+
+    const isCheckoutDisabled =
+        cartSummary.isCheckoutDisabled || isQuantityUpdating;
 
     return (
         <div
@@ -22,9 +25,7 @@ export function CartSummaryDesktop({ className }: CartSummaryDesktopProps) {
         >
             <SummaryDetails />
 
-            <Button disabled={cartSummary.isCheckoutDisabled}>
-                Перейти к оформлению
-            </Button>
+            <Button disabled={isCheckoutDisabled}>Перейти к оформлению</Button>
         </div>
     );
 }

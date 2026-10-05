@@ -2,29 +2,48 @@ import { cache } from 'react';
 
 import { prisma } from '@/db';
 import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
+import { getCartQuantityAdjustments } from '@/lib/cart/get-сart-quantity-adjustments';
 import type {
     CartData,
     CartDto,
     CartItemDto,
+    CartQuantityAdjustment,
 } from '@/services/cart/cart.types';
+import type { MeasureType } from '@/services/product/product.types';
 
 const cartProductSelect = {
     title: true,
     slug: true,
+    images: {
+        orderBy: {
+            sortOrder: 'asc',
+        },
+        take: 1,
+        select: {
+            url: true,
+        },
+    },
     stock: true,
     regularPrice: true,
     effectivePrice: true,
     discountPercent: true,
+    measureType: true,
+    measureValue: true,
 } as const;
 
 function mapCartProduct(product: {
     id: string;
     title: string;
     slug: string;
+    images: {
+        url: string;
+    }[];
     stock: number;
     regularPrice: { toString(): string };
     effectivePrice: { toString(): string } | null;
     discountPercent: number | null;
+    measureType: MeasureType;
+    measureValue: { toString(): string };
 }): CartProduct {
     if (product.effectivePrice === null) {
         throw new Error('Product has null effectivePrice');
@@ -34,10 +53,13 @@ function mapCartProduct(product: {
         productId: product.id,
         title: product.title,
         slug: product.slug,
+        imageUrl: product.images[0]?.url ?? null,
         stock: product.stock,
         regularPrice: Number(product.regularPrice),
         effectivePrice: Number(product.effectivePrice),
         discountPercent: product.discountPercent ?? 0,
+        measureType: product.measureType,
+        measureValue: Number(product.measureValue),
     };
 }
 
@@ -61,7 +83,7 @@ function mapCartItem(item: {
     };
 }
 
-export const getCart = cache(async (userId: string): Promise<CartDto> => {
+export const getCart = async (userId: string): Promise<CartDto> => {
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
@@ -84,7 +106,7 @@ export const getCart = cache(async (userId: string): Promise<CartDto> => {
     return {
         items: cart.items.map(mapCartItem),
     };
-});
+};
 
 export async function getCartData(userId: string): Promise<CartData> {
     const cart = await getCart(userId);
@@ -98,96 +120,60 @@ export async function getCartData(userId: string): Promise<CartData> {
     };
 }
 
-export async function reconcileCartQuantities(
+export async function applyCartQuantityAdjustments(
     userId: string,
-): Promise<CartDto> {
+    adjustments: CartQuantityAdjustment[],
+): Promise<void> {
+    if (adjustments.length === 0) {
+        return;
+    }
+
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
         },
         select: {
             id: true,
-            items: {
-                select: {
-                    productId: true,
-                    quantity: true,
-                    quantityAdjustedFrom: true,
-                },
-            },
         },
     });
 
-    if (!cart || cart.items.length === 0) {
-        return { items: [] };
+    if (!cart) {
+        return;
     }
 
-    const products = await prisma.product.findMany({
-        where: {
-            id: {
-                in: cart.items.map((item) => item.productId),
-            },
-        },
-        select: {
-            id: true,
-            stock: true,
-        },
-    });
+    await prisma.$transaction(
+        adjustments.map((adjustment) =>
+            prisma.cartItem.update({
+                where: {
+                    cartId_productId: {
+                        cartId: cart.id,
+                        productId: adjustment.productId,
+                    },
+                },
+                data: {
+                    quantity: adjustment.quantity,
+                    quantityAdjustedFrom: adjustment.quantityAdjustedFrom,
+                },
+            }),
+        ),
+    );
+}
 
-    const stockByProductId = new Map(
-        products.map((product) => [product.id, product.stock]),
+export async function getReconciledCartData(userId: string): Promise<CartData> {
+    const cartData = await getCartData(userId);
+
+    const adjustments = getCartQuantityAdjustments(
+        cartData.cart,
+        cartData.products,
     );
 
-    const updates = cart.items.flatMap((item) => {
-        const stock = stockByProductId.get(item.productId);
-
-        if (stock === undefined || stock <= 0) {
-            return [];
-        }
-
-        if (item.quantity > stock) {
-            return [
-                prisma.cartItem.update({
-                    where: {
-                        cartId_productId: {
-                            cartId: cart.id,
-                            productId: item.productId,
-                        },
-                    },
-                    data: {
-                        quantity: stock,
-                        quantityAdjustedFrom: item.quantity,
-                    },
-                }),
-            ];
-        }
-
-        if (
-            item.quantityAdjustedFrom !== null &&
-            stock >= item.quantityAdjustedFrom
-        ) {
-            return [
-                prisma.cartItem.update({
-                    where: {
-                        cartId_productId: {
-                            cartId: cart.id,
-                            productId: item.productId,
-                        },
-                    },
-                    data: {
-                        quantityAdjustedFrom: null,
-                    },
-                }),
-            ];
-        }
-
-        return [];
-    });
-
-    if (updates.length > 0) {
-        await prisma.$transaction(updates);
+    if (adjustments.length === 0) {
+        return cartData;
     }
 
-    return getCart(userId);
+    await applyCartQuantityAdjustments(userId, adjustments);
+
+    return getCartData(userId);
 }
 
 export const getCartProductsByIds = cache(
@@ -266,10 +252,15 @@ export async function addCartItem(
     return getCartData(userId);
 }
 
-export async function incrementCartItem(
+export async function setCartItemQuantity(
     userId: string,
     productId: string,
-): Promise<CartData> {
+    quantity: number,
+): Promise<void> {
+    if (quantity < 1) {
+        throw new Error('Quantity must be at least 1');
+    }
+
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
@@ -280,34 +271,7 @@ export async function incrementCartItem(
     });
 
     if (!cart) {
-        return getCartData(userId);
-    }
-
-    const cartItem = await prisma.cartItem.findUnique({
-        where: {
-            cartId_productId: {
-                cartId: cart.id,
-                productId,
-            },
-        },
-        select: {
-            quantity: true,
-            product: {
-                select: {
-                    stock: true,
-                },
-            },
-        },
-    });
-
-    if (!cartItem) {
-        return getCartData(userId);
-    }
-
-    if (cartItem.quantity >= cartItem.product.stock) {
-        await reconcileCartQuantities(userId);
-
-        return getCartData(userId);
+        throw new Error('Cart not found');
     }
 
     await prisma.cartItem.update({
@@ -318,84 +282,10 @@ export async function incrementCartItem(
             },
         },
         data: {
-            quantity: {
-                increment: 1,
-            },
+            quantity,
             quantityAdjustedFrom: null,
         },
     });
-
-    await reconcileCartQuantities(userId);
-
-    return getCartData(userId);
-}
-
-export async function decrementCartItem(
-    userId: string,
-    productId: string,
-): Promise<CartData> {
-    const cart = await prisma.cart.findUnique({
-        where: {
-            userId,
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!cart) {
-        return getCartData(userId);
-    }
-
-    const cartItem = await prisma.cartItem.findUnique({
-        where: {
-            cartId_productId: {
-                cartId: cart.id,
-                productId,
-            },
-        },
-        select: {
-            quantity: true,
-        },
-    });
-
-    if (!cartItem) {
-        return getCartData(userId);
-    }
-
-    if (cartItem.quantity === 1) {
-        await prisma.cartItem.delete({
-            where: {
-                cartId_productId: {
-                    cartId: cart.id,
-                    productId,
-                },
-            },
-        });
-
-        await reconcileCartQuantities(userId);
-
-        return getCartData(userId);
-    }
-
-    await prisma.cartItem.update({
-        where: {
-            cartId_productId: {
-                cartId: cart.id,
-                productId,
-            },
-        },
-        data: {
-            quantity: {
-                decrement: 1,
-            },
-            quantityAdjustedFrom: null,
-        },
-    });
-
-    await reconcileCartQuantities(userId);
-
-    return getCartData(userId);
 }
 
 export async function removeCartItem(
