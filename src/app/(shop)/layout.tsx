@@ -19,9 +19,13 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     const session = await getSession();
 
     const user = session?.user;
+    const authenticatedUser = user && !user.isAnonymous ? user : null;
 
-    const profileUser: ProfileUser | null = user
-        ? { name: user.name, email: user.email }
+    const profileUser: ProfileUser | null = authenticatedUser
+        ? {
+              name: authenticatedUser.name,
+              email: authenticatedUser.email,
+          }
         : null;
 
     const favoriteIds = user ? await getFavoriteIds(user.id) : [];

@@ -7,7 +7,7 @@ import { routes } from '@/routes';
 export async function proxy(request: NextRequest) {
     const session = await getSession();
 
-    if (!session) {
+    if (!session || session.user.isAnonymous) {
         return NextResponse.redirect(new URL(routes.signInPage(), request.url));
     }
 

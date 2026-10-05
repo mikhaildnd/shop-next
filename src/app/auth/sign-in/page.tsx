@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation';
 
 import { AuthSurface } from '@/app/auth/_components/AuthSurface';
 import { EmailSignInForm } from '@/app/auth/sign-in/_components/EmailSignInForm';
-import { getSession } from '@/auth/session';
+import { getAuthenticatedUser } from '@/auth/session';
 import { routes } from '@/routes';
 
 export default async function SignInPage() {
-    const session = await getSession();
+    const user = await getAuthenticatedUser();
 
-    if (session) {
+    if (user) {
         redirect(routes.homePage());
     }
 

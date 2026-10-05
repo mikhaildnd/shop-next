@@ -14,7 +14,7 @@ import type { ChangeEmailForm, ChangeEmailFormErrors } from '@/auth/auth.types';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateChangeEmailForm } from '@/auth/form-validators/change-email';
-import { getSession } from '@/auth/session';
+import { getAuthenticatedUser } from '@/auth/session';
 import { routes } from '@/routes';
 import {
     activateRateLimit,
@@ -35,9 +35,9 @@ export async function requestChangeEmail(
     _: ChangeEmailState,
     formData: FormData,
 ): Promise<ChangeEmailState> {
-    const session = await getSession();
+    const user = await getAuthenticatedUser();
 
-    if (!session) {
+    if (!user) {
         redirect(routes.signInPage());
     }
 
@@ -58,7 +58,7 @@ export async function requestChangeEmail(
 
     const activeRateLimit = await getRateLimitState({
         action: 'change-email',
-        identifier: session.user.id,
+        identifier: user.id,
     });
 
     if (activeRateLimit) {
@@ -70,7 +70,7 @@ export async function requestChangeEmail(
 
     const consumeResult = await consumeRateLimit({
         action: 'change-email',
-        identifier: session.user.id,
+        identifier: user.id,
         max: EMAIL_CHANGE_ATTEMPTS,
         attemptLifetimeSeconds: EMAIL_CHANGE_ATTEMPT_LIFETIME_SECONDS,
     });
@@ -88,7 +88,7 @@ export async function requestChangeEmail(
         if (consumeResult.remainingAttempts === 0) {
             await activateRateLimit({
                 action: 'change-email',
-                identifier: session.user.id,
+                identifier: user.id,
                 windowSeconds: EMAIL_CHANGE_TIMEOUT_SECONDS,
             });
         }

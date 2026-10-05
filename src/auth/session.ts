@@ -18,3 +18,23 @@ export async function requireSession() {
 
     return session;
 }
+
+export async function getAuthenticatedUser() {
+    const session = await getSession();
+
+    if (!session || session.user.isAnonymous) {
+        return null;
+    }
+
+    return session.user;
+}
+
+export async function requireAuthenticatedUser() {
+    const user = await getAuthenticatedUser();
+
+    if (!user) {
+        throw new Error('Authenticated user not found.');
+    }
+
+    return user;
+}

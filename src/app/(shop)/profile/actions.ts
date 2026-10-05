@@ -14,7 +14,7 @@ import type {
 } from '@/app/(shop)/profile/profile.types';
 import { auth } from '@/auth/auth';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
-import { requireSession } from '@/auth/session';
+import { requireAuthenticatedUser } from '@/auth/session';
 import { routes } from '@/routes';
 import { changeUserName } from '@/services/user/user.service';
 
@@ -27,7 +27,7 @@ export async function changeName(
     _: ChangeNameState,
     formData: FormData,
 ): Promise<ChangeNameState> {
-    const session = await requireSession();
+    const user = await requireAuthenticatedUser();
 
     const form: ChangeNameForm = {
         name: String(formData.get('name') ?? ''),
@@ -41,7 +41,7 @@ export async function changeName(
         };
     }
 
-    await changeUserName(session.user.id, form.name);
+    await changeUserName(user.id, form.name);
 
     revalidatePath(routes.profilePage());
 
@@ -58,7 +58,7 @@ export async function changePassword(
     _: ChangePasswordState,
     formData: FormData,
 ): Promise<ChangePasswordState> {
-    await requireSession();
+    await requireAuthenticatedUser();
 
     const form: ChangePasswordForm = {
         currentPassword: String(formData.get('currentPassword') ?? ''),
@@ -99,6 +99,8 @@ export async function changePassword(
 }
 
 export async function deleteAccount(): Promise<void> {
+    await requireAuthenticatedUser();
+
     await auth.api.deleteUser({
         headers: await headers(),
         body: {},

@@ -6,25 +6,18 @@ import { ProfileName } from '@/app/(shop)/profile/_components/ProfileName';
 import { ProfilePassword } from '@/app/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(shop)/profile/_components/ProfileSection';
 import { deleteAccount } from '@/app/(shop)/profile/actions';
-import { getSession } from '@/auth/session';
+import { getAuthenticatedUser } from '@/auth/session';
 import { Button } from '@/components/button/Button';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { SubmitButton } from '@/components/button/SubmitButton';
 import { DeletionDialog } from '@/components/DeletionDialog';
 import { routes } from '@/routes';
-import { getUserById } from '@/services/user/user.service';
 
 export default async function ProfilePage() {
-    const session = await getSession();
-
-    if (!session) {
-        redirect(routes.signInPage());
-    }
-
-    const user = await getUserById(session.user.id);
+    const user = await getAuthenticatedUser();
 
     if (!user) {
-        return null;
+        redirect(routes.signInPage());
     }
 
     return (

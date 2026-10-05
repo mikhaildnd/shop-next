@@ -15,7 +15,7 @@ import type { AuthOtpForm, AuthOtpFormErrors } from '@/auth/auth.types';
 import { changeEmailCookie } from '@/auth/cookies/change-email-cookie';
 import { translateAuthError } from '@/auth/errors/translate-auth-error';
 import { validateOtpForm } from '@/auth/form-validators/email-otp';
-import { requireSession } from '@/auth/session';
+import { requireAuthenticatedUser } from '@/auth/session';
 import { routes } from '@/routes';
 import {
     activateRateLimit,
@@ -34,7 +34,7 @@ export async function verifyEmailChangeOtp(
     _: VerifyEmailChangeState,
     formData: FormData,
 ): Promise<VerifyEmailChangeState> {
-    const session = await requireSession();
+    const user = await requireAuthenticatedUser();
 
     const changeEmail = await changeEmailCookie.get();
 
@@ -69,7 +69,7 @@ export async function verifyEmailChangeOtp(
 
         await deleteRateLimit({
             action: 'change-email-otp',
-            identifier: session.user.id,
+            identifier: user.id,
         });
     } catch (error) {
         if (isAPIError(error)) {
@@ -96,7 +96,7 @@ interface ResendEmailChangeOtpResult {
 }
 
 export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult> {
-    const session = await requireSession();
+    const user = await requireAuthenticatedUser();
 
     const changeEmail = await changeEmailCookie.get();
 
@@ -108,7 +108,7 @@ export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult
 
     const activeRateLimit = await getRateLimitState({
         action: 'change-email-otp',
-        identifier: session.user.id,
+        identifier: user.id,
     });
 
     if (activeRateLimit) {
@@ -120,7 +120,7 @@ export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult
 
     const consumeResult = await consumeRateLimit({
         action: 'change-email-otp',
-        identifier: session.user.id,
+        identifier: user.id,
         max: EMAIL_CHANGE_OTP_ATTEMPTS,
         attemptLifetimeSeconds: EMAIL_CHANGE_OTP_ATTEMPT_LIFETIME_SECONDS,
     });
@@ -141,7 +141,7 @@ export async function resendChangeEmailOtp(): Promise<ResendEmailChangeOtpResult
             activeRateLimit =
                 (await activateRateLimit({
                     action: 'change-email-otp',
-                    identifier: session.user.id,
+                    identifier: user.id,
                     windowSeconds: EMAIL_CHANGE_OTP_TIMEOUT_SECONDS,
                 })) ?? undefined;
         }
