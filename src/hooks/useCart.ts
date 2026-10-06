@@ -34,6 +34,7 @@ export interface UseCartResult {
     clearCart: () => Promise<void>;
     cartCount: number;
     pendingQuantity: PendingQuantity | null;
+    replaceCartData: (cartData: CartData) => void;
 }
 
 type PendingQuantity = {
@@ -50,10 +51,21 @@ export function useCart({
 
     const pendingQuantityRef = useRef<PendingQuantity | null>(null);
 
-    const { data: cartData, mutate } = useOptimisticMutations({
+    const {
+        data: cartData,
+        mutate,
+        replace,
+    } = useOptimisticMutations({
         initialData: initialCartState,
         actionQueue,
     });
+
+    const replaceCartData = useCallback(
+        (nextCartData: CartData) => {
+            replace(nextCartData);
+        },
+        [replace],
+    );
 
     const updatePendingQuantity = useCallback(
         (nextPendingQuantity: PendingQuantity | null) => {
@@ -273,5 +285,6 @@ export function useCart({
         clearCart,
         cartCount,
         pendingQuantity,
+        replaceCartData,
     };
 }

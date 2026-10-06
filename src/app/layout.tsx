@@ -28,9 +28,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
             className={fontMain.variable}
         >
             <body className="flex min-h-screen flex-col antialiased">
-                {children}
-
                 <Toaster />
+                {children}
             </body>
         </html>
     );

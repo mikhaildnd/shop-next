@@ -34,3 +34,8 @@ export type ChangeEmailForm = {
     email: string;
 };
 export type ChangeEmailFormErrors = FormErrors<ChangeEmailForm>;
+
+export type PendingAccountMerge = {
+    anonymousUserId: string;
+    userId: string;
+};

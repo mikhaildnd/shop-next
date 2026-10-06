@@ -26,6 +26,7 @@ interface CartContextValue {
     removeCartItem: (productId: string) => Promise<void>;
     clearCart: () => Promise<void>;
     isQuantityUpdating: boolean;
+    replaceCartData: (cartData: CartData) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -91,6 +92,7 @@ export function CartProvider({
         removeCartItem: cart.removeCartItem,
         clearCart: cart.clearCart,
         isQuantityUpdating,
+        replaceCartData: cart.replaceCartData,
     };
 
     return (

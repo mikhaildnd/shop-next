@@ -15,6 +15,7 @@ interface OptimisticMutation<T> {
 interface UseOptimisticMutationsResult<T> {
     data: T;
     mutate: (mutation: OptimisticMutation<T>) => Promise<void>;
+    replace: (data: T) => void;
 }
 
 export function useOptimisticMutations<T>({
@@ -58,5 +59,13 @@ export function useOptimisticMutations<T>({
         [actionQueue, updateVisibleData],
     );
 
-    return { data, mutate };
+    const replace = useCallback(
+        (nextData: T) => {
+            confirmedDataRef.current = nextData;
+            updateVisibleData();
+        },
+        [updateVisibleData],
+    );
+
+    return { data, mutate, replace };
 }

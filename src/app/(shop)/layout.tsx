@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { getSession } from '@/auth/session';
+import { AccountMergeToast } from '@/components/account/AccountMergeToast';
 import { CartProvider } from '@/components/cart/CartContext';
 import { FavoritesProvider } from '@/components/favorite/FavoritesContext';
 import { Footer } from '@/components/footer/Footer';
@@ -10,6 +11,8 @@ import type { ProfileUser } from '@/components/header/profile/profile.types';
 import { getReconciledCartData } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
+
+export const dynamic = 'force-dynamic';
 
 interface ShopLayoutProps {
     children: ReactNode;
@@ -38,7 +41,11 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
           };
 
     return (
-        <CartProvider initialCartState={initialCartState}>
+        <CartProvider
+            key={user?.id ?? 'guest'}
+            initialCartState={initialCartState}
+        >
+            <AccountMergeToast key={user?.id ?? 'guest'} />
             <FavoritesProvider
                 isAuthenticated={Boolean(session)}
                 initialFavoriteIds={favoriteIds}

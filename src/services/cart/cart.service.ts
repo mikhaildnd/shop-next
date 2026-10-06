@@ -331,3 +331,62 @@ export async function clearCart(userId: string): Promise<CartData> {
 
     return getCartData(userId);
 }
+
+export async function mergeAnonymousCart(
+    anonymousUserId: string,
+    userId: string,
+): Promise<CartData> {
+    if (anonymousUserId === userId) {
+        return getCartData(userId);
+    }
+
+    const anonymousCart = await prisma.cart.findUnique({
+        where: {
+            userId: anonymousUserId,
+        },
+        include: {
+            items: true,
+        },
+    });
+
+    if (!anonymousCart || anonymousCart.items.length === 0) {
+        return getCartData(userId);
+    }
+
+    const userCart = await prisma.cart.upsert({
+        where: {
+            userId,
+        },
+        create: {
+            userId,
+        },
+        update: {},
+    });
+
+    await prisma.$transaction(
+        anonymousCart.items.map((item) =>
+            prisma.cartItem.upsert({
+                where: {
+                    cartId_productId: {
+                        cartId: userCart.id,
+                        productId: item.productId,
+                    },
+                },
+                create: {
+                    cartId: userCart.id,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    quantityAdjustedFrom: null,
+                    snapshotEffectivePrice: item.snapshotEffectivePrice,
+                },
+                update: {
+                    quantity: item.quantity,
+                    quantityAdjustedFrom: null,
+                    snapshotEffectivePrice: item.snapshotEffectivePrice,
+                },
+            }),
+        ),
+    );
+
+    return getCartData(userId);
+}
