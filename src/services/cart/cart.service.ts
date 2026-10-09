@@ -134,7 +134,7 @@ export async function applyCartQuantityAdjustments(
     });
 
     if (!cart) {
-        return;
+        throw new Error('Cart not found');
     }
 
     await prisma.$transaction(
@@ -169,7 +169,31 @@ export async function getReconciledCartData(userId: string): Promise<CartData> {
 
     await applyCartQuantityAdjustments(userId, adjustments);
 
-    return getCartData(userId);
+    const updatedItems = cartData.cart.items.map((item) => {
+        const adjustment = adjustments.find(
+            (adjustment) => adjustment.productId === item.productId,
+        );
+
+        if (!adjustment) {
+            return item;
+        }
+
+        return {
+            ...item,
+            quantity: adjustment.quantity,
+            quantityAdjustedFrom: adjustment.quantityAdjustedFrom,
+        };
+    });
+
+    const updatedCart = {
+        ...cartData.cart,
+        items: updatedItems,
+    };
+
+    return {
+        ...cartData,
+        cart: updatedCart,
+    };
 }
 
 export const getCartProductsByIds = cache(
@@ -243,7 +267,7 @@ export async function addCartItem(
         update: {},
     });
 
-    return getCartData(userId);
+    return getReconciledCartData(userId);
 }
 
 export async function setCartItemQuantity(
@@ -296,7 +320,7 @@ export async function removeCartItem(
     });
 
     if (!cart) {
-        return getCartData(userId);
+        throw new Error('Cart not found');
     }
 
     await prisma.cartItem.deleteMany({
@@ -306,7 +330,7 @@ export async function removeCartItem(
         },
     });
 
-    return getCartData(userId);
+    return getReconciledCartData(userId);
 }
 
 export async function clearCart(userId: string): Promise<CartData> {
@@ -320,7 +344,7 @@ export async function clearCart(userId: string): Promise<CartData> {
     });
 
     if (!cart) {
-        return getCartData(userId);
+        throw new Error('Cart not found');
     }
 
     await prisma.cartItem.deleteMany({
@@ -329,7 +353,12 @@ export async function clearCart(userId: string): Promise<CartData> {
         },
     });
 
-    return getCartData(userId);
+    return {
+        cart: {
+            items: [],
+        },
+        products: [],
+    };
 }
 
 export async function mergeAnonymousCart(
