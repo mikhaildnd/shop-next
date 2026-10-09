@@ -5,8 +5,7 @@ import { slides } from '@/app/(shop)/_components/main-slider/main-slider.data';
 import { MainSlider } from '@/app/(shop)/_components/main-slider/MainSlider';
 import { MapsLazy } from '@/app/(shop)/_components/maps/Maps.lazy';
 import { ProductsSectionSkeleton } from '@/app/(shop)/_components/products-section/ProductsSectionSkeleton';
-import { ProductsNewSection } from '@/app/(shop)/_components/ProductsNewSection';
-import { ProductsOfferSection } from '@/app/(shop)/_components/ProductsOfferSection';
+import { ProductsSliderSection } from '@/app/(shop)/_components/ProductsSliderSection';
 import { LazySection } from '@/components/wrappers/LazySection';
 
 export default async function HomePage() {
@@ -22,10 +21,16 @@ export default async function HomePage() {
                 />
             </div>
             <Suspense fallback={<ProductsSectionSkeleton />}>
-                <ProductsOfferSection />
+                <ProductsSliderSection
+                    collectionSlug="promotion"
+                    productsCount={8}
+                />
             </Suspense>
             <Suspense fallback={<ProductsSectionSkeleton />}>
-                <ProductsNewSection />
+                <ProductsSliderSection
+                    collectionSlug="new"
+                    productsCount={8}
+                />
             </Suspense>
             <BannerSpecialOffers />
             <LazySection>
