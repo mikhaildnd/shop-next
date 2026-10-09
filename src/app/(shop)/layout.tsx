@@ -46,10 +46,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
             initialCartState={initialCartState}
         >
             <AccountMergeToast key={user?.id ?? 'guest'} />
-            <FavoritesProvider
-                isAuthenticated={Boolean(session)}
-                initialFavoriteIds={favoriteIds}
-            >
+            <FavoritesProvider initialFavoriteIds={favoriteIds}>
                 <Header user={profileUser} />
                 <main className="wrapper grow overflow-x-clip">{children}</main>
                 <Footer className="pb-(--bottom-nav-height) md:pb-0" />

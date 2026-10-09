@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 
 import { CatalogPageLayout } from '@/app/(shop)/(catalog)/_components/CatalogPageLayout';
-import { AuthenticatedFavoritesContent } from '@/app/(shop)/(catalog)/favorites/_components/AuthenticatedFavoritesContent';
-import { GuestFavoritesContent } from '@/app/(shop)/(catalog)/favorites/_components/GuestFavoritesContent';
+import { FavoritesContent } from '@/app/(shop)/(catalog)/favorites/_components/FavoritesContent';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
-import { getSession } from '@/auth/session';
 import type { BreadcrumbItem } from '@/components/breadcrumbs/breadcrumbs.types';
 import { routes } from '@/routes';
 
@@ -20,7 +18,6 @@ export default async function FavoritesPage({
     searchParams,
 }: FavoritesPageProps) {
     const params = await searchParams;
-    const session = await getSession();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -37,14 +34,7 @@ export default async function FavoritesPage({
             title="Избранное"
             breadcrumbs={breadcrumbs}
         >
-            {session ? (
-                <AuthenticatedFavoritesContent
-                    params={params}
-                    userId={session.user.id}
-                />
-            ) : (
-                <GuestFavoritesContent params={params} />
-            )}
+            <FavoritesContent params={params} />
         </CatalogPageLayout>
     );
 }

@@ -9,24 +9,24 @@ import { getProductListingPageState } from '@/app/(shop)/(catalog)/lib/product-l
 import { parseProductListing } from '@/app/(shop)/(catalog)/lib/product-listing/parse-product-listing';
 import { PRODUCTS_PER_PAGE } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.constants';
 import type { ProductListingSearchParams } from '@/app/(shop)/(catalog)/lib/product-listing/product-listing.types';
+import { getSession } from '@/auth/session';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import {
-    getProductListingStats,
-    getProducts,
-} from '@/services/product/product.service';
+import { getFavoriteProductListing } from '@/services/product/product-listing.service';
 
-interface AuthenticatedFavoritesContentProps {
+interface FavoritesContentProps {
     params: ProductListingSearchParams;
-    userId: string;
 }
 
-export async function AuthenticatedFavoritesContent({
-    params,
-    userId,
-}: AuthenticatedFavoritesContentProps) {
+export async function FavoritesContent({ params }: FavoritesContentProps) {
+    const session = await getSession();
+
+    if (!session) {
+        return <EmptyFavoritesMessage />;
+    }
+
     const listing = parseProductListing(params, {
         filterDefaults: FAVORITES_FILTER_DEFAULTS,
     });
@@ -44,23 +44,16 @@ export async function AuthenticatedFavoritesContent({
         return <PaginationIssues issues={pagination.issues} />;
     }
 
-    const selection = {
-        query: listing.query,
-        filters: listing.filters,
-        selectionScope: { favorites: { some: { userId } } },
-    };
-
-    const [productsResult, listingStats] = await Promise.all([
-        getProducts({
-            ...selection,
+    const { products, totalProductsCount, listingStats } =
+        await getFavoriteProductListing({
+            userId: session.user.id,
+            query: listing.query,
+            filters: listing.filters,
+            sort: listing.sort,
             take: pagination.take,
             skip: pagination.skip,
-            sort: listing.sort,
-        }),
-        getProductListingStats(selection),
-    ]);
+        });
 
-    const { products, totalProductsCount } = productsResult;
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
     const pageState = getProductListingPageState({
@@ -74,14 +67,7 @@ export async function AuthenticatedFavoritesContent({
     }
 
     if (pageState === 'empty') {
-        return (
-            <PageMessage
-                title="В избранном пока ничего нет"
-                description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
-            >
-                <ButtonLink href={routes.catalogPage()}>В каталог</ButtonLink>
-            </PageMessage>
-        );
+        return <EmptyFavoritesMessage />;
     }
 
     const defaultFilters = getProductFilterDefaults(FAVORITES_FILTER_DEFAULTS);
@@ -98,5 +84,16 @@ export async function AuthenticatedFavoritesContent({
                 startPage={pagination.startPage}
             />
         </ProductListingProvider>
+    );
+}
+
+function EmptyFavoritesMessage() {
+    return (
+        <PageMessage
+            title="В избранном пока ничего нет"
+            description="Добавляйте понравившиеся товары, чтобы быстро найти их позже"
+        >
+            <ButtonLink href={routes.catalogPage()}>В каталог</ButtonLink>
+        </PageMessage>
     );
 }

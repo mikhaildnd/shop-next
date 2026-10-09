@@ -31,43 +31,6 @@ export async function removeFavorite(
     });
 }
 
-export async function mergeFavorites(
-    userId: string,
-    productIds: string[],
-): Promise<string[]> {
-    if (productIds.length > 0) {
-        const products = await prisma.product.findMany({
-            where: {
-                id: {
-                    in: productIds,
-                },
-            },
-            select: {
-                id: true,
-            },
-        });
-
-        await prisma.favorite.createMany({
-            data: products.map(({ id }) => ({
-                userId,
-                productId: id,
-            })),
-            skipDuplicates: true,
-        });
-    }
-
-    const favorites = await prisma.favorite.findMany({
-        where: {
-            userId,
-        },
-        select: {
-            productId: true,
-        },
-    });
-
-    return favorites.map(({ productId }) => productId);
-}
-
 export async function getFavoriteIds(userId: string): Promise<string[]> {
     const favorites = await prisma.favorite.findMany({
         where: {

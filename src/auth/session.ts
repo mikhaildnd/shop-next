@@ -38,3 +38,9 @@ export async function requireAuthenticatedUser() {
 
     return user;
 }
+
+export async function createAnonymousSession() {
+    return auth.api.signInAnonymous({
+        headers: await headers(),
+    });
+}

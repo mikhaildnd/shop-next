@@ -8,12 +8,12 @@ import {
 } from '@/app/(shop)/(catalog)/favorites/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
 
-interface UseServerFavoritesOptions {
+interface UseFavoritesOptions {
     initialFavoriteIds: string[];
     actionQueue: ActionQueue;
 }
 
-interface UseServerFavoritesReturn {
+interface UseFavoritesReturn {
     favoriteCount: number;
     favoriteIds: Set<string>;
     isFavorite: (productId: string) => boolean;
@@ -29,10 +29,10 @@ type FavoriteMutation = {
 
 type FavoriteAction = () => Promise<void>;
 
-export function useServerFavorites({
+export function useFavorites({
     initialFavoriteIds,
     actionQueue,
-}: UseServerFavoritesOptions): UseServerFavoritesReturn {
+}: UseFavoritesOptions): UseFavoritesReturn {
     const initialFavoriteIdsSet = new Set(initialFavoriteIds);
     const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIdsSet);
 
