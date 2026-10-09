@@ -12,10 +12,7 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { PageMessage } from '@/components/PageMessage';
 import { getPaginationParams } from '@/lib/pagination/get-pagination-params';
 import { routes } from '@/routes';
-import {
-    getProductListingStats,
-    getProducts,
-} from '@/services/product/product.service';
+import { getCollectionProductListing } from '@/services/product/product-listing.service';
 
 interface CollectionPageContentProps {
     params: ProductListingSearchParams;
@@ -42,32 +39,16 @@ export async function CollectionPageContent({
         return <PaginationIssues issues={pagination.issues} />;
     }
 
-    const selection = {
-        query: listing.query,
-        filters: listing.filters,
-        selectionScope: {
-            collections: {
-                some: {
-                    collection: {
-                        slug: collectionSlug,
-                    },
-                },
-            },
-        },
-    };
-
-    const [productsResult, listingStats] = await Promise.all([
-        getProducts({
-            ...selection,
+    const { products, totalProductsCount, listingStats } =
+        await getCollectionProductListing({
+            collectionSlug,
+            query: listing.query,
+            filters: listing.filters,
+            sort: listing.sort,
             take: pagination.take,
             skip: pagination.skip,
-            sort: listing.sort,
-        }),
+        });
 
-        getProductListingStats(selection),
-    ]);
-
-    const { products, totalProductsCount } = productsResult;
     const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
 
     const pageState = getProductListingPageState({

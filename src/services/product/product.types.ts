@@ -52,9 +52,16 @@ export type ProductListingStats = {
     hasInStockProducts: boolean;
 };
 
-export type ProductsResponse = {
+export type ProductsData = {
     products: ProductDto[];
+};
+
+export type ProductsDataWithCount = ProductsData & {
     totalProductsCount: number;
+};
+
+export type ProductListingData = ProductsDataWithCount & {
+    listingStats: ProductListingStats;
 };
 
 export type ProductWithRelations = Prisma.ProductGetPayload<{

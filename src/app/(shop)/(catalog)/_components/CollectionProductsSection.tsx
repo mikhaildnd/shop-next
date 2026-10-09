@@ -1,6 +1,6 @@
 import { ProductGrid } from '@/app/(shop)/(catalog)/_components/ProductGrid';
 import { getCollectionBySlug } from '@/services/collection/collection.service';
-import { getProducts } from '@/services/product/product.service';
+import { getProductsByCollection } from '@/services/product/product.service';
 
 interface CollectionProductsSectionProps {
     collectionSlug: string;
@@ -9,23 +9,12 @@ interface CollectionProductsSectionProps {
 
 export async function CollectionProductsSection({
     collectionSlug,
-    take = 12,
+    take = 8,
 }: CollectionProductsSectionProps) {
-    const [collection, { products }] = await Promise.all([
+    const [collection, products] = await Promise.all([
         getCollectionBySlug(collectionSlug),
 
-        getProducts({
-            take,
-            selectionScope: {
-                collections: {
-                    some: {
-                        collection: {
-                            slug: collectionSlug,
-                        },
-                    },
-                },
-            },
-        }),
+        getProductsByCollection(collectionSlug, take),
     ]);
 
     if (!collection || products.length === 0) {

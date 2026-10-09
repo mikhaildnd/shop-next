@@ -3,7 +3,7 @@ import type { ProductFilters } from '@/services/product/filters/filter.types';
 
 type GetProductWhereOptions = {
     query?: string | null;
-    filters: ProductFilters;
+    filters?: ProductFilters;
 };
 
 export function getProductWhere({
@@ -17,6 +17,10 @@ export function getProductWhere({
             contains: query,
             mode: 'insensitive',
         };
+    }
+
+    if (!filters) {
+        return where;
     }
 
     if (filters.sale) {
