@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
+import { PENDING_ACCOUNT_MERGE_COOKIE } from '@/auth/auth.constants';
 import { getSession } from '@/auth/session';
 import { AccountMergeToast } from '@/components/account/AccountMergeToast';
 import { CartProvider } from '@/components/cart/CartContext';
@@ -12,8 +14,6 @@ import { getReconciledCartData } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
 
-export const dynamic = 'force-dynamic';
-
 interface ShopLayoutProps {
     children: ReactNode;
 }
@@ -23,6 +23,10 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
 
     const user = session?.user;
     const authenticatedUser = user && !user.isAnonymous ? user : null;
+
+    const hasPendingAccountMerge = authenticatedUser
+        ? (await cookies()).has(PENDING_ACCOUNT_MERGE_COOKIE)
+        : false;
 
     const profileUser: ProfileUser | null = authenticatedUser
         ? {
@@ -45,7 +49,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
             key={user?.id ?? 'guest'}
             initialCartState={initialCartState}
         >
-            <AccountMergeToast key={user?.id ?? 'guest'} />
+            {hasPendingAccountMerge && <AccountMergeToast />}
             <FavoritesProvider initialFavoriteIds={favoriteIds}>
                 <Header user={profileUser} />
                 <main className="wrapper grow overflow-x-clip">{children}</main>
