@@ -39,19 +39,33 @@ export async function retryAccountMerge(): Promise<RetryAccountMergeActionResult
                 cart,
                 cartError: false,
             }))
-            .catch(() => ({
-                cart: null,
-                cartError: true,
-            })),
+            .catch((error: unknown) => {
+                console.error('Failed to load cart after account merge', {
+                    userId: user.id,
+                    error,
+                });
+
+                return {
+                    cart: null,
+                    cartError: true,
+                };
+            }),
         getFavoriteIds(user.id)
             .then((favoriteIds) => ({
                 favoriteIds,
                 favoritesError: false,
             }))
-            .catch(() => ({
-                favoriteIds: null,
-                favoritesError: true,
-            })),
+            .catch((error: unknown) => {
+                console.error('Failed to load favorites after account merge', {
+                    userId: user.id,
+                    error,
+                });
+
+                return {
+                    favoriteIds: null,
+                    favoritesError: true,
+                };
+            }),
     ]);
 
     return {
@@ -59,22 +73,6 @@ export async function retryAccountMerge(): Promise<RetryAccountMergeActionResult
         ...cartResult,
         ...favoritesResult,
     };
-
-    // const [cartResult, favoritesResult] = await Promise.allSettled([
-    //     getReconciledCart(user.id),
-    //     getFavoriteIds(user.id),
-    // ]);
-    //
-    // return {
-    //     status: 'success',
-    //     cart: cartResult.status === 'fulfilled' ? cartResult.value : null,
-    //     cartError: cartResult.status === 'rejected',
-    //     favoriteIds:
-    //         favoritesResult.status === 'fulfilled'
-    //             ? favoritesResult.value
-    //             : null,
-    //     favoritesError: favoritesResult.status === 'rejected',
-    // };
 }
 
 export async function cancelAccountMerge() {
