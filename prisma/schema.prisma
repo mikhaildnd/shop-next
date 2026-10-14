@@ -92,17 +92,22 @@ model ProductCollection {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false) @map("email_verified")
-  image         String?
-  phone         String?  @unique
-  role          UserRole @default(USER)
-  isAnonymous   Boolean?
-  isSeed        Boolean  @default(false) @map("is_seed")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  emailVerified     Boolean   @default(false) @map("email_verified")
+  image             String?
+  phone             String?   @unique
+  role              UserRole  @default(USER)
+  isAnonymous       Boolean?
+  mergeOperationId  String?   @map("merge_operation_id")
+  mergeTargetUserId String?   @map("merge_target_user_id")
+  mergeCompletedAt  DateTime? @map("merge_completed_at")
+  mergeDismissedAt  DateTime? @map("merge_dismissed_at")
+  mergeStartedAt    DateTime? @map("merge_started_at")
+  isSeed            Boolean   @default(false) @map("is_seed")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   cart      Cart?
   favorites Favorite[]

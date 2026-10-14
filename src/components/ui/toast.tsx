@@ -14,6 +14,13 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 
+interface ToastData {
+    secondaryActionProps?: Omit<
+        React.ButtonHTMLAttributes<HTMLButtonElement>,
+        'ref'
+    >;
+}
+
 const toast = ToastPrimitive.createToastManager();
 
 function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
@@ -199,7 +206,11 @@ function ToastIcon({ type }: { type: string | undefined }) {
     );
 }
 
-function ToastItem({ toast }: { toast: ToastPrimitive.Root.ToastObject }) {
+function ToastItem({
+    toast,
+}: {
+    toast: ToastPrimitive.Root.ToastObject<ToastData>;
+}) {
     let pulseClassName: string | undefined;
 
     if (toast.updateKey) {
@@ -214,14 +225,31 @@ function ToastItem({ toast }: { toast: ToastPrimitive.Root.ToastObject }) {
             toast={toast}
             className={pulseClassName}
         >
-            <ToastContent>
-                <ToastIcon type={toast.type} />
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <ToastTitle />
-                    <ToastDescription />
+            <ToastContent className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2">
+                <div className="flex min-w-0 items-center gap-3">
+                    <ToastIcon type={toast.type} />
+
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <ToastTitle />
+                        <ToastDescription />
+                    </div>
                 </div>
-                <ToastAction />
-                <ToastClose />
+
+                <ToastClose className="shrink-0 self-start justify-self-end" />
+
+                {(toast.actionProps || toast.data?.secondaryActionProps) && (
+                    <div className="col-span-2 flex justify-center gap-2">
+                        {toast.actionProps && <ToastAction />}
+
+                        {toast.data?.secondaryActionProps && (
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                {...toast.data.secondaryActionProps}
+                            />
+                        )}
+                    </div>
+                )}
             </ToastContent>
         </Toast>
     );

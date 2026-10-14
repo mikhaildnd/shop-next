@@ -9,7 +9,7 @@ import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import {
     addCartItem,
     clearCart,
-    getReconciledCartData,
+    getReconciledCart,
     removeCartItem,
     setCartItemQuantity,
 } from '@/services/cart/cart.service';
@@ -39,7 +39,7 @@ export async function setCartItemQuantityAction(
 
     await setCartItemQuantity(userId, productId, quantity);
 
-    return getReconciledCartData(userId);
+    return getReconciledCart(userId);
 }
 
 export async function removeCartItemAction(

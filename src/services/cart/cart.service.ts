@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { prisma } from '@/db';
+import type { Prisma } from '@/generated/prisma/client';
 import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
 import { getCartQuantityAdjustments } from '@/lib/cart/get-cart-quantity-adjustments';
 import type {
@@ -29,7 +30,7 @@ const cartProductSelect = {
     discountPercent: true,
     measureType: true,
     measureValue: true,
-} as const;
+} as const satisfies Prisma.ProductSelect;
 
 function mapCartProduct(product: {
     id: string;
@@ -79,7 +80,7 @@ function mapCartItem(item: {
     };
 }
 
-export const getCart = async (userId: string): Promise<CartDto> => {
+async function getCartItems(userId: string): Promise<CartDto> {
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
@@ -102,10 +103,32 @@ export const getCart = async (userId: string): Promise<CartDto> => {
     return {
         items: cart.items.map(mapCartItem),
     };
-};
+}
 
-export async function getCartData(userId: string): Promise<CartData> {
-    const cart = await getCart(userId);
+const getCartProductsByIds = cache(
+    async (productIds: string[]): Promise<CartProduct[]> => {
+        if (productIds.length === 0) {
+            return [];
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                id: {
+                    in: productIds,
+                },
+            },
+            select: {
+                id: true,
+                ...cartProductSelect,
+            },
+        });
+
+        return products.map(mapCartProduct);
+    },
+);
+
+async function getCart(userId: string): Promise<CartData> {
+    const cart = await getCartItems(userId);
     const products = await getCartProductsByIds(
         cart.items.map((item) => item.productId),
     );
@@ -116,7 +139,7 @@ export async function getCartData(userId: string): Promise<CartData> {
     };
 }
 
-export async function applyCartQuantityAdjustments(
+async function applyCartQuantityAdjustments(
     userId: string,
     adjustments: CartQuantityAdjustment[],
 ): Promise<void> {
@@ -155,8 +178,8 @@ export async function applyCartQuantityAdjustments(
     );
 }
 
-export async function getReconciledCartData(userId: string): Promise<CartData> {
-    const cartData = await getCartData(userId);
+export async function getReconciledCart(userId: string): Promise<CartData> {
+    const cartData = await getCart(userId);
 
     const adjustments = getCartQuantityAdjustments(
         cartData.cart,
@@ -195,28 +218,6 @@ export async function getReconciledCartData(userId: string): Promise<CartData> {
         cart: updatedCart,
     };
 }
-
-export const getCartProductsByIds = cache(
-    async (productIds: string[]): Promise<CartProduct[]> => {
-        if (productIds.length === 0) {
-            return [];
-        }
-
-        const products = await prisma.product.findMany({
-            where: {
-                id: {
-                    in: productIds,
-                },
-            },
-            select: {
-                id: true,
-                ...cartProductSelect,
-            },
-        });
-
-        return products.map(mapCartProduct);
-    },
-);
 
 export async function addCartItem(
     userId: string,
@@ -267,7 +268,7 @@ export async function addCartItem(
         update: {},
     });
 
-    return getReconciledCartData(userId);
+    return getReconciledCart(userId);
 }
 
 export async function setCartItemQuantity(
@@ -330,7 +331,7 @@ export async function removeCartItem(
         },
     });
 
-    return getReconciledCartData(userId);
+    return getReconciledCart(userId);
 }
 
 export async function clearCart(userId: string): Promise<CartData> {
@@ -359,63 +360,4 @@ export async function clearCart(userId: string): Promise<CartData> {
         },
         products: [],
     };
-}
-
-export async function mergeAnonymousCart(
-    anonymousUserId: string,
-    userId: string,
-): Promise<CartData> {
-    if (anonymousUserId === userId) {
-        return getCartData(userId);
-    }
-
-    const anonymousCart = await prisma.cart.findUnique({
-        where: {
-            userId: anonymousUserId,
-        },
-        include: {
-            items: true,
-        },
-    });
-
-    if (!anonymousCart || anonymousCart.items.length === 0) {
-        return getCartData(userId);
-    }
-
-    const userCart = await prisma.cart.upsert({
-        where: {
-            userId,
-        },
-        create: {
-            userId,
-        },
-        update: {},
-    });
-
-    await prisma.$transaction(
-        anonymousCart.items.map((item) =>
-            prisma.cartItem.upsert({
-                where: {
-                    cartId_productId: {
-                        cartId: userCart.id,
-                        productId: item.productId,
-                    },
-                },
-                create: {
-                    cartId: userCart.id,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    quantityAdjustedFrom: null,
-                    snapshotEffectivePrice: item.snapshotEffectivePrice,
-                },
-                update: {
-                    quantity: item.quantity,
-                    quantityAdjustedFrom: null,
-                    snapshotEffectivePrice: item.snapshotEffectivePrice,
-                },
-            }),
-        ),
-    );
-
-    return getCartData(userId);
 }

@@ -1,7 +1,6 @@
-import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
-import { PENDING_ACCOUNT_MERGE_COOKIE } from '@/auth/auth.constants';
+import { getPendingAccountMerge } from '@/auth/actions/account-merge.actions';
 import { getSession } from '@/auth/session';
 import { AccountMergeToast } from '@/components/account/AccountMergeToast';
 import { CartProvider } from '@/components/cart/CartContext';
@@ -10,7 +9,7 @@ import { Footer } from '@/components/footer/Footer';
 import { Header } from '@/components/header/Header';
 import { MobileNavigation } from '@/components/header/MobileNavigation';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
-import { getReconciledCartData } from '@/services/cart/cart.service';
+import { getReconciledCart } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
 import { getFavoriteIds } from '@/services/favorite/favorite.service';
 
@@ -24,8 +23,8 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     const user = session?.user;
     const authenticatedUser = user && !user.isAnonymous ? user : null;
 
-    const hasPendingAccountMerge = authenticatedUser
-        ? (await cookies()).has(PENDING_ACCOUNT_MERGE_COOKIE)
+    const hasPendingMerge = authenticatedUser
+        ? await getPendingAccountMerge()
         : false;
 
     const profileUser: ProfileUser | null = authenticatedUser
@@ -38,7 +37,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
     const favoriteIds = user ? await getFavoriteIds(user.id) : [];
 
     const initialCartState: CartData = user
-        ? await getReconciledCartData(user.id)
+        ? await getReconciledCart(user.id)
         : {
               cart: { items: [] },
               products: [],
@@ -49,7 +48,7 @@ export default async function ShopLayout({ children }: ShopLayoutProps) {
             key={user?.id ?? 'guest'}
             initialCartState={initialCartState}
         >
-            {hasPendingAccountMerge && <AccountMergeToast />}
+            {hasPendingMerge && <AccountMergeToast />}
             <FavoritesProvider initialFavoriteIds={favoriteIds}>
                 <Header user={profileUser} />
                 <main className="wrapper grow overflow-x-clip">{children}</main>

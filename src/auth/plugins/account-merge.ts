@@ -1,109 +1,100 @@
 import type { BetterAuthPlugin } from 'better-auth';
 import {
     createAuthEndpoint,
-    createAuthMiddleware,
     getSessionFromCtx,
     sensitiveSessionMiddleware,
 } from 'better-auth/api';
 
+import type { AccountMergeResult } from '@/auth/account-merge.types';
 import { PENDING_ACCOUNT_MERGE_COOKIE } from '@/auth/auth.constants';
-import type { PendingAccountMerge } from '@/auth/auth.types';
 import { prisma } from '@/db';
-import { mergeAnonymousCart } from '@/services/cart/cart.service';
+import { mergeAnonymousAccountData } from '@/services/account/account-merge.service';
+
+type AccountMergePreparation =
+    | {
+          success: true;
+          anonymousUserId: string;
+          userId: string;
+      }
+    | {
+          success: false;
+          reason:
+              | 'missing-cookie'
+              | 'invalid-cookie'
+              | 'different-user'
+              | 'merge-completed'
+              | 'merge-dismissed'
+              | 'invalid-anonymous-user';
+      };
+
+async function prepareAccountMerge(
+    pendingMergeCookie: string | false | null,
+    sessionUserId: string,
+): Promise<AccountMergePreparation> {
+    if (!pendingMergeCookie) {
+        return { success: false, reason: 'missing-cookie' };
+    }
+
+    let pendingMerge: unknown;
+
+    try {
+        pendingMerge = JSON.parse(pendingMergeCookie);
+    } catch {
+        return { success: false, reason: 'invalid-cookie' };
+    }
+
+    if (
+        typeof pendingMerge !== 'object' ||
+        pendingMerge === null ||
+        !('userId' in pendingMerge) ||
+        typeof pendingMerge.userId !== 'string' ||
+        !('anonymousUserId' in pendingMerge) ||
+        typeof pendingMerge.anonymousUserId !== 'string' ||
+        !pendingMerge.anonymousUserId
+    ) {
+        return { success: false, reason: 'invalid-cookie' };
+    }
+
+    if (pendingMerge.userId !== sessionUserId) {
+        return { success: false, reason: 'different-user' };
+    }
+
+    const anonymousUser = await prisma.user.findUnique({
+        where: { id: pendingMerge.anonymousUserId },
+        select: {
+            id: true,
+            isAnonymous: true,
+            mergeTargetUserId: true,
+            mergeCompletedAt: true,
+            mergeDismissedAt: true,
+        },
+    });
+
+    if (
+        anonymousUser?.isAnonymous !== true ||
+        anonymousUser.mergeTargetUserId !== sessionUserId
+    ) {
+        return { success: false, reason: 'invalid-anonymous-user' };
+    }
+
+    if (anonymousUser.mergeCompletedAt !== null) {
+        return { success: false, reason: 'merge-completed' };
+    }
+
+    if (anonymousUser.mergeDismissedAt !== null) {
+        return { success: false, reason: 'merge-dismissed' };
+    }
+
+    return {
+        success: true,
+        anonymousUserId: anonymousUser.id,
+        userId: sessionUserId,
+    };
+}
 
 export function accountMergePlugin() {
     return {
         id: 'account-merge',
-        hooks: {
-            after: [
-                {
-                    matcher: (context) =>
-                        context.path === '/sign-in/email' ||
-                        context.path === '/verify-email-otp',
-                    handler: createAuthMiddleware(async (ctx) => {
-                        const newSession = ctx.context.newSession;
-
-                        if (!newSession || newSession.user.isAnonymous) {
-                            return;
-                        }
-
-                        const pendingMergeCookie = await ctx.getSignedCookie(
-                            PENDING_ACCOUNT_MERGE_COOKIE,
-                            ctx.context.secret,
-                        );
-
-                        if (!pendingMergeCookie) {
-                            return;
-                        }
-
-                        let pendingMerge: PendingAccountMerge;
-
-                        try {
-                            pendingMerge = JSON.parse(pendingMergeCookie);
-                        } catch {
-                            await ctx.setSignedCookie(
-                                PENDING_ACCOUNT_MERGE_COOKIE,
-                                '',
-                                ctx.context.secret,
-                                { maxAge: 0 },
-                            );
-                            return;
-                        }
-
-                        if (pendingMerge.userId !== newSession.user.id) {
-                            return;
-                        }
-
-                        const anonymousUser = await prisma.user.findUnique({
-                            where: {
-                                id: pendingMerge.anonymousUserId,
-                            },
-                            select: {
-                                id: true,
-                                isAnonymous: true,
-                            },
-                        });
-
-                        if (!anonymousUser || !anonymousUser.isAnonymous) {
-                            await ctx.setSignedCookie(
-                                PENDING_ACCOUNT_MERGE_COOKIE,
-                                '',
-                                ctx.context.secret,
-                                { maxAge: 0 },
-                            );
-                            return;
-                        }
-
-                        try {
-                            await mergeAnonymousCart(
-                                anonymousUser.id,
-                                newSession.user.id,
-                            );
-
-                            await ctx.context.internalAdapter.deleteUser(
-                                anonymousUser.id,
-                            );
-
-                            await ctx.setSignedCookie(
-                                PENDING_ACCOUNT_MERGE_COOKIE,
-                                '',
-                                ctx.context.secret,
-                                { maxAge: 0 },
-                            );
-                        } catch (error) {
-                            ctx.context.logger.error(
-                                'Failed to auto-retry anonymous cart merge',
-                                {
-                                    anonymousUserId: anonymousUser.id,
-                                    userId: newSession.user.id,
-                                    error,
-                                },
-                            );
-                        }
-                    }),
-                },
-            ],
-        },
         endpoints: {
             getPendingAccountMerge: createAuthEndpoint(
                 '/account-merge/pending',
@@ -124,34 +115,13 @@ export function accountMergePlugin() {
                         ctx.context.secret,
                     );
 
-                    if (!pendingMergeCookie) {
-                        return ctx.json({
-                            hasPendingMerge: false,
-                        });
-                    }
-
-                    let pendingMerge: PendingAccountMerge;
-
-                    try {
-                        pendingMerge = JSON.parse(pendingMergeCookie);
-                    } catch {
-                        await ctx.setSignedCookie(
-                            PENDING_ACCOUNT_MERGE_COOKIE,
-                            '',
-                            ctx.context.secret,
-                            {
-                                maxAge: 0,
-                            },
-                        );
-
-                        return ctx.json({
-                            hasPendingMerge: false,
-                        });
-                    }
+                    const preparation = await prepareAccountMerge(
+                        pendingMergeCookie,
+                        session.user.id,
+                    );
 
                     return ctx.json({
-                        hasPendingMerge:
-                            pendingMerge.userId === session.user.id,
+                        hasPendingMerge: preparation.success,
                     });
                 },
             ),
@@ -161,13 +131,12 @@ export function accountMergePlugin() {
                     method: 'POST',
                     use: [sensitiveSessionMiddleware],
                 },
-                async (ctx) => {
+                async (ctx): Promise<AccountMergeResult> => {
                     const session = ctx.context.session;
 
                     if (!session || session.user.isAnonymous) {
                         return ctx.json({
-                            success: false,
-                            cart: null,
+                            status: 'unavailable',
                         });
                     }
 
@@ -176,104 +145,173 @@ export function accountMergePlugin() {
                         ctx.context.secret,
                     );
 
-                    if (!pendingMergeCookie) {
-                        return ctx.json({
-                            success: true,
-                            cart: null,
-                        });
+                    const preparation = await prepareAccountMerge(
+                        pendingMergeCookie,
+                        session.user.id,
+                    );
+
+                    if (!preparation.success) {
+                        return ctx.json({ status: 'unavailable' });
                     }
 
-                    let pendingMerge: PendingAccountMerge;
+                    const { anonymousUserId, userId } = preparation;
 
                     try {
-                        pendingMerge = JSON.parse(pendingMergeCookie);
-                    } catch {
-                        await ctx.setSignedCookie(
-                            PENDING_ACCOUNT_MERGE_COOKIE,
-                            '',
-                            ctx.context.secret,
-                            {
-                                maxAge: 0,
-                            },
+                        const result = await mergeAnonymousAccountData(
+                            anonymousUserId,
+                            userId,
                         );
 
-                        return ctx.json({
-                            success: true,
-                            cart: null,
-                        });
-                    }
-
-                    if (pendingMerge.userId !== session.user.id) {
-                        return ctx.json({
-                            success: false,
-                            cart: null,
-                        });
-                    }
-
-                    const anonymousUser = await prisma.user.findUnique({
-                        where: {
-                            id: pendingMerge.anonymousUserId,
-                        },
-                        select: {
-                            id: true,
-                            isAnonymous: true,
-                        },
-                    });
-
-                    if (!anonymousUser || !anonymousUser.isAnonymous) {
-                        await ctx.setSignedCookie(
-                            PENDING_ACCOUNT_MERGE_COOKIE,
-                            '',
-                            ctx.context.secret,
-                            {
-                                maxAge: 0,
-                            },
-                        );
-
-                        return ctx.json({
-                            success: true,
-                            cart: null,
-                        });
-                    }
-
-                    try {
-                        const cart = await mergeAnonymousCart(
-                            anonymousUser.id,
-                            session.user.id,
-                        );
-
-                        await ctx.context.internalAdapter.deleteUser(
-                            anonymousUser.id,
-                        );
-
-                        await ctx.setSignedCookie(
-                            PENDING_ACCOUNT_MERGE_COOKIE,
-                            '',
-                            ctx.context.secret,
-                            {
-                                maxAge: 0,
-                            },
-                        );
-
-                        return ctx.json({
-                            success: true,
-                            cart,
-                        });
+                        if (result === 'unavailable') {
+                            return ctx.json({ status: 'unavailable' });
+                        }
                     } catch (error) {
                         ctx.context.logger.error(
-                            'Failed to retry anonymous cart merge',
+                            'Failed to retry account data merge',
                             {
-                                anonymousUserId: anonymousUser.id,
-                                userId: session.user.id,
+                                anonymousUserId,
+                                userId,
                                 error,
                             },
                         );
 
-                        return ctx.json({
-                            success: false,
-                            cart: null,
-                        });
+                        return ctx.json({ status: 'failed' });
                     }
+
+                    try {
+                        await ctx.setSignedCookie(
+                            PENDING_ACCOUNT_MERGE_COOKIE,
+                            '',
+                            ctx.context.secret,
+                            { maxAge: 0 },
+                        );
+                    } catch (error) {
+                        ctx.context.logger.error(
+                            'Failed to clear pending account merge cookie',
+                            {
+                                anonymousUserId,
+                                userId,
+                                error,
+                            },
+                        );
+                    }
+
+                    try {
+                        await ctx.context.internalAdapter.deleteUser(
+                            anonymousUserId,
+                        );
+                    } catch (error) {
+                        ctx.context.logger.error(
+                            'Failed to delete anonymous user after account merge',
+                            {
+                                anonymousUserId,
+                                userId,
+                                error,
+                            },
+                        );
+                    }
+
+                    return ctx.json({ status: 'success' });
+                },
+            ),
+            cancelAccountMerge: createAuthEndpoint(
+                '/account-merge/cancel',
+                {
+                    method: 'POST',
+                    use: [sensitiveSessionMiddleware],
+                },
+                async (ctx): Promise<AccountMergeResult> => {
+                    const session = ctx.context.session;
+
+                    if (!session || session.user.isAnonymous) {
+                        return ctx.json({ status: 'unavailable' });
+                    }
+
+                    const pendingMergeCookie = await ctx.getSignedCookie(
+                        PENDING_ACCOUNT_MERGE_COOKIE,
+                        ctx.context.secret,
+                    );
+
+                    const preparation = await prepareAccountMerge(
+                        pendingMergeCookie,
+                        session.user.id,
+                    );
+
+                    if (!preparation.success) {
+                        if (
+                            preparation.reason === 'missing-cookie' ||
+                            preparation.reason === 'different-user'
+                        ) {
+                            return ctx.json({ status: 'unavailable' });
+                        }
+
+                        await ctx.setSignedCookie(
+                            PENDING_ACCOUNT_MERGE_COOKIE,
+                            '',
+                            ctx.context.secret,
+                            { maxAge: 0 },
+                        );
+
+                        return ctx.json({ status: 'unavailable' });
+                    }
+
+                    const { anonymousUserId, userId } = preparation;
+
+                    let result: { count: number };
+
+                    try {
+                        result = await prisma.user.updateMany({
+                            where: {
+                                id: anonymousUserId,
+                                isAnonymous: true,
+                                mergeTargetUserId: userId,
+                                mergeCompletedAt: null,
+                                mergeDismissedAt: null,
+                                mergeOperationId: null,
+                            },
+                            data: {
+                                mergeDismissedAt: new Date(),
+                            },
+                        });
+                    } catch (error) {
+                        ctx.context.logger.error(
+                            'Failed to cancel account merge',
+                            { anonymousUserId, userId, error },
+                        );
+
+                        return ctx.json({ status: 'failed' });
+                    }
+
+                    if (result.count !== 1) {
+                        return ctx.json({ status: 'unavailable' });
+                    }
+
+                    try {
+                        await ctx.context.internalAdapter.deleteUser(
+                            anonymousUserId,
+                        );
+                    } catch (error) {
+                        ctx.context.logger.error(
+                            'Failed to delete anonymous user after account merge cancellation',
+                            { anonymousUserId, userId, error },
+                        );
+                    }
+
+                    try {
+                        await ctx.setSignedCookie(
+                            PENDING_ACCOUNT_MERGE_COOKIE,
+                            '',
+                            ctx.context.secret,
+                            { maxAge: 0 },
+                        );
+                    } catch (error) {
+                        ctx.context.logger.error(
+                            'Failed to clear pending account merge cookie',
+                            { anonymousUserId, userId, error },
+                        );
+                    }
+
+                    return ctx.json({ status: 'success' });
                 },
             ),
         },

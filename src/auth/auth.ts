@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { createAuthMiddleware } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
 import { anonymous, emailOTP } from 'better-auth/plugins';
 
@@ -9,16 +10,25 @@ import {
     OTP_LENGTH,
     PENDING_ACCOUNT_MERGE_COOKIE,
     PENDING_ACCOUNT_MERGE_MAX_AGE,
+    SESSION_EXPIRES_IN_AGE,
+    SESSION_UPDATE_AGE,
 } from '@/auth/auth.constants';
 import { accountMergePlugin } from '@/auth/plugins/account-merge';
 import { prisma } from '@/db';
 import { sendEmailOtp } from '@/email/email.service';
-import { mergeAnonymousCart } from '@/services/cart/cart.service';
+import {
+    cleanupMergedAnonymousUsers,
+    mergeAnonymousAccountData,
+} from '@/services/account/account-merge.service';
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
+    session: {
+        expiresIn: SESSION_EXPIRES_IN_AGE,
+        updateAge: SESSION_UPDATE_AGE,
+    },
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
@@ -31,27 +41,34 @@ export const auth = betterAuth({
             enabled: true,
         },
     },
+    hooks: {
+        after: createAuthMiddleware(async (ctx) => {
+            const newSession = ctx.context.newSession;
+
+            if (!newSession || newSession.user.isAnonymous) return;
+
+            await ctx.context.runInBackgroundOrAwait(
+                cleanupMergedAnonymousUsers(
+                    newSession.user.id,
+                    (anonymousUserId) =>
+                        ctx.context.internalAdapter.deleteUser(anonymousUserId),
+                ),
+            );
+        }),
+    },
     plugins: [
         anonymous({
             disableDeleteAnonymousUser: true,
             onLinkAccount: async ({ anonymousUser, newUser, ctx }) => {
-                try {
-                    await mergeAnonymousCart(
-                        anonymousUser.user.id,
-                        newUser.user.id,
-                    );
-                } catch (error) {
-                    ctx.context.logger.error('Failed to merge anonymous cart', {
-                        anonymousUserId: anonymousUser.user.id,
-                        userId: newUser.user.id,
-                        error,
-                    });
+                const anonymousUserId = anonymousUser.user.id;
+                const userId = newUser.user.id;
 
+                async function savePendingAccountMerge() {
                     await ctx.setSignedCookie(
                         PENDING_ACCOUNT_MERGE_COOKIE,
                         JSON.stringify({
-                            anonymousUserId: anonymousUser.user.id,
-                            userId: newUser.user.id,
+                            anonymousUserId,
+                            userId,
                         }),
                         ctx.context.secret,
                         {
@@ -62,13 +79,91 @@ export const auth = betterAuth({
                             path: '/',
                         },
                     );
+                }
 
+                try {
+                    const result = await prisma.user.updateMany({
+                        where: {
+                            id: anonymousUserId,
+                            isAnonymous: true,
+                            mergeTargetUserId: null,
+                            mergeStartedAt: null,
+                        },
+                        data: {
+                            mergeTargetUserId: userId,
+                            mergeStartedAt: new Date(),
+                        },
+                    });
+
+                    if (result.count === 0) {
+                        const existingUser = await prisma.user.findUnique({
+                            where: { id: anonymousUserId },
+                            select: {
+                                isAnonymous: true,
+                                mergeTargetUserId: true,
+                                mergeStartedAt: true,
+                                mergeCompletedAt: true,
+                                mergeDismissedAt: true,
+                            },
+                        });
+
+                        if (
+                            existingUser?.isAnonymous !== true ||
+                            existingUser.mergeTargetUserId !== userId ||
+                            existingUser.mergeStartedAt === null ||
+                            existingUser.mergeCompletedAt !== null ||
+                            existingUser.mergeDismissedAt !== null
+                        ) {
+                            ctx.context.logger.error(
+                                'Anonymous account merge is not available',
+                                { anonymousUserId, userId },
+                            );
+
+                            await savePendingAccountMerge();
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    ctx.context.logger.error(
+                        'Failed to prepare account merge',
+                        { anonymousUserId, userId, error },
+                    );
+
+                    await savePendingAccountMerge();
                     return;
                 }
 
-                await ctx.context.internalAdapter.deleteUser(
-                    anonymousUser.user.id,
-                );
+                try {
+                    const result = await mergeAnonymousAccountData(
+                        anonymousUserId,
+                        userId,
+                    );
+
+                    if (result === 'unavailable') {
+                        await savePendingAccountMerge();
+                        return;
+                    }
+                } catch (error) {
+                    ctx.context.logger.error('Failed to merge account data', {
+                        anonymousUserId,
+                        userId,
+                        error,
+                    });
+
+                    await savePendingAccountMerge();
+                    return;
+                }
+
+                try {
+                    await ctx.context.internalAdapter.deleteUser(
+                        anonymousUserId,
+                    );
+                } catch (error) {
+                    ctx.context.logger.error(
+                        'Failed to delete anonymous user after account merge',
+                        { anonymousUserId, userId, error },
+                    );
+                }
             },
         }),
         accountMergePlugin(),
