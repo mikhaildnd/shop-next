@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback } from 'react';
 
 import {
     addFavoriteAction,
     removeFavoriteAction,
 } from '@/app/(app)/(shop)/(catalog)/favorites/actions';
+import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
 import type { ActionQueue } from '@/lib/async/action-queue';
 
 interface UseFavoritesOptions {
@@ -21,104 +22,50 @@ interface UseFavoritesReturn {
     replaceFavorites: (favoriteIds: string[]) => void;
 }
 
-type FavoriteMutation = {
-    id: number;
-    productId: string;
-    isFavorite: boolean;
-};
-
-type FavoriteAction = () => Promise<void>;
-
 export function useFavorites({
     initialFavoriteIds,
     actionQueue,
 }: UseFavoritesOptions): UseFavoritesReturn {
-    const initialFavoriteIdsSet = new Set(initialFavoriteIds);
-    const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIdsSet);
-
-    const favoriteIdsRef = useRef(favoriteIds);
-    const confirmedFavoriteIdsRef = useRef(initialFavoriteIdsSet);
-    const pendingMutationsRef = useRef<FavoriteMutation[]>([]);
-    const nextMutationIdRef = useRef(0);
-
-    const updateVisibleFavoriteIds = useCallback(() => {
-        const nextFavoriteIds = new Set(confirmedFavoriteIdsRef.current);
-
-        for (const mutation of pendingMutationsRef.current) {
-            if (mutation.isFavorite) {
-                nextFavoriteIds.add(mutation.productId);
-            } else {
-                nextFavoriteIds.delete(mutation.productId);
-            }
-        }
-
-        favoriteIdsRef.current = nextFavoriteIds;
-        setFavoriteIds(nextFavoriteIds);
-    }, []);
+    const {
+        data: favoriteIds,
+        mutate,
+        replace,
+        getData,
+    } = useOptimisticMutations<Set<string>>({
+        initialData: new Set(initialFavoriteIds),
+        actionQueue,
+    });
 
     const replaceFavorites = useCallback(
         (favoriteIds: string[]) => {
-            confirmedFavoriteIdsRef.current = new Set(favoriteIds);
-            updateVisibleFavoriteIds();
+            replace(new Set(favoriteIds));
         },
-        [updateVisibleFavoriteIds],
-    );
-
-    const enqueueMutation = useCallback(
-        (mutation: FavoriteMutation, action: FavoriteAction): Promise<void> => {
-            pendingMutationsRef.current.push(mutation);
-            updateVisibleFavoriteIds();
-
-            const execute = async () => {
-                try {
-                    await action();
-
-                    if (mutation.isFavorite) {
-                        confirmedFavoriteIdsRef.current = new Set(
-                            confirmedFavoriteIdsRef.current,
-                        );
-                        confirmedFavoriteIdsRef.current.add(mutation.productId);
-                    } else {
-                        const nextFavoriteIds = new Set(
-                            confirmedFavoriteIdsRef.current,
-                        );
-                        nextFavoriteIds.delete(mutation.productId);
-                        confirmedFavoriteIdsRef.current = nextFavoriteIds;
-                    }
-                } finally {
-                    pendingMutationsRef.current =
-                        pendingMutationsRef.current.filter(
-                            (pendingMutation) =>
-                                pendingMutation.id !== mutation.id,
-                        );
-
-                    updateVisibleFavoriteIds();
-                }
-            };
-
-            return actionQueue.enqueue(execute);
-        },
-        [actionQueue, updateVisibleFavoriteIds],
+        [replace],
     );
 
     const toggleFavorite = useCallback(
         (productId: string): Promise<void> => {
-            const currentIsFavorite = favoriteIdsRef.current.has(productId);
-            const nextIsFavorite = !currentIsFavorite;
+            const nextIsFavorite = !getData().has(productId);
 
-            return enqueueMutation(
-                {
-                    id: nextMutationIdRef.current++,
-                    productId,
-                    isFavorite: nextIsFavorite,
+            return mutate({
+                update: (currentFavoriteIds) => {
+                    const nextFavoriteIds = new Set(currentFavoriteIds);
+
+                    if (nextIsFavorite) {
+                        nextFavoriteIds.add(productId);
+                    } else {
+                        nextFavoriteIds.delete(productId);
+                    }
+
+                    return nextFavoriteIds;
                 },
-                () =>
+                action: () =>
                     nextIsFavorite
                         ? addFavoriteAction(productId)
                         : removeFavoriteAction(productId),
-            );
+            });
         },
-        [enqueueMutation],
+        [getData, mutate],
     );
 
     const isFavorite = useCallback(

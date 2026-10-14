@@ -9,11 +9,12 @@ interface UseOptimisticMutationsOptions<T> {
 
 interface OptimisticMutation<T> {
     update: (data: T) => T;
-    action: () => Promise<T>;
+    action: () => Promise<T | void>;
 }
 
 interface UseOptimisticMutationsResult<T> {
     data: T;
+    getData: () => T;
     mutate: (mutation: OptimisticMutation<T>) => Promise<void>;
     replace: (data: T) => void;
 }
@@ -27,14 +28,18 @@ export function useOptimisticMutations<T>({
 
     const pendingMutationsRef = useRef<OptimisticMutation<T>[]>([]);
 
-    const updateVisibleData = useCallback(() => {
-        const nextData = pendingMutationsRef.current.reduce(
-            (currentData, mutation) => mutation.update(currentData),
-            confirmedDataRef.current,
-        );
+    const getData = useCallback(
+        () =>
+            pendingMutationsRef.current.reduce(
+                (currentData, mutation) => mutation.update(currentData),
+                confirmedDataRef.current,
+            ),
+        [],
+    );
 
-        setData(nextData);
-    }, []);
+    const updateVisibleData = useCallback(() => {
+        setData(getData());
+    }, [getData]);
 
     const mutate = useCallback(
         (mutation: OptimisticMutation<T>): Promise<void> => {
@@ -43,7 +48,12 @@ export function useOptimisticMutations<T>({
 
             const execute = async () => {
                 try {
-                    confirmedDataRef.current = await mutation.action();
+                    const result = await mutation.action();
+
+                    confirmedDataRef.current =
+                        result === undefined
+                            ? mutation.update(confirmedDataRef.current)
+                            : result;
                 } finally {
                     pendingMutationsRef.current =
                         pendingMutationsRef.current.filter(
@@ -67,5 +77,5 @@ export function useOptimisticMutations<T>({
         [updateVisibleData],
     );
 
-    return { data, mutate, replace };
+    return { data, mutate, replace, getData };
 }
