@@ -12,6 +12,7 @@ interface FavoritesContextValue {
     favoriteCount: number;
     isFavorite: (productId: string) => boolean;
     toggleFavorite: (productId: string) => void | Promise<void>;
+    replaceFavorites: (favoriteIds: string[]) => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -37,6 +38,7 @@ export function FavoritesProvider({
         favoriteCount: favorites.favoriteCount,
         isFavorite: favorites.isFavorite,
         toggleFavorite: favorites.toggleFavorite,
+        replaceFavorites: favorites.replaceFavorites,
     };
 
     return (

@@ -6,16 +6,15 @@ export type AccountMergeResult =
 export type RetryAccountMergeActionResult =
     | {
           status: 'success';
-          cart: CartData;
-          cartError: false;
-      }
-    | {
-          status: 'success';
-          cart: null;
-          cartError: true;
+          cart: CartData | null;
+          cartError: boolean;
+          favoriteIds: string[] | null;
+          favoritesError: boolean;
       }
     | {
           status: 'unavailable' | 'failed';
           cart: null;
           cartError: false;
+          favoriteIds: null;
+          favoritesError: false;
       };

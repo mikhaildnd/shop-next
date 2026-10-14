@@ -8,7 +8,7 @@ import {
     clearCartAction,
     removeCartItemAction,
     setCartItemQuantityAction,
-} from '@/app/(shop)/cart/actions';
+} from '@/app/(app)/(shop)/cart/actions';
 import { toast } from '@/components/ui/toast';
 import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
 import type { ActionQueue } from '@/lib/async/action-queue';

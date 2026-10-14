@@ -1,0 +1,37 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+
+import { AuthSurface } from '@/app/(app)/auth/_components/AuthSurface';
+import { EmailSignInForm } from '@/app/(app)/auth/sign-in/_components/EmailSignInForm';
+import { getAuthenticatedUser } from '@/auth/session';
+import { routes } from '@/routes';
+
+export default async function SignInPage() {
+    const user = await getAuthenticatedUser();
+
+    if (user) {
+        redirect(routes.homePage());
+    }
+
+    return (
+        <AuthSurface>
+            <AuthSurface.Header title="Вход в магазин" />
+
+            <EmailSignInForm />
+
+            <AuthSurface.Footer>
+                <div className="flex justify-center">
+                    <p className="text-sm">
+                        Впервые на сайте?{' '}
+                        <Link
+                            href={routes.signUpPage()}
+                            className="link-style focus-ring"
+                        >
+                            Создайте аккаунт
+                        </Link>
+                    </p>
+                </div>
+            </AuthSurface.Footer>
+        </AuthSurface>
+    );
+}

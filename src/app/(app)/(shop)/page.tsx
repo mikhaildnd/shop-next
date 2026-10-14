@@ -1,0 +1,41 @@
+import { Suspense } from 'react';
+
+import { BannerSpecialOffers } from '@/app/(app)/(shop)/_components/banners/BannerSpecialOffers';
+import { slides } from '@/app/(app)/(shop)/_components/main-slider/main-slider.data';
+import { MainSlider } from '@/app/(app)/(shop)/_components/main-slider/MainSlider';
+import { MapsLazy } from '@/app/(app)/(shop)/_components/maps/Maps.lazy';
+import { ProductsSectionSkeleton } from '@/app/(app)/(shop)/_components/products-section/ProductsSectionSkeleton';
+import { ProductsSliderSection } from '@/app/(app)/(shop)/_components/ProductsSliderSection';
+import { LazySection } from '@/components/wrappers/LazySection';
+
+export default async function HomePage() {
+    return (
+        <div className="page-spacing flex flex-col gap-y-10 md:mt-6 md:gap-y-20 lg:mt-10">
+            <div className="-mx-(--section-padding) md:mx-0">
+                <MainSlider
+                    className="h-[500px] w-full rounded-b-3xl md:rounded-3xl xl:h-[680px]"
+                    slides={slides}
+                    autoplay={{
+                        delay: 10000,
+                    }}
+                />
+            </div>
+            <Suspense fallback={<ProductsSectionSkeleton />}>
+                <ProductsSliderSection
+                    collectionSlug="promotion"
+                    productsCount={8}
+                />
+            </Suspense>
+            <Suspense fallback={<ProductsSectionSkeleton />}>
+                <ProductsSliderSection
+                    collectionSlug="new"
+                    productsCount={8}
+                />
+            </Suspense>
+            <BannerSpecialOffers />
+            <LazySection>
+                <MapsLazy />
+            </LazySection>
+        </div>
+    );
+}

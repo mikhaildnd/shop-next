@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
     addFavoriteAction,
     removeFavoriteAction,
-} from '@/app/(shop)/(catalog)/favorites/actions';
+} from '@/app/(app)/(shop)/(catalog)/favorites/actions';
 import type { ActionQueue } from '@/lib/async/action-queue';
 
 interface UseFavoritesOptions {

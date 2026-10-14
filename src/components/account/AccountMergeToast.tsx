@@ -7,6 +7,7 @@ import {
     retryAccountMerge,
 } from '@/auth/actions/account-merge.actions';
 import { useCartContext } from '@/components/cart/CartContext';
+import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,6 +24,7 @@ const ACCOUNT_MERGE_TOAST_ID = 'account-merge';
 
 export function AccountMergeToast() {
     const { replaceCartData } = useCartContext();
+    const { replaceFavorites } = useFavoritesContext();
     const isRetryingRef = useRef(false);
     const isCancellingRef = useRef(false);
 
@@ -166,11 +168,25 @@ export function AccountMergeToast() {
                 const result = await retryAccountMerge();
 
                 if (result.status === 'success') {
-                    if (result.cartError) {
+                    if (result.cart) {
+                        replaceCartData(result.cart);
+                    }
+
+                    if (result.favoriteIds !== null) {
+                        replaceFavorites(result.favoriteIds);
+                    }
+
+                    if (result.cartError || result.favoritesError) {
+                        const failedData = [
+                            result.cartError && 'корзину',
+                            result.favoritesError && 'избранное',
+                        ]
+                            .filter(Boolean)
+                            .join(' и ');
+
                         toast.update(ACCOUNT_MERGE_TOAST_ID, {
-                            title: 'Данные аккаунта синхронизированы, но не удалось обновить корзину',
-                            description:
-                                'Обновите страницу, чтобы загрузить актуальное состояние корзины',
+                            title: 'Не удалось обновить данные',
+                            description: `Перенос аккаунта завершён, но не удалось обновить ${failedData}. Обновите страницу, чтобы загрузить актуальные данные.`,
                             timeout: 0,
                             type: 'error',
                             actionProps: {
@@ -183,10 +199,6 @@ export function AccountMergeToast() {
                         });
 
                         return;
-                    }
-
-                    if (result.cart) {
-                        replaceCartData(result.cart);
                     }
 
                     toast.update(ACCOUNT_MERGE_TOAST_ID, {
@@ -250,7 +262,7 @@ export function AccountMergeToast() {
         return () => {
             toast.close(ACCOUNT_MERGE_TOAST_ID);
         };
-    }, [replaceCartData]);
+    }, [replaceCartData, replaceFavorites]);
 
     return (
         <AlertDialog
