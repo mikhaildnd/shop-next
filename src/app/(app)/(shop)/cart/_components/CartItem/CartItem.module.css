@@ -1,0 +1,80 @@
+.item {
+    display: grid;
+    grid-template-areas:
+            'image . price'
+            'image . .'
+            'image . details'
+            '. . .'
+            'controls controls controls';
+    grid-template-columns: 6rem .5rem minmax(0, 1fr);
+    grid-template-rows: min-content .3rem minmax(0, 1fr) .625rem min-content;
+}
+
+.item:has(.info) {
+    grid-template-areas:
+        'image . price'
+        'image . .'
+        'image . details'
+        '. . .'
+        'info info info'
+        '. . .'
+        'controls controls controls';
+    grid-template-rows: min-content .3rem minmax(0, 1fr) .625rem auto .625rem min-content;
+}
+
+.image {
+    grid-area: image;
+}
+
+.details {
+    grid-area: details;
+}
+
+.price {
+    grid-area: price;
+}
+
+.info {
+    grid-area: info;
+}
+
+.controls {
+    grid-area: controls;
+}
+
+@media (min-width: 640px) {
+    .item {
+        grid-template-areas:
+            'image . details . price'
+            '. . . . .'
+            'controls controls controls controls controls';
+        grid-template-columns: 6rem .5rem minmax(0, 1fr) 1.2rem 10.625rem;
+        grid-template-rows: min-content .625rem min-content;
+    }
+
+    .item:has(.info) {
+        grid-template-areas:
+            'image . details . price'
+            '. . . . .'
+            'info info info . .'
+            '. . . . .'
+            'controls controls controls controls controls';
+        grid-template-rows: min-content .625rem min-content .625rem min-content;
+    }
+}
+
+@media (min-width: 768px) {
+    .item {
+        grid-template-areas:
+            'image . details . price . controls';
+        grid-template-columns: 6rem .5rem auto 1.5rem 11.25rem 1rem 6.875rem;
+        grid-template-rows: auto;
+    }
+
+    .item:has(.info)  {
+        grid-template-areas:
+            'image . details . price . controls'
+            'image . info . price . controls';
+        grid-template-rows: auto auto;
+    }
+}
