@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import { routes } from '@/routes';
 
-export async function signOut(): Promise<void> {
+export async function signOutAction(): Promise<void> {
     await auth.api.signOut({
         headers: await headers(),
     });

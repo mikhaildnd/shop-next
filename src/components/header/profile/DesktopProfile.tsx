@@ -4,7 +4,7 @@ import { CircleUser, LogOut, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { signOut } from '@/auth/actions/sign-out';
+import { signOutAction } from '@/auth/actions/sign-out';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { Dropdown } from '@/components/dropdown/Dropdown';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
@@ -26,6 +26,7 @@ export function DesktopProfile({ user, className }: DesktopProfileProps) {
         'px-2 [&>:not(:last-child)]:border-b [&>:not(:last-child)]:border-gray-200';
 
     const menuIconClassName = 'size-4 stroke-[2px]';
+
     return (
         <Dropdown
             isOpen={isOpen}
@@ -74,7 +75,10 @@ export function DesktopProfile({ user, className }: DesktopProfileProps) {
                         </div>
 
                         <div className="flex flex-col py-2">
-                            <form action={signOut}>
+                            <form
+                                action={signOutAction}
+                                onSubmit={() => setIsOpen(false)}
+                            >
                                 <button
                                     className={cn(
                                         'w-full cursor-pointer',

@@ -4,7 +4,7 @@ import { CircleUser, LogOut, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { signOut } from '@/auth/actions/sign-out';
+import { signOutAction } from '@/auth/actions/sign-out';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { CloseButton } from '@/components/button/CloseButton';
 import type { ProfileUser } from '@/components/header/profile/profile.types';
@@ -83,7 +83,7 @@ export function MobileProfile({ user, className }: MobileProfileProps) {
                             </div>
 
                             <div className="flex flex-col py-2">
-                                <form action={signOut}>
+                                <form action={signOutAction}>
                                     <button
                                         className={cn(
                                             'w-full cursor-pointer',
