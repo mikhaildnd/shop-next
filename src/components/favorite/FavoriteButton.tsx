@@ -48,10 +48,10 @@ export function FavoriteButton({
         >
             <Heart
                 className={cn(
-                    'stroke-red-500 stroke-[1.5px] transition-[fill,stroke] duration-150 group-active:stroke-red-400',
+                    'stroke-gray-400 stroke-[1.5px] transition-[fill,stroke] duration-150 group-active:stroke-red-500',
                     favorite
-                        ? 'fill-red-500 group-active:fill-red-400'
-                        : 'fill-transparent',
+                        ? 'fill-red-500 stroke-red-500 group-active:fill-red-400'
+                        : 'fill-transparent group-hover:stroke-gray-600',
                     iconClassName,
                 )}
             />

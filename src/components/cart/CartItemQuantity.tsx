@@ -10,19 +10,22 @@ type CartItemQuantitySize = 'sm' | 'md';
 
 type CartItemQuantityVariant = 'primary' | 'neutral';
 
+const buttonBaseClasses =
+    'flex h-full items-center justify-center disabled:cursor-not-allowed disabled:opacity-50';
+
 const sizeClasses: Record<CartItemQuantitySize, string> = {
     sm: 'h-8',
-    md: 'h-10',
+    md: 'h-9',
 };
 
 const buttonSizeClasses: Record<CartItemQuantitySize, string> = {
-    sm: 'px-3',
-    md: 'px-4',
+    sm: 'size-8',
+    md: 'size-9',
 };
 
 const variantClasses: Record<CartItemQuantityVariant, string> = {
-    neutral: 'border border-gray-100',
-    primary: 'border border-(--color-primary)',
+    neutral: 'border border-gray-50',
+    primary: 'border border-(--color-primary)/15',
 };
 
 const buttonVariantClasses: Record<CartItemQuantityVariant, string> = {
@@ -69,7 +72,7 @@ export function CartItemQuantity({
     return (
         <div
             className={cn(
-                'flex items-center justify-between overflow-clip rounded',
+                'flex items-center justify-between overflow-clip rounded-md',
                 sizeClasses[size],
                 variantClasses[variant],
                 className,
@@ -79,7 +82,7 @@ export function CartItemQuantity({
                 type="button"
                 disabled={disabled}
                 className={cn(
-                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
+                    buttonBaseClasses,
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
@@ -98,7 +101,7 @@ export function CartItemQuantity({
                 type="button"
                 disabled={isIncrementDisabled}
                 className={cn(
-                    'flex h-full items-center justify-between disabled:cursor-not-allowed disabled:opacity-50',
+                    buttonBaseClasses,
                     buttonSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
