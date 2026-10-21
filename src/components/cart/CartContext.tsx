@@ -14,8 +14,11 @@ import type { ProductDto } from '@/services/product/product.types';
 
 interface CartContextValue {
     cartItems: CartItemData[];
+    availableCartItems: CartItemData[];
+    unavailableCartItems: CartItemData[];
     cartSummary: CartSummaryData;
     cartCount: number;
+    hasPriceChanges: boolean;
     addCartItem: (
         product: ProductDto,
         snapshot: CartItemSnapshot,
@@ -72,18 +75,39 @@ export function CartProvider({
         });
     }, [cart.items, cart.products, cart.pendingQuantity]);
 
+    const availableCartItems = useMemo(
+        () => cartItems.filter((item) => item.product.stock > 0),
+        [cartItems],
+    );
+
+    const unavailableCartItems = useMemo(
+        () => cartItems.filter((item) => item.product.stock === 0),
+        [cartItems],
+    );
+
     const getCartItem = useCallback(
         (productId: string) =>
             cartItems.find((item) => item.productId === productId),
         [cartItems],
     );
 
-    const cartSummary = useMemo(() => getCartSummary(cartItems), [cartItems]);
+    const cartSummary = useMemo(
+        () => getCartSummary(availableCartItems),
+        [availableCartItems],
+    );
+
     const isQuantityUpdating = cart.pendingQuantity !== null;
+
+    const hasPriceChanges = availableCartItems.some(
+        (item) => item.snapshot.effectivePrice !== item.product.effectivePrice,
+    );
 
     const contextValue: CartContextValue = {
         cartItems,
+        availableCartItems,
+        unavailableCartItems,
         cartSummary,
+        hasPriceChanges,
         cartCount: cart.cartCount,
         addCartItem: cart.addCartItem,
         getCartItem,

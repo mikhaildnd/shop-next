@@ -9,22 +9,17 @@ interface CartItemsProps {
 }
 
 export function CartItems({ className }: CartItemsProps) {
-    const { cartItems, cartSummary } = useCartContext();
+    const { availableCartItems, unavailableCartItems, hasPriceChanges } =
+        useCartContext();
 
-    const availableItems = cartItems.filter((item) => item.product.stock > 0);
-
-    const unavailableItems = cartItems.filter(
-        (item) => item.product.stock === 0,
-    );
-
-    const changedPriceProducts = availableItems.filter(
+    const changedPriceProducts = availableCartItems.filter(
         (item) => item.product.effectivePrice !== item.snapshot.effectivePrice,
     );
 
     return (
         <div className={cn('flex flex-col gap-6', className)}>
             <div className="flex flex-col">
-                {cartSummary.hasPriceChanges && (
+                {hasPriceChanges && (
                     <CartPriceChangesMessage>
                         <CartPriceChangesDialog
                             cartItems={changedPriceProducts}
@@ -35,7 +30,7 @@ export function CartItems({ className }: CartItemsProps) {
                 <p className="text-md font-semibold">Доступны для заказа</p>
 
                 <div className="flex flex-col divide-y divide-gray-200">
-                    {availableItems.map((item) => (
+                    {availableCartItems.map((item) => (
                         <CartItem
                             key={item.productId}
                             item={item}
@@ -44,14 +39,14 @@ export function CartItems({ className }: CartItemsProps) {
                 </div>
             </div>
 
-            {unavailableItems.length > 0 && (
+            {unavailableCartItems.length > 0 && (
                 <div className="flex flex-col">
                     <p className="text-md font-semibold">
                         Недоступны для заказа
                     </p>
 
                     <div className="flex flex-col divide-y divide-gray-200">
-                        {unavailableItems.map((item) => (
+                        {unavailableCartItems.map((item) => (
                             <CartItem
                                 key={item.productId}
                                 item={item}

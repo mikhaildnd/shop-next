@@ -5,57 +5,42 @@ export type CartSummaryData = {
     effectivePriceTotal: number;
     availableCartCount: number;
     discountAmount: number;
-    hasPriceChanges: boolean;
     hasStockIssues: boolean;
     isCheckoutDisabled: boolean;
 };
 
-export function getCartSummary(items: CartItemData[]): CartSummaryData {
-    const availableItems = items.flatMap((item) => {
-        if (item.product.stock === 0) {
-            return [];
-        }
-
-        const availableQuantity = Math.min(item.quantity, item.product.stock);
-
-        return [{ product: item.product, availableQuantity }];
-    });
-
-    const regularPriceTotal = availableItems.reduce(
-        (sum, { product, availableQuantity }) =>
-            sum + product.regularPrice * availableQuantity,
+export function getCartSummary(
+    availableCartItems: CartItemData[],
+): CartSummaryData {
+    const regularPriceTotal = availableCartItems.reduce(
+        (sum, { product, quantity }) => sum + product.regularPrice * quantity,
         0,
     );
 
-    const effectivePriceTotal = availableItems.reduce(
-        (sum, { product, availableQuantity }) =>
-            sum + product.effectivePrice * availableQuantity,
+    const effectivePriceTotal = availableCartItems.reduce(
+        (sum, { product, quantity }) => sum + product.effectivePrice * quantity,
         0,
     );
 
-    const availableCartCount = availableItems.reduce(
-        (sum, { availableQuantity }) => sum + availableQuantity,
+    const availableCartCount = availableCartItems.reduce(
+        (sum, { quantity }) => sum + quantity,
         0,
     );
 
     const discountAmount = regularPriceTotal - effectivePriceTotal;
 
-    const hasPriceChanges = items.some(
-        (item) => item.snapshot.effectivePrice !== item.product.effectivePrice,
+    const hasStockIssues = availableCartItems.some(
+        (item) => item.quantity > item.product.stock,
     );
 
-    const hasStockIssues = items.some(
-        (item) => item.product.stock > 0 && item.quantity > item.product.stock,
-    );
-
-    const isCheckoutDisabled = availableItems.length === 0 || hasStockIssues;
+    const isCheckoutDisabled =
+        availableCartItems.length === 0 || hasStockIssues;
 
     return {
         regularPriceTotal,
         effectivePriceTotal,
         availableCartCount,
         discountAmount,
-        hasPriceChanges,
         hasStockIssues,
         isCheckoutDisabled,
     };
