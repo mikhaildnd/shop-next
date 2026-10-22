@@ -21,3 +21,8 @@ export type CartQuantityAdjustment = {
     quantity: number;
     quantityAdjustedFrom: number | null;
 };
+
+export type UpdateCartItemPriceSnapshotsResult = {
+    updatedProductIds: string[];
+    changedProducts: CartProduct[];
+};

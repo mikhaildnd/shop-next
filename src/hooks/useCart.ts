@@ -278,37 +278,63 @@ export function useCart({
 
     const updateCartItemPriceSnapshots = useCallback(
         async (productIds: string[]) => {
-            await updateCartItemPriceSnapshotsAction(productIds);
+            const confirmations = cartData.cart.items
+                .filter((item) => productIds.includes(item.productId))
+                .map((item) => {
+                    const product = cartData.products.find(
+                        (product) => product.productId === item.productId,
+                    );
+
+                    return product
+                        ? {
+                              productId: item.productId,
+                              effectivePrice: product.effectivePrice,
+                          }
+                        : null;
+                })
+                .filter((confirmation) => confirmation !== null);
+
+            const result =
+                await updateCartItemPriceSnapshotsAction(confirmations);
 
             updateConfirmed((data) => ({
                 ...data,
                 cart: {
                     ...data.cart,
                     items: data.cart.items.map((item) => {
-                        if (!productIds.includes(item.productId)) {
+                        if (
+                            !result.updatedProductIds.includes(item.productId)
+                        ) {
                             return item;
                         }
 
-                        const product = data.products.find(
-                            (product) => product.productId === item.productId,
+                        const confirmation = confirmations.find(
+                            (confirmation) =>
+                                confirmation.productId === item.productId,
                         );
 
-                        if (!product || product.stock === 0) {
+                        if (!confirmation) {
                             return item;
                         }
 
                         return {
                             ...item,
                             snapshot: {
-                                ...item.snapshot,
-                                effectivePrice: product.effectivePrice,
+                                effectivePrice: confirmation.effectivePrice,
                             },
                         };
                     }),
                 },
+                products: data.products.map(
+                    (product) =>
+                        result.changedProducts.find(
+                            (changedProduct) =>
+                                changedProduct.productId === product.productId,
+                        ) ?? product,
+                ),
             }));
         },
-        [updateConfirmed],
+        [cartData.cart.items, cartData.products, updateConfirmed],
     );
 
     return {

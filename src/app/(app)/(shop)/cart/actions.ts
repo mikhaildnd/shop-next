@@ -13,7 +13,10 @@ import {
     setCartItemQuantity,
     updateCartItemPriceSnapshots,
 } from '@/services/cart/cart.service';
-import type { CartData } from '@/services/cart/cart.types';
+import type {
+    CartData,
+    UpdateCartItemPriceSnapshotsResult,
+} from '@/services/cart/cart.types';
 
 export async function addCartItemAction(productId: string): Promise<CartData> {
     const session = await getSession();
@@ -54,18 +57,25 @@ export async function clearCartAction(): Promise<CartData> {
 }
 
 export async function updateCartItemPriceSnapshotsAction(
-    productIds: string[],
-): Promise<void> {
+    confirmations: {
+        productId: string;
+        effectivePrice: number;
+    }[],
+): Promise<UpdateCartItemPriceSnapshotsResult> {
     const session = await requireSession();
 
     if (
-        !Array.isArray(productIds) ||
-        productIds.some((productId) => typeof productId !== 'string')
+        !Array.isArray(confirmations) ||
+        confirmations.some(
+            (confirmation) =>
+                !confirmation ||
+                typeof confirmation.productId !== 'string' ||
+                typeof confirmation.effectivePrice !== 'number' ||
+                !Number.isFinite(confirmation.effectivePrice),
+        )
     ) {
-        throw new Error('Invalid product IDs');
+        throw new Error('Invalid price confirmations');
     }
 
-    const userId = session.user.id;
-
-    await updateCartItemPriceSnapshots(userId, productIds);
+    return updateCartItemPriceSnapshots(session.user.id, confirmations);
 }
