@@ -8,11 +8,11 @@ import {
     clearCartAction,
     removeCartItemAction,
     setCartItemQuantityAction,
+    updateCartItemPriceSnapshotsAction,
 } from '@/app/(app)/(shop)/cart/actions';
 import { toast } from '@/components/ui/toast';
 import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
 import type { ActionQueue } from '@/lib/async/action-queue';
-import type { CartItemSnapshot } from '@/lib/cart/cart.types';
 import type { CartData, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
@@ -24,10 +24,7 @@ interface UseCartOptions {
 export interface UseCartResult {
     items: CartItemDto[];
     products: CartData['products'];
-    addCartItem: (
-        product: ProductDto,
-        snapshot: CartItemSnapshot,
-    ) => Promise<void>;
+    addCartItem: (product: ProductDto) => Promise<void>;
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
     removeCartItem: (productId: string) => Promise<void>;
@@ -35,6 +32,7 @@ export interface UseCartResult {
     cartCount: number;
     pendingQuantity: PendingQuantity | null;
     replaceCartData: (cartData: CartData) => void;
+    updateCartItemPriceSnapshots: (productIds: string[]) => Promise<void>;
 }
 
 type PendingQuantity = {
@@ -55,6 +53,7 @@ export function useCart({
         data: cartData,
         mutate,
         replace,
+        updateConfirmed,
     } = useOptimisticMutations({
         initialData: initialCartState,
         actionQueue,
@@ -119,7 +118,7 @@ export function useCart({
     );
 
     const addCartItem = useCallback(
-        (product: ProductDto, snapshot: CartItemSnapshot) =>
+        (product: ProductDto) =>
             mutate({
                 update: (data) => {
                     const hasItem = data.cart.items.some(
@@ -144,7 +143,9 @@ export function useCart({
                                     productId: product.id,
                                     quantity: 1,
                                     quantityAdjustedFrom: null,
-                                    snapshot,
+                                    snapshot: {
+                                        effectivePrice: product.effectivePrice,
+                                    },
                                 },
                             ],
                         },
@@ -167,7 +168,7 @@ export function useCart({
                               ],
                     };
                 },
-                action: () => addCartItemAction(product.id, snapshot),
+                action: () => addCartItemAction(product.id),
             }),
         [mutate],
     );
@@ -275,6 +276,41 @@ export function useCart({
         0,
     );
 
+    const updateCartItemPriceSnapshots = useCallback(
+        async (productIds: string[]) => {
+            await updateCartItemPriceSnapshotsAction(productIds);
+
+            updateConfirmed((data) => ({
+                ...data,
+                cart: {
+                    ...data.cart,
+                    items: data.cart.items.map((item) => {
+                        if (!productIds.includes(item.productId)) {
+                            return item;
+                        }
+
+                        const product = data.products.find(
+                            (product) => product.productId === item.productId,
+                        );
+
+                        if (!product || product.stock === 0) {
+                            return item;
+                        }
+
+                        return {
+                            ...item,
+                            snapshot: {
+                                ...item.snapshot,
+                                effectivePrice: product.effectivePrice,
+                            },
+                        };
+                    }),
+                },
+            }));
+        },
+        [updateConfirmed],
+    );
+
     return {
         items: cartData.cart.items,
         products: cartData.products,
@@ -286,5 +322,6 @@ export function useCart({
         cartCount,
         pendingQuantity,
         replaceCartData,
+        updateCartItemPriceSnapshots,
     };
 }

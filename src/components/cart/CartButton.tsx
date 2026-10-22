@@ -22,9 +22,7 @@ export function CartButton({ product, className }: CartButtonProps) {
 
     const handleAddCartItem = async () => {
         try {
-            await addCartItem(product, {
-                effectivePrice: product.effectivePrice,
-            });
+            await addCartItem(product);
         } catch {
             toast.add({
                 id: 'cart-add-error',

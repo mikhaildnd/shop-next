@@ -2,6 +2,7 @@ import { CartItem } from '@/app/(app)/(shop)/cart/_components/CartItem/CartItem'
 import { CartPriceChangesDialog } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesDialog';
 import { CartPriceChangesMessage } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesMessage';
 import { useCartContext } from '@/components/cart/CartContext';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 interface CartItemsProps {
@@ -9,18 +10,38 @@ interface CartItemsProps {
 }
 
 export function CartItems({ className }: CartItemsProps) {
-    const { availableCartItems, unavailableCartItems, hasPriceChanges } =
-        useCartContext();
+    const {
+        availableCartItems,
+        unavailableCartItems,
+        hasPriceChanges,
+        updateCartItemPriceSnapshots,
+    } = useCartContext();
 
     const changedPriceProducts = availableCartItems.filter(
         (item) => item.product.effectivePrice !== item.snapshot.effectivePrice,
     );
 
+    const handleConfirmPriceChanges = async () => {
+        try {
+            await updateCartItemPriceSnapshots(
+                changedPriceProducts.map((item) => item.productId),
+            );
+        } catch {
+            toast.add({
+                id: 'cart-price-changes-error',
+                type: 'error',
+                description: 'Произошла ошибка. Попробуйте ещё раз.',
+            });
+        }
+    };
+
     return (
         <div className={cn('flex flex-col gap-6', className)}>
             <div className="flex flex-col">
                 {hasPriceChanges && (
-                    <CartPriceChangesMessage>
+                    <CartPriceChangesMessage
+                        onClose={handleConfirmPriceChanges}
+                    >
                         <CartPriceChangesDialog
                             cartItems={changedPriceProducts}
                         />

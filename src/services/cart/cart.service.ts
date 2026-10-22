@@ -2,7 +2,7 @@ import { cache } from 'react';
 
 import { prisma } from '@/db';
 import type { Prisma } from '@/generated/prisma/client';
-import type { CartItemSnapshot, CartProduct } from '@/lib/cart/cart.types';
+import type { CartProduct } from '@/lib/cart/cart.types';
 import { getCartQuantityAdjustments } from '@/lib/cart/get-cart-quantity-adjustments';
 import type {
     CartData,
@@ -222,7 +222,6 @@ export async function getReconciledCart(userId: string): Promise<CartData> {
 export async function addCartItem(
     userId: string,
     productId: string,
-    snapshot: CartItemSnapshot,
 ): Promise<CartData> {
     const product = await prisma.product.findUnique({
         where: {
@@ -230,6 +229,7 @@ export async function addCartItem(
         },
         select: {
             stock: true,
+            effectivePrice: true,
         },
     });
 
@@ -239,6 +239,10 @@ export async function addCartItem(
 
     if (product.stock < 1) {
         throw new Error('Product is out of stock');
+    }
+
+    if (product.effectivePrice === null) {
+        throw new Error('Product has null effectivePrice');
     }
 
     const cart = await prisma.cart.upsert({
@@ -263,7 +267,7 @@ export async function addCartItem(
             productId,
             quantity: 1,
             quantityAdjustedFrom: null,
-            snapshotEffectivePrice: snapshot.effectivePrice,
+            snapshotEffectivePrice: product.effectivePrice,
         },
         update: {},
     });
@@ -360,4 +364,61 @@ export async function clearCart(userId: string): Promise<CartData> {
         },
         products: [],
     };
+}
+
+export async function updateCartItemPriceSnapshots(
+    userId: string,
+    productIds: string[],
+): Promise<void> {
+    if (productIds.length === 0) {
+        return;
+    }
+
+    const cartItems = await prisma.cartItem.findMany({
+        where: {
+            cart: {
+                userId,
+            },
+            productId: {
+                in: productIds,
+            },
+            product: {
+                stock: {
+                    gt: 0,
+                },
+            },
+        },
+        select: {
+            productId: true,
+            product: {
+                select: {
+                    effectivePrice: true,
+                },
+            },
+        },
+    });
+
+    const updates = [];
+
+    for (const item of cartItems) {
+        if (item.product.effectivePrice === null) {
+            continue;
+        }
+
+        updates.push(
+            prisma.cartItem.updateMany({
+                where: {
+                    cart: {
+                        userId,
+                    },
+                    productId: item.productId,
+                },
+                data: {
+                    snapshotEffectivePrice: item.product.effectivePrice,
+                },
+            }),
+        );
+    }
+
+    await prisma.$transaction(updates);
 }

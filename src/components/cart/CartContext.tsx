@@ -6,7 +6,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 
 import { useCart } from '@/hooks/useCart';
 import { createActionQueue } from '@/lib/async/action-queue';
-import type { CartItemData, CartItemSnapshot } from '@/lib/cart/cart.types';
+import type { CartItemData } from '@/lib/cart/cart.types';
 import type { CartSummaryData } from '@/lib/cart/get-cart-summary';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
 import type { CartData } from '@/services/cart/cart.types';
@@ -19,10 +19,7 @@ interface CartContextValue {
     cartSummary: CartSummaryData;
     cartCount: number;
     hasPriceChanges: boolean;
-    addCartItem: (
-        product: ProductDto,
-        snapshot: CartItemSnapshot,
-    ) => Promise<void>;
+    addCartItem: (product: ProductDto) => Promise<void>;
     getCartItem: (productId: string) => CartItemData | undefined;
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
@@ -30,6 +27,7 @@ interface CartContextValue {
     clearCart: () => Promise<void>;
     isQuantityUpdating: boolean;
     replaceCartData: (cartData: CartData) => void;
+    updateCartItemPriceSnapshots: (productIds: string[]) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -117,6 +115,7 @@ export function CartProvider({
         clearCart: cart.clearCart,
         isQuantityUpdating,
         replaceCartData: cart.replaceCartData,
+        updateCartItemPriceSnapshots: cart.updateCartItemPriceSnapshots,
     };
 
     return (
