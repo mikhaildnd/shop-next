@@ -37,7 +37,7 @@ export function CartSummaryMobile({ className }: CartSummaryMobileProps) {
             >
                 <div
                     className={cn(
-                        'fixed inset-x-0 bottom-(--bottom-nav-height) z-40 flex items-center gap-4 border-b border-gray-200 bg-white px-3 py-2 shadow-(--shadow-top)',
+                        'fixed inset-x-0 bottom-(--bottom-nav-height) z-30 flex items-center gap-4 border-b border-gray-200 bg-white px-3 py-2 shadow-(--shadow-top)',
                         'transition-transform duration-(--transition-duration-default)',
                         isNavigationHidden &&
                             'translate-y-(--bottom-nav-height)',

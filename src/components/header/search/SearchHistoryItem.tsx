@@ -21,11 +21,11 @@ export function SearchHistoryItem({
     onSelect,
 }: SearchHistoryItemProps) {
     return (
-        <li className="group/item flex items-center rounded transition-colors focus-within:bg-gray-50 focus-within:ring-1 focus-within:ring-(--color-primary) focus-within:ring-inset hover:bg-gray-50">
+        <li className="group/item flex items-center gap-2 px-3 py-1.5 transition-colors focus-within:bg-gray-50 focus-within:ring-1 focus-within:ring-(--color-primary) focus-within:ring-inset hover:bg-gray-50">
             <Link
                 onClick={onSelect}
                 href={getSearchHistoryItemHref(item)}
-                className="flex min-w-0 grow items-center gap-x-2 px-3 py-1.5 focus-visible:outline-none"
+                className="flex min-w-0 grow items-center gap-x-2 focus-visible:outline-none"
             >
                 <div className="flex size-8 shrink-0 items-center justify-center">
                     {item.type === 'query' && (
@@ -56,7 +56,6 @@ export function SearchHistoryItem({
             </Link>
 
             <CloseButton
-                className="mr-2"
                 aria-label="Удалить элемент истории"
                 onClick={() => onRemove(item)}
             />
