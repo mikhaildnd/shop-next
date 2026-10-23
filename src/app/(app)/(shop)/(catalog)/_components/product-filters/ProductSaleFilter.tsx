@@ -1,5 +1,5 @@
-import { FilterCheckbox } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/FilterCheckbox';
 import { FilterSection } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/FilterSection';
+import { Checkbox } from '@/components/form/Checkbox';
 
 interface ProductSaleFilterProps {
     checked: boolean;
@@ -12,7 +12,7 @@ export function ProductSaleFilter({
 }: ProductSaleFilterProps) {
     return (
         <FilterSection>
-            <FilterCheckbox
+            <Checkbox
                 id="sale"
                 checked={checked}
                 label="Только со скидкой"

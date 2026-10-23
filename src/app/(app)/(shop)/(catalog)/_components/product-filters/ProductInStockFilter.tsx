@@ -1,5 +1,5 @@
-import { FilterCheckbox } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/FilterCheckbox';
 import { FilterSection } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/FilterSection';
+import { Checkbox } from '@/components/form/Checkbox';
 
 interface ProductInStockFilterProps {
     checked: boolean;
@@ -12,7 +12,7 @@ export function ProductInStockFilter({
 }: ProductInStockFilterProps) {
     return (
         <FilterSection>
-            <FilterCheckbox
+            <Checkbox
                 id="in-stock"
                 checked={checked}
                 label="В наличии"
