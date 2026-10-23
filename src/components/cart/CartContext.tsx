@@ -28,6 +28,11 @@ interface CartContextValue {
     isQuantityUpdating: boolean;
     replaceCartData: (cartData: CartData) => void;
     updateCartItemPriceSnapshots: (productIds: string[]) => Promise<void>;
+    setCartItemSelection: (
+        productId: string,
+        isSelected: boolean,
+    ) => Promise<void>;
+    setAllCartItemsSelection: (isSelected: boolean) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -89,9 +94,14 @@ export function CartProvider({
         [cartItems],
     );
 
-    const cartSummary = useMemo(
-        () => getCartSummary(availableCartItems),
+    const selectedCartItems = useMemo(
+        () => availableCartItems.filter((item) => item.isSelected),
         [availableCartItems],
+    );
+
+    const cartSummary = useMemo(
+        () => getCartSummary(selectedCartItems),
+        [selectedCartItems],
     );
 
     const isQuantityUpdating = cart.pendingQuantity !== null;
@@ -116,6 +126,8 @@ export function CartProvider({
         isQuantityUpdating,
         replaceCartData: cart.replaceCartData,
         updateCartItemPriceSnapshots: cart.updateCartItemPriceSnapshots,
+        setCartItemSelection: cart.setCartItemSelection,
+        setAllCartItemsSelection: cart.setAllCartItemsSelection,
     };
 
     return (

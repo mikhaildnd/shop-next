@@ -66,12 +66,14 @@ function mapCartItem(item: {
     productId: string;
     quantity: number;
     quantityAdjustedFrom: number | null;
+    isSelected: boolean;
     snapshotEffectivePrice: { toString(): string };
 }): CartItemDto {
     return {
         productId: item.productId,
         quantity: item.quantity,
         quantityAdjustedFrom: item.quantityAdjustedFrom,
+        isSelected: item.isSelected,
         snapshot: {
             effectivePrice: Number(item.snapshotEffectivePrice),
         },
@@ -104,6 +106,13 @@ async function getCart(userId: string): Promise<CartData> {
     const cartDto: CartDto = {
         items: cart.items.map(mapCartItem),
     };
+
+    if (cartDto.items.length === 0) {
+        return {
+            cart: cartDto,
+            products: [],
+        };
+    }
 
     const cartProductIds = cartDto.items.map((item) => item.productId);
 
@@ -373,5 +382,49 @@ export async function updateCartItemPriceSnapshots(
                 },
             });
         }
+    });
+}
+
+export async function setCartItemSelection(
+    userId: string,
+    productId: string,
+    isSelected: boolean,
+): Promise<void> {
+    const result = await prisma.cartItem.updateMany({
+        where: {
+            cart: {
+                userId,
+            },
+            productId,
+            product: {
+                stock: { gt: 0 },
+            },
+        },
+        data: {
+            isSelected,
+        },
+    });
+
+    if (result.count === 0) {
+        throw new Error('Cart item selection could not be updated');
+    }
+}
+
+export async function setAllCartItemsSelection(
+    userId: string,
+    isSelected: boolean,
+): Promise<void> {
+    await prisma.cartItem.updateMany({
+        where: {
+            cart: {
+                userId,
+            },
+            product: {
+                stock: { gt: 0 },
+            },
+        },
+        data: {
+            isSelected,
+        },
     });
 }

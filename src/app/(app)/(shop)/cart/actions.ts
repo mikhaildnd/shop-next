@@ -10,7 +10,9 @@ import {
     clearCart,
     getReconciledCart,
     removeCartItem,
+    setAllCartItemsSelection,
     setCartItemQuantity,
+    setCartItemSelection,
     updateCartItemPriceSnapshots,
 } from '@/services/cart/cart.service';
 import type { CartData } from '@/services/cart/cart.types';
@@ -80,6 +82,27 @@ export async function updateCartItemPriceSnapshotsAction(
     }
 
     await updateCartItemPriceSnapshots(session.user.id, confirmations);
+
+    return getReconciledCart(session.user.id);
+}
+
+export async function setCartItemSelectionAction(
+    productId: string,
+    isSelected: boolean,
+): Promise<CartData> {
+    const session = await requireSession();
+
+    await setCartItemSelection(session.user.id, productId, isSelected);
+
+    return getReconciledCart(session.user.id);
+}
+
+export async function setAllCartItemsSelectionAction(
+    isSelected: boolean,
+): Promise<CartData> {
+    const session = await requireSession();
+
+    await setAllCartItemsSelection(session.user.id, isSelected);
 
     return getReconciledCart(session.user.id);
 }

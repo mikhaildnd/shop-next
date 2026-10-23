@@ -4,6 +4,7 @@ export type CartItemDto = {
     productId: string;
     quantity: number;
     quantityAdjustedFrom: number | null;
+    isSelected: boolean;
     snapshot: CartItemSnapshot;
 };
 

@@ -10,6 +10,8 @@ import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
 import { DeletionDialog } from '@/components/DeletionDialog';
 import { FavoriteButton } from '@/components/favorite/FavoriteButton';
+import { Checkbox } from '@/components/form/Checkbox';
+import { toast } from '@/components/ui/toast';
 import type { CartItemData } from '@/lib/cart/cart.types';
 import { cn } from '@/lib/cn';
 import { formatMeasureValue } from '@/lib/format-measure-value';
@@ -21,7 +23,8 @@ interface CartItemProps {
 }
 
 export function CartItem({ item }: CartItemProps) {
-    const { removeCartItem } = useCartContext();
+    const { removeCartItem, setCartItemSelection } = useCartContext();
+    const isSelected = item.isSelected;
 
     const wasQuantityAdjusted = item.quantityAdjustedFrom !== null;
 
@@ -36,9 +39,22 @@ export function CartItem({ item }: CartItemProps) {
 
     const isOutOfStock = item.product.stock === 0;
 
+    const handleSelectionChange = async (isSelected: boolean) => {
+        try {
+            await setCartItemSelection(item.productId, isSelected);
+        } catch {
+            toast.add({
+                id: 'cart-selection-error',
+                type: 'error',
+                description:
+                    'Не удалось изменить выбор товара. Попробуйте ещё раз.',
+            });
+        }
+    };
+
     return (
         <article className={cn('py-3', styles.item)}>
-            <div className={styles.image}>
+            <div className={cn('relative', styles.image)}>
                 <Link href={routes.productPage(item.product.slug)}>
                     <CartItemImage
                         imageUrl={item.product.imageUrl}
@@ -46,6 +62,17 @@ export function CartItem({ item }: CartItemProps) {
                         imageDisabled={isOutOfStock}
                     />
                 </Link>
+
+                {!isOutOfStock && (
+                    <Checkbox
+                        id={`cart-item-${item.productId}`}
+                        checked={isSelected}
+                        onChange={handleSelectionChange}
+                        ariaLabel={`Выбрать ${item.product.title}`}
+                        variant="cart"
+                        className="absolute top-0 left-0 z-2"
+                    />
+                )}
             </div>
 
             <div className={styles.price}>

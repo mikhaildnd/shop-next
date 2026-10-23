@@ -7,7 +7,9 @@ import {
     addCartItemAction,
     clearCartAction,
     removeCartItemAction,
+    setAllCartItemsSelectionAction,
     setCartItemQuantityAction,
+    setCartItemSelectionAction,
     updateCartItemPriceSnapshotsAction,
 } from '@/app/(app)/(shop)/cart/actions';
 import { toast } from '@/components/ui/toast';
@@ -33,6 +35,11 @@ export interface UseCartResult {
     pendingQuantity: PendingQuantity | null;
     replaceCartData: (cartData: CartData) => void;
     updateCartItemPriceSnapshots: (productIds: string[]) => Promise<void>;
+    setCartItemSelection: (
+        productId: string,
+        isSelected: boolean,
+    ) => Promise<void>;
+    setAllCartItemsSelection: (isSelected: boolean) => Promise<void>;
 }
 
 type PendingQuantity = {
@@ -142,6 +149,7 @@ export function useCart({
                                     productId: product.id,
                                     quantity: 1,
                                     quantityAdjustedFrom: null,
+                                    isSelected: true,
                                     snapshot: {
                                         effectivePrice: product.effectivePrice,
                                     },
@@ -323,6 +331,52 @@ export function useCart({
         [cartData.cart.items, cartData.products, mutate],
     );
 
+    const setCartItemSelection = useCallback(
+        (productId: string, isSelected: boolean) =>
+            mutate({
+                update: (data) => ({
+                    ...data,
+                    cart: {
+                        ...data.cart,
+                        items: data.cart.items.map((item) =>
+                            item.productId === productId
+                                ? { ...item, isSelected }
+                                : item,
+                        ),
+                    },
+                }),
+                action: () => setCartItemSelectionAction(productId, isSelected),
+            }),
+        [mutate],
+    );
+
+    const setAllCartItemsSelection = useCallback(
+        (isSelected: boolean) =>
+            mutate({
+                update: (data) => {
+                    const availableProductIds = new Set(
+                        data.products
+                            .filter((product) => product.stock > 0)
+                            .map((product) => product.productId),
+                    );
+
+                    return {
+                        ...data,
+                        cart: {
+                            ...data.cart,
+                            items: data.cart.items.map((item) =>
+                                availableProductIds.has(item.productId)
+                                    ? { ...item, isSelected }
+                                    : item,
+                            ),
+                        },
+                    };
+                },
+                action: () => setAllCartItemsSelectionAction(isSelected),
+            }),
+        [mutate],
+    );
+
     return {
         items: cartData.cart.items,
         products: cartData.products,
@@ -335,5 +389,7 @@ export function useCart({
         pendingQuantity,
         replaceCartData,
         updateCartItemPriceSnapshots,
+        setCartItemSelection,
+        setAllCartItemsSelection,
     };
 }

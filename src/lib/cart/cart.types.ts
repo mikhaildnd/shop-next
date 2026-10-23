@@ -22,6 +22,7 @@ export type CartItemData = {
     quantity: number;
     displayQuantity: number;
     quantityAdjustedFrom: number | null;
+    isSelected: boolean;
     snapshot: CartItemSnapshot;
     product: CartProduct;
 };

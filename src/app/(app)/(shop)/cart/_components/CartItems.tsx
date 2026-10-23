@@ -2,6 +2,7 @@ import { CartItem } from '@/app/(app)/(shop)/cart/_components/CartItem/CartItem'
 import { CartPriceChangesDialog } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesDialog';
 import { CartPriceChangesMessage } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesMessage';
 import { useCartContext } from '@/components/cart/CartContext';
+import { Checkbox } from '@/components/form/Checkbox';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
@@ -15,11 +16,29 @@ export function CartItems({ className }: CartItemsProps) {
         unavailableCartItems,
         hasPriceChanges,
         updateCartItemPriceSnapshots,
+        setAllCartItemsSelection,
     } = useCartContext();
 
     const changedPriceProducts = availableCartItems.filter(
         (item) => item.product.effectivePrice !== item.snapshot.effectivePrice,
     );
+
+    const areAllSelected =
+        availableCartItems.length > 0 &&
+        availableCartItems.every((item) => item.isSelected);
+
+    const handleToggleAll = async () => {
+        try {
+            await setAllCartItemsSelection(!areAllSelected);
+        } catch {
+            toast.add({
+                id: 'cart-selection-error',
+                type: 'error',
+                description:
+                    'Не удалось изменить выбор товаров. Попробуйте ещё раз.',
+            });
+        }
+    };
 
     const handleConfirmPriceChanges = async () => {
         try {
@@ -47,6 +66,15 @@ export function CartItems({ className }: CartItemsProps) {
                         />
                     </CartPriceChangesMessage>
                 )}
+
+                <div className="mb-3 py-2">
+                    <Checkbox
+                        id="cart-select-all"
+                        checked={areAllSelected}
+                        onChange={handleToggleAll}
+                        label="Выбрать все"
+                    />
+                </div>
 
                 <p className="text-md font-semibold">Доступны для заказа</p>
 
