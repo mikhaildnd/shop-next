@@ -70,11 +70,13 @@ export async function mergeAnonymousAccountData(
                         quantity: item.quantity,
                         quantityAdjustedFrom: null,
                         snapshotEffectivePrice: item.snapshotEffectivePrice,
+                        isSelected: item.isSelected,
                     },
                     update: {
                         quantity: item.quantity,
                         quantityAdjustedFrom: null,
                         snapshotEffectivePrice: item.snapshotEffectivePrice,
+                        isSelected: item.isSelected,
                     },
                 });
             }
