@@ -13,21 +13,22 @@ import {
     setCartItemQuantity,
     updateCartItemPriceSnapshots,
 } from '@/services/cart/cart.service';
-import type {
-    CartData,
-    UpdateCartItemPriceSnapshotsResult,
-} from '@/services/cart/cart.types';
+import type { CartData } from '@/services/cart/cart.types';
 
 export async function addCartItemAction(productId: string): Promise<CartData> {
     const session = await getSession();
 
     if (session) {
-        return addCartItem(session.user.id, productId);
+        await addCartItem(session.user.id, productId);
+
+        return getReconciledCart(session.user.id);
     }
 
     const anonymousSession = await createAnonymousSession();
 
-    return addCartItem(anonymousSession.user.id, productId);
+    await addCartItem(anonymousSession.user.id, productId);
+
+    return getReconciledCart(anonymousSession.user.id);
 }
 
 export async function setCartItemQuantityAction(
@@ -35,11 +36,10 @@ export async function setCartItemQuantityAction(
     quantity: number,
 ): Promise<CartData> {
     const session = await requireSession();
-    const userId = session.user.id;
 
-    await setCartItemQuantity(userId, productId, quantity);
+    await setCartItemQuantity(session.user.id, productId, quantity);
 
-    return getReconciledCart(userId);
+    return getReconciledCart(session.user.id);
 }
 
 export async function removeCartItemAction(
@@ -47,7 +47,9 @@ export async function removeCartItemAction(
 ): Promise<CartData> {
     const session = await requireSession();
 
-    return removeCartItem(session.user.id, productId);
+    await removeCartItem(session.user.id, productId);
+
+    return getReconciledCart(session.user.id);
 }
 
 export async function clearCartAction(): Promise<CartData> {
@@ -61,7 +63,7 @@ export async function updateCartItemPriceSnapshotsAction(
         productId: string;
         effectivePrice: number;
     }[],
-): Promise<UpdateCartItemPriceSnapshotsResult> {
+): Promise<CartData> {
     const session = await requireSession();
 
     if (
@@ -77,5 +79,7 @@ export async function updateCartItemPriceSnapshotsAction(
         throw new Error('Invalid price confirmations');
     }
 
-    return updateCartItemPriceSnapshots(session.user.id, confirmations);
+    await updateCartItemPriceSnapshots(session.user.id, confirmations);
+
+    return getReconciledCart(session.user.id);
 }

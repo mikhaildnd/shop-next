@@ -53,7 +53,6 @@ export function useCart({
         data: cartData,
         mutate,
         replace,
-        updateConfirmed,
     } = useOptimisticMutations({
         initialData: initialCartState,
         actionQueue,
@@ -277,7 +276,7 @@ export function useCart({
     );
 
     const updateCartItemPriceSnapshots = useCallback(
-        async (productIds: string[]) => {
+        (productIds: string[]) => {
             const confirmations = cartData.cart.items
                 .filter((item) => productIds.includes(item.productId))
                 .map((item) => {
@@ -294,47 +293,34 @@ export function useCart({
                 })
                 .filter((confirmation) => confirmation !== null);
 
-            const result =
-                await updateCartItemPriceSnapshotsAction(confirmations);
+            return mutate({
+                update: (data) => ({
+                    ...data,
+                    cart: {
+                        ...data.cart,
+                        items: data.cart.items.map((item) => {
+                            const confirmation = confirmations.find(
+                                (confirmation) =>
+                                    confirmation.productId === item.productId,
+                            );
 
-            updateConfirmed((data) => ({
-                ...data,
-                cart: {
-                    ...data.cart,
-                    items: data.cart.items.map((item) => {
-                        if (
-                            !result.updatedProductIds.includes(item.productId)
-                        ) {
-                            return item;
-                        }
+                            if (!confirmation) {
+                                return item;
+                            }
 
-                        const confirmation = confirmations.find(
-                            (confirmation) =>
-                                confirmation.productId === item.productId,
-                        );
-
-                        if (!confirmation) {
-                            return item;
-                        }
-
-                        return {
-                            ...item,
-                            snapshot: {
-                                effectivePrice: confirmation.effectivePrice,
-                            },
-                        };
-                    }),
-                },
-                products: data.products.map(
-                    (product) =>
-                        result.changedProducts.find(
-                            (changedProduct) =>
-                                changedProduct.productId === product.productId,
-                        ) ?? product,
-                ),
-            }));
+                            return {
+                                ...item,
+                                snapshot: {
+                                    effectivePrice: confirmation.effectivePrice,
+                                },
+                            };
+                        }),
+                    },
+                }),
+                action: () => updateCartItemPriceSnapshotsAction(confirmations),
+            });
         },
-        [cartData.cart.items, cartData.products, updateConfirmed],
+        [cartData.cart.items, cartData.products, mutate],
     );
 
     return {
