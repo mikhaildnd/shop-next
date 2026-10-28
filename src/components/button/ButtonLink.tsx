@@ -1,43 +1,32 @@
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
 
-import type {
-    ButtonSize,
-    ButtonVariant,
-} from '@/components/button/button.types';
+import {
+    buttonContentSizeClasses,
+    buttonVariantClasses,
+} from '@/components/button/button.styles';
+import type { ButtonStyleProps } from '@/components/button/button.types';
 import { cn } from '@/lib/cn';
+import { controlHeightClasses, controlShapeClasses } from '@/lib/ui/ui-styles';
 
-interface ButtonLinkProps extends ComponentProps<typeof Link> {
-    variant?: ButtonVariant;
-    size?: ButtonSize;
-}
-
-const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'button-primary',
-    outline: 'button-outline',
-    destructive: 'button-destructive',
-    accent: 'button-accent',
-    neutral: 'button-neutral',
-};
-
-const sizeClasses: Record<ButtonSize, string> = {
-    xs: 'button-xs',
-    sm: 'button-sm',
-    md: 'button-md',
-};
+interface ButtonLinkProps
+    extends ComponentProps<typeof Link>, ButtonStyleProps {}
 
 export function ButtonLink({
     className,
     variant = 'primary',
     size = 'md',
+    shape = 'rounded',
     ...props
 }: ButtonLinkProps) {
     return (
         <Link
             className={cn(
                 'button-base',
-                variantClasses[variant],
-                sizeClasses[size],
+                buttonVariantClasses[variant],
+                controlHeightClasses[size],
+                buttonContentSizeClasses[size],
+                controlShapeClasses[shape],
                 className,
             )}
             {...props}

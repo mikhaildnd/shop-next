@@ -5,7 +5,6 @@ import { cn } from '@/lib/cn';
 interface SliderNavigationButtonProps {
     direction: 'prev' | 'next';
     className?: string;
-    iconClassName?: string;
     isDisabled?: boolean;
     onClick: () => void;
 }
@@ -24,7 +23,6 @@ const ArrowIcon = (props: SVGProps<SVGSVGElement>) => (
 export function SliderNavigationButton({
     direction,
     className,
-    iconClassName,
     isDisabled = false,
     onClick,
 }: SliderNavigationButtonProps) {
@@ -47,7 +45,6 @@ export function SliderNavigationButton({
                     isDisabled
                         ? 'opacity-50'
                         : 'transition-colors group-hover:fill-black group-active:fill-black',
-                    iconClassName,
                 )}
             />
             <span className="sr-only">

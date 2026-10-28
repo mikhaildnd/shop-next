@@ -5,14 +5,20 @@ import { useCartContext } from '@/components/cart/CartContext';
 import { CartItemQuantity } from '@/components/cart/CartItemQuantity';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
+import type { ControlSize } from '@/lib/ui/ui-styles';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface CartButtonProps {
     product: ProductDto;
+    size?: ControlSize;
     className?: string;
 }
 
-export function CartButton({ product, className }: CartButtonProps) {
+export function CartButton({
+    product,
+    size = 'md',
+    className,
+}: CartButtonProps) {
     const { addCartItem, getCartItem } = useCartContext();
 
     const cartItem = getCartItem(product.id);
@@ -37,6 +43,7 @@ export function CartButton({ product, className }: CartButtonProps) {
             {isInCart && !isOutOfStock ? (
                 <CartItemQuantity
                     className="flex-1"
+                    size={size}
                     productId={product.id}
                     quantity={cartItem.displayQuantity}
                     maxQuantity={product.stock}
@@ -44,6 +51,7 @@ export function CartButton({ product, className }: CartButtonProps) {
             ) : (
                 <Button
                     className="flex-1"
+                    size={size}
                     disabled={isOutOfStock}
                     onClick={isOutOfStock ? undefined : handleAddCartItem}
                     variant="accent"

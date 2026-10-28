@@ -42,7 +42,7 @@ export function Maps() {
                                     onClick={() => setCurrentLocation(key)}
                                     type="button"
                                     className={cn(
-                                        'button-base button-sm',
+                                        'button-base control-height-sm control-shape-rounded button-content-sm',
                                         isActive
                                             ? 'button-selected'
                                             : 'button-neutral',

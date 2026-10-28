@@ -58,6 +58,7 @@ export function SearchHistoryItem({
             <CloseButton
                 aria-label="Удалить элемент истории"
                 onClick={() => onRemove(item)}
+                size="sm"
             />
         </li>
     );

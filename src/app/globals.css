@@ -117,7 +117,7 @@
 }
 
 @utility button-base {
-  @apply flex cursor-pointer items-center justify-center rounded
+  @apply flex items-center justify-center
   transition-colors
   disabled:pointer-events-none
   disabled:opacity-50;
@@ -176,20 +176,71 @@
 @utility button-selected {
   @apply bg-(--color-primary)
   text-white
-  focus-ring
-  active:opacity-80;
+  cursor-default
+  focus-ring;
 }
 
-@utility button-xs {
-  @apply h-6 px-1 text-xs;
+@utility control-size-xs {
+  width: var(--spacing-control-xs);
+  height: var(--spacing-control-xs);
 }
 
-@utility button-sm {
-  @apply h-8 px-2 text-sm;
+@utility control-size-sm {
+  width: var(--spacing-control-sm);
+  height: var(--spacing-control-sm);
 }
 
-@utility button-md {
-  @apply h-10 px-4;
+@utility control-size-md {
+  width: var(--spacing-control-md);
+  height: var(--spacing-control-md);
+}
+
+@utility control-height-xs {
+  height: var(--spacing-control-xs);
+}
+
+@utility control-height-sm {
+  height: var(--spacing-control-sm);
+}
+
+@utility control-height-md {
+  height: var(--spacing-control-md);
+}
+
+@utility control-shape-round {
+  @apply rounded-full;
+}
+
+@utility control-shape-rounded {
+  @apply rounded-md;
+}
+
+@utility control-shape-square {
+  @apply rounded-none;
+}
+
+@utility button-content-xs {
+  @apply px-1 text-xs;
+}
+
+@utility button-content-sm {
+  @apply px-2 text-sm;
+}
+
+@utility button-content-md {
+  @apply px-4 text-md;
+}
+
+@utility button-icon-xs {
+  @apply [&_svg]:size-3;
+}
+
+@utility button-icon-sm {
+  @apply [&_svg]:size-4;
+}
+
+@utility button-icon-md {
+  @apply [&_svg]:size-5;
 }
 
 @property --toast-pulse-scale {
@@ -211,6 +262,10 @@
 }
 
 @theme inline {
+  --spacing-control-xs: 1.5rem;
+  --spacing-control-sm: 2rem;
+  --spacing-control-md: 2.5rem;
+
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

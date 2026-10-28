@@ -1,18 +1,28 @@
 import { SlidersHorizontal as IconFilter } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
-interface ProductFiltersButtonProps {
-    onClick: () => void;
-}
+import { IconButton } from '@/components/button/IconButton';
 
-export function ProductFiltersButton({ onClick }: ProductFiltersButtonProps) {
+type ProductFiltersButtonProps = Omit<
+    ComponentProps<typeof IconButton>,
+    'children'
+>;
+
+export function ProductFiltersButton({
+    onClick,
+    ...props
+}: ProductFiltersButtonProps) {
     return (
-        <button
-            type="button"
+        <IconButton
+            size="md"
+            shape="rounded"
             aria-label="Открыть фильтры"
-            className="rounded-xl border border-gray-100 bg-white p-2"
             onClick={onClick}
+            className="border border-gray-100 bg-white hover:border-gray-200"
+            variant="ghost"
+            {...props}
         >
-            <IconFilter className="size-6" />
-        </button>
+            <IconFilter />
+        </IconButton>
     );
 }

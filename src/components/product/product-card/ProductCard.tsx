@@ -94,7 +94,10 @@ export function ProductCard({ product, href }: ProductCardProps) {
                     </div>
 
                     {/*ACTIONS SEGMENT*/}
-                    <CartButton product={product} />
+                    <CartButton
+                        size="md"
+                        product={product}
+                    />
                 </footer>
             </div>
         </article>

@@ -1,24 +1,22 @@
 'use client';
 
 import { Heart } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
-import type { IconButtonProps } from '@/components/button/icon-button/icon-button.types';
-import { IconButton } from '@/components/button/icon-button/IconButton';
+import { IconButton } from '@/components/button/IconButton';
 import { useFavoritesContext } from '@/components/favorite/FavoritesContext';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 
 interface FavoriteButtonProps extends Omit<
-    IconButtonProps,
+    ComponentProps<typeof IconButton>,
     'children' | 'aria-label' | 'onClick'
 > {
     productId: string;
-    iconClassName?: string;
 }
 
 export function FavoriteButton({
     productId,
-    iconClassName,
     className,
     ...props
 }: FavoriteButtonProps) {
@@ -52,7 +50,6 @@ export function FavoriteButton({
                     favorite
                         ? 'fill-red-500 stroke-red-500 group-active:fill-red-400'
                         : 'fill-transparent group-hover:stroke-gray-600',
-                    iconClassName,
                 )}
             />
         </IconButton>

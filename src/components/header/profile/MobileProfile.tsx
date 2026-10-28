@@ -61,6 +61,7 @@ export function MobileProfile({ user, className }: MobileProfileProps) {
                         <CloseButton
                             aria-label="Закрыть профиль"
                             onClick={() => setIsOpen(false)}
+                            size="sm"
                         />
                     </div>
 

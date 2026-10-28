@@ -1,6 +1,8 @@
-import { Search as IconSearch, X as IconClose } from 'lucide-react';
+import { Search as IconSearch } from 'lucide-react';
 import type { ChangeEvent, SubmitEventHandler } from 'react';
 
+import { CloseButton } from '@/components/button/CloseButton';
+import { IconButton } from '@/components/button/IconButton';
 import { cn } from '@/lib/cn';
 
 interface SearchFormProps {
@@ -20,9 +22,6 @@ export function SearchForm({
     onReset,
     className,
 }: SearchFormProps) {
-    const iconButtonClass =
-        'rounded p-1 transition-colors hover:bg-gray-200 focus-visible:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-(--color-primary) cursor-pointer md:p-1.5';
-
     return (
         <form
             className={cn('relative w-full', className)}
@@ -30,7 +29,7 @@ export function SearchForm({
             autoComplete="off"
         >
             <input
-                className="h-10 w-full no-search-cancel rounded border border-(--color-primary)/60 bg-gray-50 p-2 pr-16 text-base leading-[150%] text-black transition-colors placeholder:text-(--placeholder-text-color) focus:border-(--color-primary) focus:bg-white focus:ring-1 focus:ring-(--color-primary)/20 focus:outline-none"
+                className="h-10 w-full no-search-cancel rounded-md border border-(--color-primary)/60 bg-gray-50 p-2 pr-16 text-base leading-[150%] text-black transition-colors placeholder:text-(--placeholder-text-color) focus:border-(--color-primary) focus:bg-white focus:ring-1 focus:ring-(--color-primary)/20 focus:outline-none"
                 autoComplete="off"
                 value={value}
                 onChange={onChange}
@@ -39,25 +38,22 @@ export function SearchForm({
                 type="search"
             />
 
-            <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center md:right-2 md:gap-2">
+            <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-1 md:right-2 md:gap-2">
                 {value && (
-                    <button
-                        type="button"
-                        onClick={onReset}
+                    <CloseButton
                         aria-label="Очистить поиск"
-                        className={iconButtonClass}
-                    >
-                        <IconClose className="size-5 text-gray-500 transition-colors" />
-                    </button>
+                        onClick={onReset}
+                        size="sm"
+                    />
                 )}
 
-                <button
+                <IconButton
                     type="submit"
-                    aria-label="Поиск"
-                    className={iconButtonClass}
+                    size="sm"
+                    shape="rounded"
                 >
-                    <IconSearch className="size-5 text-gray-500 transition-colors" />
-                </button>
+                    <IconSearch />
+                </IconButton>
             </div>
         </form>
     );

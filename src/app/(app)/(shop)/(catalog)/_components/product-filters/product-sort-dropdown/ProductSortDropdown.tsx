@@ -7,9 +7,19 @@ import { PRODUCT_SORT_ITEMS } from '@/app/(app)/(shop)/(catalog)/_components/pro
 import { useProductListingContext } from '@/app/(app)/(shop)/(catalog)/_components/ProductListingContext';
 import { useDismiss } from '@/hooks/useDismiss';
 import { cn } from '@/lib/cn';
+import type { ControlShape, ControlSize } from '@/lib/ui/ui-styles';
+import { controlHeightClasses, controlShapeClasses } from '@/lib/ui/ui-styles';
 import type { ProductSort } from '@/services/product/sort/sort.types';
 
-export function ProductSortDropdown() {
+interface ProductSortDropdownProps {
+    size?: ControlSize;
+    shape?: ControlShape;
+}
+
+export function ProductSortDropdown({
+    size = 'md',
+    shape = 'rounded',
+}: ProductSortDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const rootRef = useRef<HTMLDivElement>(null);
@@ -21,7 +31,10 @@ export function ProductSortDropdown() {
         PRODUCT_SORT_ITEMS[0];
 
     const handleSelect = (nextSort: ProductSort) => {
-        if (nextSort === listing.sort) return;
+        if (nextSort === listing.sort) {
+            setIsOpen(false);
+            return;
+        }
 
         updateListing({
             sort: nextSort,
@@ -42,7 +55,11 @@ export function ProductSortDropdown() {
             className="relative"
         >
             <button
-                className="flex w-54 cursor-pointer items-center justify-between overflow-x-hidden rounded-xl border border-gray-100 bg-white px-4 py-2 whitespace-nowrap focus-ring hover:border-gray-200"
+                className={cn(
+                    'flex w-54 items-center justify-between border border-gray-100 bg-white px-3 whitespace-nowrap focus-ring hover:border-gray-200',
+                    controlHeightClasses[size],
+                    controlShapeClasses[shape],
+                )}
                 type="button"
                 onClick={() => setIsOpen((open) => !open)}
                 aria-expanded={isOpen}
@@ -58,15 +75,22 @@ export function ProductSortDropdown() {
             </button>
 
             {isOpen && (
-                <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white whitespace-nowrap shadow-lg">
+                <ul
+                    className={cn(
+                        'absolute z-20 mt-2 w-full overflow-hidden border border-gray-100 bg-white whitespace-nowrap shadow-lg',
+                        controlShapeClasses[shape],
+                    )}
+                >
                     {PRODUCT_SORT_ITEMS.map((option) => (
                         <li key={option.value}>
                             <button
                                 className={cn(
-                                    'flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors outline-none',
-                                    'hover:bg-(--color-primary)/10 focus-visible:bg-(--color-primary)/10',
-                                    option.value === listing.sort &&
-                                        'bg-(--color-primary)/20 font-semibold',
+                                    'flex w-full items-center justify-between px-3 transition-colors outline-none',
+                                    'focus-visible:bg-(--color-primary)/10',
+                                    controlHeightClasses[size],
+                                    option.value === listing.sort
+                                        ? 'bg-(--color-primary)/20 font-semibold'
+                                        : 'hover:bg-(--color-primary)/10',
                                 )}
                                 type="button"
                                 onClick={() => handleSelect(option.value)}
@@ -74,7 +98,7 @@ export function ProductSortDropdown() {
                                 <span>{option.label}</span>
 
                                 {option.value === listing.sort && (
-                                    <Check className="size-5 text-(--color-primary)" />
+                                    <Check className="size-4 text-(--color-primary)" />
                                 )}
                             </button>
                         </li>

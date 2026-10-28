@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ProductFiltersButton } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/ProductFiltersButton';
 import { ProductFiltersPanel } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/ProductFiltersPanel';
 import { ResetFiltersButton } from '@/app/(app)/(shop)/(catalog)/_components/product-filters/ResetFiltersButton';
+import { IconButton } from '@/components/button/IconButton';
 import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
 
 interface ProductMobileFiltersProps {
@@ -27,14 +28,17 @@ export function ProductMobileFilters({ className }: ProductMobileFiltersProps) {
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex flex-col bg-white">
                     <header className="flex items-center gap-x-4 border-b border-gray-100 px-4 py-4">
-                        <button
-                            type="button"
+                        <IconButton
+                            className="border border-gray-100 hover:border-gray-200"
                             onClick={closeFilters}
                             aria-label="Закрыть фильтры"
-                            className="rounded-xl border border-gray-100 bg-white p-2 text-gray-500"
+                            size="md"
+                            shape="rounded"
+                            variant="ghost"
                         >
-                            <IconClose className="size-6" />
-                        </button>
+                            <IconClose />
+                        </IconButton>
+
                         <h2 className="text-lg font-semibold">Фильтры</h2>
                     </header>
 
