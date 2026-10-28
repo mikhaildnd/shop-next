@@ -34,7 +34,7 @@ export function Footer({ className }: { className?: string }) {
                 />
                 <FooterNav className={styles.nav} />
             </div>
-            <div className="flex flex-col gap-x-2 gap-y-2 border-t border-(--color-light-gray) py-2 text-sm md:flex-row md:py-4">
+            <div className="flex flex-col gap-x-2 gap-y-2 border-t border-(--color-light-gray) py-2 text-sm md:flex-row md:items-center md:py-4">
                 <p>{`© ${currentYear} Next shop, Inc.`}</p>
                 <Link
                     href="/"
