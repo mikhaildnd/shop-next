@@ -80,7 +80,7 @@ export function EmailVerificationForm({
                 pendingText="Отправка"
                 onClick={handleResend}
                 isLoading={isResending}
-                disabled={isResending || isRunning}
+                disabled={isPending || isResending || isRunning}
             >
                 Отправить код повторно
             </LoadingButton>

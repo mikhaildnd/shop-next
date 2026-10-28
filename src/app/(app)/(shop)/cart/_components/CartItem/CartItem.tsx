@@ -1,5 +1,3 @@
-'use client';
-
 import { ImageOff, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -48,6 +46,18 @@ export function CartItem({ item }: CartItemProps) {
                 type: 'error',
                 description:
                     'Не удалось изменить выбор товара. Попробуйте ещё раз.',
+            });
+        }
+    };
+
+    const handleRemove = async () => {
+        try {
+            await removeCartItem(item.productId);
+        } catch {
+            toast.add({
+                id: 'cart-remove-error',
+                type: 'error',
+                description: 'Не удалось удалить товар. Попробуйте ещё раз.',
             });
         }
     };
@@ -143,18 +153,7 @@ export function CartItem({ item }: CartItemProps) {
                         }
                         title="Удалить товар?"
                         description="Товар будет удалён из корзины."
-                        onConfirm={async () => {
-                            try {
-                                await removeCartItem(item.productId);
-                            } catch {
-                                toast.add({
-                                    id: 'cart-remove-error',
-                                    type: 'error',
-                                    description:
-                                        'Не удалось удалить товар. Попробуйте ещё раз.',
-                                });
-                            }
-                        }}
+                        onConfirm={handleRemove}
                     />
                 </div>
             </div>

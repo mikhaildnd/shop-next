@@ -48,6 +48,7 @@ export function SearchForm({
                 )}
 
                 <IconButton
+                    aria-label="Поиск"
                     type="submit"
                     size="sm"
                     shape="rounded"

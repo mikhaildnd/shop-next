@@ -110,6 +110,13 @@
   focus-visible:outline-none;
 }
 
+@utility focus-ring-neutral {
+  @apply focus-visible:ring-1
+  focus-visible:ring-(--color-ring)
+  focus-visible:ring-offset-1
+  focus-visible:outline-none;
+}
+
 @utility link-style {
   @apply text-(--color-primary)
   underline-offset-1
@@ -170,7 +177,7 @@
   active:opacity-90
   hover:bg-gray-200
   focus-visible:bg-gray-200
-  focus-ring;
+  focus-ring-neutral;
 }
 
 @utility button-selected {
@@ -228,7 +235,7 @@
 }
 
 @utility button-content-md {
-  @apply px-4 text-md;
+  @apply px-4 text-base;
 }
 
 @utility button-icon-xs {

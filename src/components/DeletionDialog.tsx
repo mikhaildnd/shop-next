@@ -26,7 +26,6 @@ interface DeletionDialogProps {
     confirmLabel?: string;
     cancelLabel?: string;
     onConfirm?: () => void | Promise<void>;
-    confirmFormId?: string;
 }
 
 export function DeletionDialog({
@@ -38,7 +37,6 @@ export function DeletionDialog({
     confirmLabel = 'Удалить',
     cancelLabel = 'Отмена',
     onConfirm,
-    confirmFormId,
 }: DeletionDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
     const isOpen = open ?? internalOpen;
@@ -85,8 +83,7 @@ export function DeletionDialog({
                     <Button
                         size="sm"
                         variant="destructive"
-                        type={confirmFormId ? 'submit' : 'button'}
-                        form={confirmFormId}
+                        type="button"
                         onClick={() => {
                             handleOpenChange(false);
                             onConfirm?.();
