@@ -1,16 +1,13 @@
 import { redirect } from 'next/navigation';
 
+import { DeleteAccountButton } from '@/app/(app)/(shop)/profile/_components/DeleteAccountButton';
 import { ProfileBadge } from '@/app/(app)/(shop)/profile/_components/ProfileBadge';
 import { ProfileItem } from '@/app/(app)/(shop)/profile/_components/ProfileItem';
 import { ProfileName } from '@/app/(app)/(shop)/profile/_components/ProfileName';
 import { ProfilePassword } from '@/app/(app)/(shop)/profile/_components/ProfilePassword';
 import { ProfileSection } from '@/app/(app)/(shop)/profile/_components/ProfileSection';
-import { deleteAccount } from '@/app/(app)/(shop)/profile/actions';
 import { getAuthenticatedUser } from '@/auth/session';
-import { Button } from '@/components/button/Button';
 import { ButtonLink } from '@/components/button/ButtonLink';
-import { SubmitButton } from '@/components/button/SubmitButton';
-import { DeletionDialog } from '@/components/DeletionDialog';
 import { routes } from '@/routes';
 
 export default async function ProfilePage() {
@@ -58,32 +55,7 @@ export default async function ProfilePage() {
                     title="Удаление аккаунта"
                     variant="destructive"
                 >
-                    <div className="flex flex-col items-start gap-3">
-                        <DeletionDialog
-                            trigger={
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                >
-                                    Удалить аккаунт
-                                </Button>
-                            }
-                            title="Удалить аккаунт?"
-                            description="Восстановить аккаунт будет невозможно."
-                            confirmAction={
-                                <form action={deleteAccount}>
-                                    <SubmitButton
-                                        className="w-full"
-                                        size="sm"
-                                        variant="destructive"
-                                        pendingText="Удаление аккаунта"
-                                    >
-                                        Удалить аккаунт
-                                    </SubmitButton>
-                                </form>
-                            }
-                        />
-                    </div>
+                    <DeleteAccountButton />
                 </ProfileSection>
             </div>
         </div>
