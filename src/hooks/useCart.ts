@@ -7,6 +7,7 @@ import {
     addCartItemAction,
     clearCartAction,
     removeCartItemAction,
+    removeCartItemsAction,
     setAllCartItemsSelectionAction,
     setCartItemQuantityAction,
     setCartItemSelectionAction,
@@ -30,6 +31,7 @@ export interface UseCartResult {
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
     removeCartItem: (productId: string) => Promise<void>;
+    removeCartItems: (productIds: string[]) => Promise<void>;
     clearCart: () => Promise<void>;
     cartCount: number;
     pendingQuantity: PendingQuantity | null;
@@ -262,6 +264,36 @@ export function useCart({
         [mutate, saveQuantity, updatePendingQuantity],
     );
 
+    const removeCartItems = useCallback(
+        (productIds: string[]) => {
+            if (productIds.length === 0) {
+                return Promise.resolve();
+            }
+
+            const productIdSet = new Set(productIds);
+            const pendingProductId = pendingQuantityRef.current?.productId;
+
+            if (pendingProductId && productIdSet.has(pendingProductId)) {
+                saveQuantity.cancel();
+                updatePendingQuantity(null);
+            }
+
+            return mutate({
+                update: (data) => ({
+                    ...data,
+                    cart: {
+                        ...data.cart,
+                        items: data.cart.items.filter(
+                            (item) => !productIdSet.has(item.productId),
+                        ),
+                    },
+                }),
+                action: () => removeCartItemsAction(productIds),
+            });
+        },
+        [mutate, saveQuantity, updatePendingQuantity],
+    );
+
     const clearCart = useCallback(() => {
         saveQuantity.cancel();
         updatePendingQuantity(null);
@@ -384,6 +416,7 @@ export function useCart({
         incrementCartItem,
         decrementCartItem,
         removeCartItem,
+        removeCartItems,
         clearCart,
         cartCount,
         pendingQuantity,

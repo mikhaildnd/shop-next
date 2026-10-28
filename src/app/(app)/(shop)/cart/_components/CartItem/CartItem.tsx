@@ -121,6 +121,7 @@ export function CartItem({ item }: CartItemProps) {
                         maxQuantity={item.product.stock}
                         size="sm"
                         variant="neutral"
+                        confirmRemoval
                     />
                 )}
 
@@ -142,7 +143,18 @@ export function CartItem({ item }: CartItemProps) {
                         }
                         title="Удалить товар?"
                         description="Товар будет удалён из корзины."
-                        onConfirm={() => removeCartItem(item.productId)}
+                        onConfirm={async () => {
+                            try {
+                                await removeCartItem(item.productId);
+                            } catch {
+                                toast.add({
+                                    id: 'cart-remove-error',
+                                    type: 'error',
+                                    description:
+                                        'Не удалось удалить товар. Попробуйте ещё раз.',
+                                });
+                            }
+                        }}
                     />
                 </div>
             </div>
@@ -269,22 +281,3 @@ function CartItemDetails({
         </div>
     );
 }
-
-// interface CartItemMessageProps {
-//     message: string;
-//     className?: string;
-// }
-//
-// function CartItemMessage({ message, className }: CartItemMessageProps) {
-//     return (
-//         <p
-//             className={cn(
-//                 'flex items-center gap-3 rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-500',
-//                 className,
-//             )}
-//         >
-//             <Info className="size-5 shrink-0" />
-//             <span>{message}</span>
-//         </p>
-//     );
-// }

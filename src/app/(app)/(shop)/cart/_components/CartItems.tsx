@@ -1,7 +1,9 @@
 import { CartItem } from '@/app/(app)/(shop)/cart/_components/CartItem/CartItem';
+import { CartItemRemoveButton } from '@/app/(app)/(shop)/cart/_components/CartItemRemoveButton';
 import { CartPriceChangesDialog } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesDialog';
 import { CartPriceChangesMessage } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesMessage';
 import { useCartContext } from '@/components/cart/CartContext';
+import { DeletionDialog } from '@/components/DeletionDialog';
 import { Checkbox } from '@/components/form/Checkbox';
 import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
@@ -17,6 +19,7 @@ export function CartItems({ className }: CartItemsProps) {
         hasPriceChanges,
         updateCartItemPriceSnapshots,
         setAllCartItemsSelection,
+        removeCartItems,
     } = useCartContext();
 
     const changedPriceProducts = availableCartItems.filter(
@@ -27,6 +30,10 @@ export function CartItems({ className }: CartItemsProps) {
         availableCartItems.length > 0 &&
         availableCartItems.every((item) => item.isSelected);
 
+    const selectedProductIds = availableCartItems
+        .filter((item) => item.isSelected)
+        .map((item) => item.productId);
+
     const handleToggleAll = async () => {
         try {
             await setAllCartItemsSelection(!areAllSelected);
@@ -36,6 +43,19 @@ export function CartItems({ className }: CartItemsProps) {
                 type: 'error',
                 description:
                     'Не удалось изменить выбор товаров. Попробуйте ещё раз.',
+            });
+        }
+    };
+
+    const handleRemoveSelected = async () => {
+        try {
+            await removeCartItems(selectedProductIds);
+        } catch {
+            toast.add({
+                id: 'cart-remove-selected-error',
+                type: 'error',
+                description:
+                    'Не удалось удалить выбранные товары. Попробуйте ещё раз.',
             });
         }
     };
@@ -67,12 +87,28 @@ export function CartItems({ className }: CartItemsProps) {
                     </CartPriceChangesMessage>
                 )}
 
-                <div className="mb-3 py-2">
+                <div className="mb-3 flex items-center justify-between py-2">
                     <Checkbox
+                        variant="cart"
                         id="cart-select-all"
                         checked={areAllSelected}
                         onChange={handleToggleAll}
                         label="Выбрать все"
+                    />
+
+                    <DeletionDialog
+                        trigger={
+                            <CartItemRemoveButton
+                                className="bg-gray-50"
+                                size="sm"
+                                shape="rounded"
+                                disabled={selectedProductIds.length === 0}
+                            />
+                        }
+                        title="Удалить выбранные товары?"
+                        description="Выбранные товары будут удалены из корзины. Это действие нельзя отменить."
+                        confirmLabel="Удалить"
+                        onConfirm={handleRemoveSelected}
                     />
                 </div>
 

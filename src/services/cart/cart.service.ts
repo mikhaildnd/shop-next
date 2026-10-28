@@ -428,3 +428,23 @@ export async function setAllCartItemsSelection(
         },
     });
 }
+
+export async function removeCartItems(
+    userId: string,
+    productIds: string[],
+): Promise<void> {
+    if (productIds.length === 0) {
+        return;
+    }
+
+    await prisma.cartItem.deleteMany({
+        where: {
+            cart: {
+                userId,
+            },
+            productId: {
+                in: productIds,
+            },
+        },
+    });
+}

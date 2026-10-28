@@ -24,6 +24,7 @@ interface CartContextValue {
     incrementCartItem: (productId: string) => void;
     decrementCartItem: (productId: string) => void;
     removeCartItem: (productId: string) => Promise<void>;
+    removeCartItems: (productIds: string[]) => Promise<void>;
     clearCart: () => Promise<void>;
     isQuantityUpdating: boolean;
     replaceCartData: (cartData: CartData) => void;
@@ -122,6 +123,7 @@ export function CartProvider({
         incrementCartItem: cart.incrementCartItem,
         decrementCartItem: cart.decrementCartItem,
         removeCartItem: cart.removeCartItem,
+        removeCartItems: cart.removeCartItems,
         clearCart: cart.clearCart,
         isQuantityUpdating,
         replaceCartData: cart.replaceCartData,

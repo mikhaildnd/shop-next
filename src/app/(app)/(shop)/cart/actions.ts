@@ -10,6 +10,7 @@ import {
     clearCart,
     getReconciledCart,
     removeCartItem,
+    removeCartItems,
     setAllCartItemsSelection,
     setCartItemQuantity,
     setCartItemSelection,
@@ -50,6 +51,23 @@ export async function removeCartItemAction(
     const session = await requireSession();
 
     await removeCartItem(session.user.id, productId);
+
+    return getReconciledCart(session.user.id);
+}
+
+export async function removeCartItemsAction(
+    productIds: string[],
+): Promise<CartData> {
+    const session = await requireSession();
+
+    if (
+        !Array.isArray(productIds) ||
+        !productIds.every((id) => typeof id === 'string')
+    ) {
+        throw new Error('Invalid product IDs');
+    }
+
+    await removeCartItems(session.user.id, productIds);
 
     return getReconciledCart(session.user.id);
 }

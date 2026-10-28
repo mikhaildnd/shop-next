@@ -4,24 +4,20 @@ import { useState } from 'react';
 
 import { useCartContext } from '@/components/cart/CartContext';
 import { DeletionDialog } from '@/components/DeletionDialog';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
-
-type CartItemQuantitySize = 'sm' | 'md';
+import {
+    controlHeightClasses,
+    type ControlShape,
+    controlShapeClasses,
+    type ControlSize,
+    controlSizeClasses,
+} from '@/lib/ui/ui-styles';
 
 type CartItemQuantityVariant = 'primary' | 'neutral';
 
 const buttonBaseClasses =
-    'flex h-full items-center justify-center disabled:cursor-not-allowed disabled:opacity-50';
-
-const sizeClasses: Record<CartItemQuantitySize, string> = {
-    sm: 'h-8',
-    md: 'h-9',
-};
-
-const buttonSizeClasses: Record<CartItemQuantitySize, string> = {
-    sm: 'size-8',
-    md: 'size-9',
-};
+    'flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50';
 
 const variantClasses: Record<CartItemQuantityVariant, string> = {
     neutral: 'border border-gray-50',
@@ -39,8 +35,10 @@ interface CartItemQuantityProps {
     productId: string;
     quantity: number;
     maxQuantity?: number;
-    size?: CartItemQuantitySize;
+    size?: ControlSize;
+    shape?: ControlShape;
     variant?: CartItemQuantityVariant;
+    confirmRemoval?: boolean;
     className?: string;
 }
 export function CartItemQuantity({
@@ -48,7 +46,9 @@ export function CartItemQuantity({
     quantity,
     maxQuantity,
     size = 'md',
+    shape = 'rounded',
     variant = 'primary',
+    confirmRemoval = false,
     className,
 }: CartItemQuantityProps) {
     const { incrementCartItem, decrementCartItem, removeCartItem } =
@@ -62,18 +62,36 @@ export function CartItemQuantity({
 
     const handleDecrement = async () => {
         if (quantity === 1) {
-            setIsRemoveDialogOpen(true);
+            if (confirmRemoval) {
+                setIsRemoveDialogOpen(true);
+            } else {
+                await handleRemove();
+            }
+
             return;
         }
 
         decrementCartItem(productId);
     };
 
+    async function handleRemove() {
+        try {
+            await removeCartItem(productId);
+        } catch {
+            toast.add({
+                id: 'cart-remove-error',
+                type: 'error',
+                description: 'Не удалось удалить товар. Попробуйте ещё раз.',
+            });
+        }
+    }
+
     return (
         <div
             className={cn(
-                'flex items-center justify-between overflow-clip rounded-md',
-                sizeClasses[size],
+                'flex items-center justify-between overflow-clip',
+                controlHeightClasses[size],
+                controlShapeClasses[shape],
                 variantClasses[variant],
                 className,
             )}
@@ -83,7 +101,7 @@ export function CartItemQuantity({
                 disabled={disabled}
                 className={cn(
                     buttonBaseClasses,
-                    buttonSizeClasses[size],
+                    controlSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
                 onClick={handleDecrement}
@@ -102,20 +120,23 @@ export function CartItemQuantity({
                 disabled={isIncrementDisabled}
                 className={cn(
                     buttonBaseClasses,
-                    buttonSizeClasses[size],
+                    controlSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
                 onClick={() => incrementCartItem(productId)}
             >
                 +
             </button>
-            <DeletionDialog
-                open={isRemoveDialogOpen}
-                onOpenChange={setIsRemoveDialogOpen}
-                title="Удалить товар?"
-                description="Товар будет удалён из корзины."
-                onConfirm={() => removeCartItem(productId)}
-            />
+
+            {confirmRemoval && (
+                <DeletionDialog
+                    open={isRemoveDialogOpen}
+                    onOpenChange={setIsRemoveDialogOpen}
+                    title="Удалить товар?"
+                    description="Товар будет удалён из корзины."
+                    onConfirm={handleRemove}
+                />
+            )}
         </div>
     );
 }
