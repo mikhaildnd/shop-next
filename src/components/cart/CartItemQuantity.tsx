@@ -8,16 +8,11 @@ import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/cn';
 import {
     controlHeightClasses,
-    type ControlShape,
-    controlShapeClasses,
     type ControlSize,
     controlSizeClasses,
 } from '@/lib/ui/ui-styles';
 
 type CartItemQuantityVariant = 'primary' | 'neutral';
-
-const buttonBaseClasses =
-    'flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50';
 
 const variantClasses: Record<CartItemQuantityVariant, string> = {
     neutral: 'border border-gray-50',
@@ -36,7 +31,6 @@ interface CartItemQuantityProps {
     quantity: number;
     maxQuantity?: number;
     size?: ControlSize;
-    shape?: ControlShape;
     variant?: CartItemQuantityVariant;
     confirmRemoval?: boolean;
     className?: string;
@@ -46,7 +40,6 @@ export function CartItemQuantity({
     quantity,
     maxQuantity,
     size = 'md',
-    shape = 'rounded',
     variant = 'primary',
     confirmRemoval = false,
     className,
@@ -89,9 +82,8 @@ export function CartItemQuantity({
     return (
         <div
             className={cn(
-                'flex items-center justify-between overflow-clip',
+                'flex items-center justify-between rounded-md',
                 controlHeightClasses[size],
-                controlShapeClasses[shape],
                 variantClasses[variant],
                 className,
             )}
@@ -100,7 +92,7 @@ export function CartItemQuantity({
                 type="button"
                 disabled={disabled}
                 className={cn(
-                    buttonBaseClasses,
+                    'button-base rounded-l-md focus-ring',
                     controlSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
@@ -119,7 +111,7 @@ export function CartItemQuantity({
                 type="button"
                 disabled={isIncrementDisabled}
                 className={cn(
-                    buttonBaseClasses,
+                    'button-base rounded-r-md focus-ring',
                     controlSizeClasses[size],
                     buttonVariantClasses[variant],
                 )}
