@@ -1,4 +1,5 @@
 import { CartPriceChangeItem } from '@/app/(app)/(shop)/cart/_components/CartPriceChangeItem';
+import { Button } from '@/components/button/Button';
 import {
     Dialog,
     DialogContent,
@@ -20,12 +21,12 @@ export function CartPriceChangesDialog({
         <Dialog>
             <DialogTrigger
                 render={
-                    <button
-                        className="text-sm leading-normal text-blue-700"
-                        type="button"
+                    <Button
+                        size="sm"
+                        variant="neutral"
                     >
                         Подробнее
-                    </button>
+                    </Button>
                 }
             />
             <DialogContent className="p-3 md:p-4">

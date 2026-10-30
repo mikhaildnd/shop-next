@@ -1,6 +1,9 @@
+'use client';
+
+import { useState } from 'react';
+
 import { CartItem } from '@/app/(app)/(shop)/cart/_components/CartItem/CartItem';
 import { CartItemRemoveButton } from '@/app/(app)/(shop)/cart/_components/CartItemRemoveButton';
-import { CartPriceChangesDialog } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesDialog';
 import { CartPriceChangesMessage } from '@/app/(app)/(shop)/cart/_components/CartPriceChangesMessage';
 import { useCartContext } from '@/components/cart/CartContext';
 import { DeletionDialog } from '@/components/DeletionDialog';
@@ -16,7 +19,6 @@ export function CartItems({ className }: CartItemsProps) {
     const {
         availableCartItems,
         unavailableCartItems,
-        hasPriceChanges,
         updateCartItemPriceSnapshots,
         setAllCartItemsSelection,
         removeCartItems,
@@ -33,6 +35,9 @@ export function CartItems({ className }: CartItemsProps) {
     const selectedProductIds = availableCartItems
         .filter((item) => item.isSelected)
         .map((item) => item.productId);
+
+    const [isPriceChangesMessageVisible, setIsPriceChangesMessageVisible] =
+        useState(true);
 
     const handleToggleAll = async () => {
         try {
@@ -69,7 +74,8 @@ export function CartItems({ className }: CartItemsProps) {
             toast.add({
                 id: 'cart-price-changes-error',
                 type: 'error',
-                description: 'Произошла ошибка. Попробуйте ещё раз.',
+                description:
+                    'Не удалось подтвердить новые цены. Попробуйте ещё раз.',
             });
         }
     };
@@ -77,15 +83,17 @@ export function CartItems({ className }: CartItemsProps) {
     return (
         <div className={cn('flex flex-col gap-6', className)}>
             <div className="flex flex-col">
-                {hasPriceChanges && (
-                    <CartPriceChangesMessage
-                        onClose={handleConfirmPriceChanges}
-                    >
-                        <CartPriceChangesDialog
+                {changedPriceProducts.length > 0 &&
+                    isPriceChangesMessageVisible && (
+                        <CartPriceChangesMessage
+                            className="mb-4"
+                            onConfirm={handleConfirmPriceChanges}
+                            onClose={() =>
+                                setIsPriceChangesMessageVisible(false)
+                            }
                             cartItems={changedPriceProducts}
                         />
-                    </CartPriceChangesMessage>
-                )}
+                    )}
 
                 <div className="mb-3 flex items-center justify-between py-2">
                     <Checkbox
