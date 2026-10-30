@@ -172,11 +172,11 @@
 
 @utility button-neutral {
   @apply border border-gray-200
-  bg-gray-100
+  bg-white
   text-neutral-700
   active:opacity-90
-  hover:bg-gray-200
-  focus-visible:bg-gray-200
+  hover:bg-gray-100
+  focus-visible:bg-gray-100
   focus-ring-neutral;
 }
 
