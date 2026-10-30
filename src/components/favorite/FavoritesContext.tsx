@@ -1,11 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import { createContext, useContext } from 'react';
 
 import { useFavorites } from '@/hooks/useFavorites';
-import { createActionQueue } from '@/lib/async/action-queue';
 
 interface FavoritesContextValue {
     favoriteIds: Set<string>;
@@ -26,11 +24,8 @@ export function FavoritesProvider({
     initialFavoriteIds,
     children,
 }: FavoritesProviderProps) {
-    const [actionQueue] = useState(createActionQueue);
-
     const favorites = useFavorites({
         initialFavoriteIds,
-        actionQueue,
     });
 
     const contextValue: FavoritesContextValue = {

@@ -1,17 +1,16 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
     addFavoriteAction,
     removeFavoriteAction,
 } from '@/app/(app)/(shop)/(catalog)/favorites/actions';
 import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
-import type { ActionQueue } from '@/lib/async/action-queue';
+import { createActionQueue } from '@/lib/async/action-queue';
 
 interface UseFavoritesOptions {
     initialFavoriteIds: string[];
-    actionQueue: ActionQueue;
 }
 
 interface UseFavoritesReturn {
@@ -24,8 +23,9 @@ interface UseFavoritesReturn {
 
 export function useFavorites({
     initialFavoriteIds,
-    actionQueue,
 }: UseFavoritesOptions): UseFavoritesReturn {
+    const [actionQueue] = useState(createActionQueue);
+
     const {
         data: favoriteIds,
         mutate,
