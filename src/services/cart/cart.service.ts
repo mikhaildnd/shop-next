@@ -80,7 +80,7 @@ function mapCartItem(item: {
     };
 }
 
-async function getCart(userId: string): Promise<CartData> {
+export async function getCart(userId: string): Promise<CartData> {
     const cart = await prisma.cart.findUnique({
         where: {
             userId,
@@ -273,8 +273,8 @@ export async function setCartItemQuantity(
     productId: string,
     quantity: number,
 ): Promise<void> {
-    if (quantity < 1) {
-        throw new Error('Quantity must be at least 1');
+    if (!Number.isInteger(quantity) || quantity < 1) {
+        throw new Error('Invalid quantity');
     }
 
     const cart = await prisma.cart.findUnique({
@@ -308,53 +308,44 @@ export async function removeCartItem(
     userId: string,
     productId: string,
 ): Promise<void> {
-    const cart = await prisma.cart.findUnique({
-        where: {
-            userId,
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!cart) {
-        throw new Error('Cart not found');
-    }
-
     await prisma.cartItem.deleteMany({
         where: {
-            cartId: cart.id,
+            cart: {
+                userId,
+            },
             productId,
         },
     });
 }
 
-export async function clearCart(userId: string): Promise<CartData> {
-    const cart = await prisma.cart.findUnique({
-        where: {
-            userId,
-        },
-        select: {
-            id: true,
-        },
-    });
-
-    if (!cart) {
-        throw new Error('Cart not found');
+export async function removeCartItems(
+    userId: string,
+    productIds: string[],
+): Promise<void> {
+    if (productIds.length === 0) {
+        return;
     }
 
     await prisma.cartItem.deleteMany({
         where: {
-            cartId: cart.id,
+            cart: {
+                userId,
+            },
+            productId: {
+                in: productIds,
+            },
         },
     });
+}
 
-    return {
-        cart: {
-            items: [],
+export async function clearCart(userId: string): Promise<void> {
+    await prisma.cartItem.deleteMany({
+        where: {
+            cart: {
+                userId,
+            },
         },
-        products: [],
-    };
+    });
 }
 
 export async function updateCartItemPriceSnapshots(
@@ -364,6 +355,10 @@ export async function updateCartItemPriceSnapshots(
         effectivePrice: number;
     }[],
 ): Promise<void> {
+    if (confirmations.length === 0) {
+        return;
+    }
+
     await prisma.$transaction(async (tx) => {
         for (const confirmation of confirmations) {
             await tx.cartItem.updateMany({
@@ -425,26 +420,6 @@ export async function setAllCartItemsSelection(
         },
         data: {
             isSelected,
-        },
-    });
-}
-
-export async function removeCartItems(
-    userId: string,
-    productIds: string[],
-): Promise<void> {
-    if (productIds.length === 0) {
-        return;
-    }
-
-    await prisma.cartItem.deleteMany({
-        where: {
-            cart: {
-                userId,
-            },
-            productId: {
-                in: productIds,
-            },
         },
     });
 }

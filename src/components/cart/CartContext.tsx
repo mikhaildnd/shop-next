@@ -2,10 +2,9 @@
 
 import type { ReactNode } from 'react';
 import { useCallback } from 'react';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { useCart } from '@/hooks/useCart';
-import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartItemData } from '@/lib/cart/cart.types';
 import type { CartSummaryData } from '@/lib/cart/get-cart-summary';
 import { getCartSummary } from '@/lib/cart/get-cart-summary';
@@ -18,7 +17,6 @@ interface CartContextValue {
     unavailableCartItems: CartItemData[];
     cartSummary: CartSummaryData;
     cartCount: number;
-    hasPriceChanges: boolean;
     addCartItem: (product: ProductDto) => Promise<void>;
     getCartItem: (productId: string) => CartItemData | undefined;
     incrementCartItem: (productId: string) => void;
@@ -47,11 +45,8 @@ export function CartProvider({
     initialCartState,
     children,
 }: CartProviderProps) {
-    const [actionQueue] = useState(createActionQueue);
-
     const cart = useCart({
         initialCartState,
-        actionQueue,
     });
 
     const cartItems = useMemo(() => {
@@ -107,16 +102,11 @@ export function CartProvider({
 
     const isQuantityUpdating = cart.pendingQuantity !== null;
 
-    const hasPriceChanges = availableCartItems.some(
-        (item) => item.snapshot.effectivePrice !== item.product.effectivePrice,
-    );
-
     const contextValue: CartContextValue = {
         cartItems,
         availableCartItems,
         unavailableCartItems,
         cartSummary,
-        hasPriceChanges,
         cartCount: cart.cartCount,
         addCartItem: cart.addCartItem,
         getCartItem,

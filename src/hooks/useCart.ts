@@ -15,13 +15,12 @@ import {
 } from '@/app/(app)/(shop)/cart/actions';
 import { toast } from '@/components/ui/toast';
 import { useOptimisticMutations } from '@/hooks/useOptimisticMutations';
-import type { ActionQueue } from '@/lib/async/action-queue';
+import { createActionQueue } from '@/lib/async/action-queue';
 import type { CartData, CartItemDto } from '@/services/cart/cart.types';
 import type { ProductDto } from '@/services/product/product.types';
 
 interface UseCartOptions {
     initialCartState: CartData;
-    actionQueue: ActionQueue;
 }
 
 export interface UseCartResult {
@@ -49,10 +48,9 @@ type PendingQuantity = {
     quantity: number;
 };
 
-export function useCart({
-    initialCartState,
-    actionQueue,
-}: UseCartOptions): UseCartResult {
+export function useCart({ initialCartState }: UseCartOptions): UseCartResult {
+    const [actionQueue] = useState(createActionQueue);
+
     const [pendingQuantity, setPendingQuantity] =
         useState<PendingQuantity | null>(null);
 
@@ -257,6 +255,9 @@ export function useCart({
                             (item) => item.productId !== productId,
                         ),
                     },
+                    products: data.products.filter(
+                        (product) => product.productId !== productId,
+                    ),
                 }),
                 action: () => removeCartItemAction(productId),
             });
@@ -287,6 +288,9 @@ export function useCart({
                             (item) => !productIdSet.has(item.productId),
                         ),
                     },
+                    products: data.products.filter(
+                        (product) => !productIdSet.has(product.productId),
+                    ),
                 }),
                 action: () => removeCartItemsAction(productIds),
             });
@@ -305,6 +309,7 @@ export function useCart({
                     ...data.cart,
                     items: [],
                 },
+                products: [],
             }),
             action: clearCartAction,
         });
@@ -332,6 +337,10 @@ export function useCart({
                         : null;
                 })
                 .filter((confirmation) => confirmation !== null);
+
+            if (confirmations.length === 0) {
+                return Promise.resolve();
+            }
 
             return mutate({
                 update: (data) => ({

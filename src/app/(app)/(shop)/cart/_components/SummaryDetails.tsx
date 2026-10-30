@@ -10,7 +10,7 @@ export function SummaryDetails() {
 
             <div className="flex justify-between">
                 <span>Количество товаров</span>
-                <span>{cartSummary.availableCartCount}</span>
+                <span>{cartSummary.selectedCartCount}</span>
             </div>
 
             <div className="flex justify-between">
